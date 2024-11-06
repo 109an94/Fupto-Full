@@ -182,18 +182,18 @@ watch(
         </ul>
       </li>
       <li>
-        <a href="#" @click="handleDropdownClick('notices', $event)" :class="{ active: isMenuActive('notices') }">
+        <a href="#" @click="handleDropdownClick('boards', $event)" :class="{ active: isMenuActive('boards') }">
           <i class="bx bxs-notepad icon"></i> 게시판
           <i class="bx bx-chevron-right icon-right"></i>
         </a>
-        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('notices') }">
+        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('boards') }">
           <li>
-            <NuxtLink to="/admin/notices/list" :class="{ 'sub-menu-active': isSubMenuActive('/admin/notices/list') }">
+            <NuxtLink to="/admin/boards/list" :class="{ 'sub-menu-active': isSubMenuActive('/admin/boards/list') }">
               게시판 목록
             </NuxtLink>
           </li>
           <li>
-            <NuxtLink to="/admin/notices/reg" :class="{ 'sub-menu-active': isSubMenuActive('/admin/notices/reg') }">
+            <NuxtLink to="/admin/boards/reg" :class="{ 'sub-menu-active': isSubMenuActive('/admin/boards/reg') }">
               게시판 등록
             </NuxtLink>
           </li>
