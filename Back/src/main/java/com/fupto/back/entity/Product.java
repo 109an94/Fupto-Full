@@ -1,5 +1,6 @@
 package com.fupto.back.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,14 +11,15 @@ import java.util.List;
 
 @Getter
 @Setter
+@ToString
 @Entity
-@Table(name = "product")
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@Builder
+@Table(name = "product")
 public class Product {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
@@ -46,30 +48,29 @@ public class Product {
     private Boolean state;
 
     @ColumnDefault("current_timestamp()")
-    @Column(name = "create_date")
+    @Column(name = "create_date", insertable = false, updatable = false)
     private Instant createDate;
 
     @ColumnDefault("current_timestamp()")
-    @Column(name = "update_date")
+    @Column(name = "update_date", insertable = false)
     private Instant updateDate;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "brand_id", nullable = false)
-    @JsonManagedReference
+    @JsonBackReference
     private Brand brand;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
-    @JsonManagedReference
+    @JsonBackReference
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "shopping_mall_id", nullable = false)
-    @JsonManagedReference
+    @JsonBackReference
     private ShoppingMall shoppingMall;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference
-    private List<PriceHistory> priceHistory;
-
+    private List<PriceHistory> priceHistories;
 }

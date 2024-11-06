@@ -1,11 +1,13 @@
 package com.fupto.back.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
+import java.util.List;
 
 @Getter
 @Setter
@@ -39,11 +41,15 @@ public class Brand {
     private Boolean state;
 
     @ColumnDefault("current_timestamp()")
-    @Column(name = "create_date")
+    @Column(name = "create_date", insertable = false, updatable = false)
     private Instant createDate;
 
     @ColumnDefault("current_timestamp()")
-    @Column(name = "update_date")
+    @Column(name = "update_date", insertable = false)
     private Instant updateDate;
+
+    @OneToMany(mappedBy = "brand", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<Product> products;
 
 }

@@ -1,8 +1,11 @@
 package com.fupto.back.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -10,6 +13,7 @@ import lombok.Setter;
 @Table(name = "category")
 public class Category {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
@@ -22,5 +26,9 @@ public class Category {
 
     @Column(name = "level", nullable = false)
     private Integer level;
+
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<Product> products;
 
 }

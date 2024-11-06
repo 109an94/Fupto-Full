@@ -14,7 +14,7 @@ import java.time.Instant;
 @Table(name = "price_history")
 public class PriceHistory {
     @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
@@ -22,10 +22,10 @@ public class PriceHistory {
     private Integer salePrice;
 
     @ColumnDefault("current_timestamp()")
-    @Column(name = "create_date")
+    @Column(name = "create_date", insertable = false, updatable = false)
     private Instant createDate;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     @JsonBackReference
     private Product product;

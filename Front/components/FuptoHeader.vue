@@ -5,7 +5,7 @@
       <ul class="main-nav-list">
         <li class="main-nav_link">
           <a href="#">여성</a>
-          <NuxtLink to="/product/list">남성</NuxtLink>
+          <NuxtLink to="/products/list">남성</NuxtLink>
         </li>
         <li class="main-nav_link">
           <a href="#">브랜드</a>
