@@ -33,19 +33,25 @@ public class DefaultMemberService implements MemberService{
     }
 
     @Override
-    public MemberResponseDto getMemberList(MemberSearchDto memberSearchDto) {
+    public MemberResponseDto getMemberList(MemberSearchDto SearchDto) {
+        return getMemberList(SearchDto.getPage(),SearchDto.getSize(),SearchDto.getType(),SearchDto.getKeyWord());
+    }
+
+    @Override
+    public MemberResponseDto getMemberList(Integer page, Integer size,String type, String keyWord) {
 
         //페이지 처리
-        Pageable pageable = PageRequest.of(memberSearchDto.getPage() - 1,
-                memberSearchDto.getSize(),
-                Sort.by(memberSearchDto.getUserId()).descending());
+        Pageable pageable = PageRequest.of(page - 1,
+                size,
+                Sort.by(type).descending());
 
-        //
-        Page<Member> memberPage = memberRepository.searchMember(
-                memberSearchDto.getUserId(),
-                memberSearchDto.getNickname(),
-                pageable
-        );
+        // userId와 nickname 설정
+        String userId = type.equals("userId") ? keyWord : null;
+        String nickname = type.equals("nickname") ? keyWord : null;
+
+        // 레포지토리 메소드 호출
+        Page<Member> memberPage = memberRepository.searchMember(userId, nickname, pageable);
+
         List<MemberListDto> memberListDtos = memberPage
                 .getContent()
                 .stream()

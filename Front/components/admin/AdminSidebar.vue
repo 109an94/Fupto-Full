@@ -164,13 +164,13 @@ watch(
       </li>
       <li class="divider" :data-text="isCollapsed ? '-' : 'user'">사용자 관리</li>
       <li>
-        <a href="#" @click="handleDropdownClick('users', $event)" :class="{ active: isMenuActive('users') }">
+        <a href="#" @click="handleDropdownClick('members', $event)" :class="{ active: isMenuActive('members') }">
           <i class="bx bx-user icon"></i> 고객
           <i class="bx bx-chevron-right icon-right"></i>
         </a>
-        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('users') }">
+        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('members') }">
           <li>
-            <NuxtLink to="/admin/users/list" :class="{ 'sub-menu-active': isSubMenuActive('/admin/users/list') }">
+            <NuxtLink to="/admin/members/list" :class="{ 'sub-menu-active': isSubMenuActive('/admin/members/list') }">
               고객 관리
             </NuxtLink>
           </li>
