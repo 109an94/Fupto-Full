@@ -8,11 +8,22 @@ import {ref, computed, watch, onMounted} from 'vue';
 //----------------state--------------
 const members = ref([]);
 const isLoading = ref(false);
-
+const totalPages = ref(0);
+const currentPage = ref(0);
+const page = ref(10);
+const size = ref(10);
+const filterData = ref({
+  type: "userId",
+  keyWord :""
+})
 //---------------methods
 const fetchMembers = async (page = 1) => {
   try{
-    const response = await fetch(`http://localhost:8080/api/v1/admin/members`);
+    // if (filterData.value.type) {params.append("type", filterData.value.type)};
+    // if (filterData.value.keyWord) {params.append("keyWord", filterData.value.keyWord)};
+
+
+    const response = await fetch(`http://localhost:8080/api/v1/admin/members/search?${params.toString()}`);
     const data = await response.json();
     // members.value = data.members;
     members.value = data; //아직 data 자체가 배열이여서 직접 할당
@@ -45,6 +56,16 @@ onMounted(()=>{
 })
 
 //------------event handler
+
+const searchHandler = (event) =>{
+  event.preventDefault();
+  currentPage.value = 0;
+  fetchMembers();
+}
+
+
+
+//----------------
 interface User {
   id: string;
   name: string;
@@ -114,6 +135,7 @@ members.value.forEach(members => {
     </ul>
     <div class="data">
       <div class="content-data">
+        <form @submit="searchHandler">
         <div class="card">
           <div class="">
             <!--                          class에 head 제거함-->
@@ -166,12 +188,12 @@ members.value.forEach(members => {
                 <tr>
                   <th>검색명</th>
                   <td colspan="3">
-                    <select class="">
-                      <option>아이디</option>
-                      <option>이름</option>
-                      <option>이메일</option>
+                    <select v-model="filterData.type" class="">
+                      <option value="userId">아이디</option>
+                      <option value="nickname">이름</option>
+                      <option value="email">이메일</option>
                     </select>
-                    <input type="text" class="" value=" 검색어 입력" >
+                    <input type="text" class=""  v-model="filterData.keyWord">
                   </td>
                 </tr>
                 </tbody>
@@ -180,6 +202,7 @@ members.value.forEach(members => {
           </div>
           <div class="filter-btn"><button class="btn-url btn-main">검색</button></div>
         </div>
+        </form>
       </div>
     </div>
     <div class="data">
