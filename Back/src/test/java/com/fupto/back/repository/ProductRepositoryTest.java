@@ -10,12 +10,5 @@ import java.util.List;
 @DataJpaTest
 public class ProductRepositoryTest {
 
-    @Autowired
-    private ProductRepository productRepository;
 
-    @Test
-    void joinTest(){
-        List<Product> products = productRepository.findAll();
-        products.forEach(System.out::println);
-    }
 }
