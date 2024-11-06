@@ -52,6 +52,7 @@ li {
 }
 #sidebar.hide {
   max-width: 60px;
+  overflow: hidden;
 }
 #sidebar.hide:hover {
   max-width: 260px;
@@ -127,11 +128,21 @@ li {
   transition: all 0.3s ease;
   white-space: nowrap;
 }
+
 #sidebar.hide:hover .divider {
+  font-size: 12px;
   text-align: left;
 }
+#sidebar.hide:hover .divider::before {
+  content: none;
+}
 #sidebar.hide .divider {
+  font-size: 0;
   text-align: center;
+}
+#sidebar.hide .divider::before {
+  content: "-";
+  font-size: 12px;
 }
 #sidebar .side-dropdown {
   padding-left: 54px;

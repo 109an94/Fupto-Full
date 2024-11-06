@@ -8,16 +8,21 @@ useHead({
   script: [
     { src: "https://unpkg.com/boxicons@2.0.9/dist/boxicons.js", body: true },
     { src: "https://cdn.jsdelivr.net/npm/flatpickr", body: true },
-    // { src: "/js/admin/script.js", body: true },
   ],
 });
+
+const isCollapsed = ref(false);
+
+const toggleSidebar = () => {
+  isCollapsed.value = !isCollapsed.value;
+};
 </script>
 
 <template>
   <div>
-    <AdminSidebar />
+    <AdminSidebar :is-collapsed="isCollapsed" />
     <section id="content">
-      <AdminNavbar />
+      <AdminNavbar @toggle-sidebar="toggleSidebar" />
       <slot />
     </section>
   </div>
