@@ -1,6 +1,13 @@
 <script setup>
+const props = defineProps({
+  isCollapsed: {
+    type: Boolean,
+    default: false,
+  },
+});
+
 const route = useRoute();
-const isCollapsed = ref(false);
+// const isCollapsed = ref(false);
 const activeDropdown = ref(null);
 const activeMenuItem = ref(null);
 
@@ -46,7 +53,7 @@ const handleBrandClick = () => {
 
 // 사이드바 마우스 이벤트 처리
 const handleSidebarMouseLeave = () => {
-  if (isCollapsed.value) {
+  if (props.isCollapsed) {
     activeDropdown.value = null;
   }
 };
