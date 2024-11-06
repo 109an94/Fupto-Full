@@ -1,0 +1,137 @@
+.card {
+  background-color: #fff;
+  border: none;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+.card-body {
+  padding: 15px;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+.table th,
+.table td {
+  padding: 8px;
+  border: 1px solid #e0e0e0;
+}
+.table th {
+  background-color: #f8f8f8;
+  font-weight: 500;
+  text-align: center;
+  color: #333;
+  width: 100px;
+}
+.important {
+  margin-left: 15px;
+  accent-color: #dc3545;
+}
+
+.select {
+  width: 90px;
+  padding: 6px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.input-text {
+  width: 400px;
+  padding: 6px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.select {
+  background-color: #fff;
+  margin-right: 5px;
+}
+
+.btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.3s;
+}
+.btn-primary {
+  background-color: var(--blue);
+  color: white;
+}
+.btn-primary:hover {
+  background-color: var(--dark-blue);
+}
+.text-center {
+  text-align: center;
+}
+
+.content {
+  width: 600px;
+  height: 400px;
+  padding: 6px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.toggleSwitch {
+  width: 44px;
+  height: 22px;
+  display: block;
+  position: relative;
+  border-radius: 30px;
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.toggleSwitch .toggleButton {
+  width: 23px;
+  height: 20px;
+  position: absolute;
+  top: 50%;
+  left: 22px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: var(--blue);
+}
+
+#toggle:checked ~ .toggleSwitch {
+  background: var(--blue);
+}
+
+#toggle:checked ~ .toggleSwitch .toggleButton {
+  left: calc(100% - 44px);
+  background: #fff;
+}
+
+.toggleSwitch, .toggleButton {
+  transition: all 0.2s ease-in;
+}
+
+
+.image-preview {
+  margin-top: 15px;
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 150px;
+  border: 1px solid var(--dark-grey);
+  border-radius: 5px;
+  object-fit: cover;
+  display: flex;
+}
+
+#fileUpload {
+  margin-top: 17px;
+}
+
+
+
