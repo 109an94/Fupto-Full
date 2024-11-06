@@ -91,72 +91,72 @@ watch(
       </li>
       <li class="divider" :data-text="isCollapsed ? '-' : 'main'">사이트 관리</li>
       <li>
-        <a href="#" @click="handleDropdownClick('product', $event)" :class="{ active: isMenuActive('product') }">
+        <a href="#" @click="handleDropdownClick('products', $event)" :class="{ active: isMenuActive('products') }">
           <i class="bx bxs-inbox icon"></i> 상품
           <i class="bx bx-chevron-right icon-right"></i>
         </a>
-        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('product') }">
+        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('products') }">
           <li>
-            <NuxtLink to="/admin/product/list" :class="{ 'sub-menu-active': isSubMenuActive('/admin/product/list') }">
+            <NuxtLink to="/admin/products/list" :class="{ 'sub-menu-active': isSubMenuActive('/admin/products/list') }">
               상품 목록
             </NuxtLink>
           </li>
           <li>
-            <NuxtLink to="/admin/product/reg" :class="{ 'sub-menu-active': isSubMenuActive('/admin/product/reg') }">
+            <NuxtLink to="/admin/products/reg" :class="{ 'sub-menu-active': isSubMenuActive('/admin/products/reg') }">
               상품 등록
             </NuxtLink>
           </li>
           <li>
-            <NuxtLink to="/admin/product/map" :class="{ 'sub-menu-active': isSubMenuActive('/admin/product/map') }">
+            <NuxtLink to="/admin/products/map" :class="{ 'sub-menu-active': isSubMenuActive('/admin/products/map') }">
               상품 매핑
             </NuxtLink>
           </li>
         </ul>
       </li>
       <li>
-        <a href="#" @click="handleDropdownClick('brand', $event)" :class="{ active: isMenuActive('brand') }">
+        <a href="#" @click="handleDropdownClick('brands', $event)" :class="{ active: isMenuActive('brands') }">
           <i class="bx bxs-purchase-tag-alt icon"></i> 브랜드
           <i class="bx bx-chevron-right icon-right"></i>
         </a>
-        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('brand') }">
+        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('brands') }">
           <li>
-            <NuxtLink to="/admin/brand/list" :class="{ 'sub-menu-active': isSubMenuActive('/admin/brand/list') }">
+            <NuxtLink to="/admin/brands/list" :class="{ 'sub-menu-active': isSubMenuActive('/admin/brands/list') }">
               브랜드 목록
             </NuxtLink>
           </li>
           <li>
-            <NuxtLink to="/admin/brand/reg" :class="{ 'sub-menu-active': isSubMenuActive('/admin/brand/reg') }">
+            <NuxtLink to="/admin/brands/reg" :class="{ 'sub-menu-active': isSubMenuActive('/admin/brands/reg') }">
               브랜드 등록
             </NuxtLink>
           </li>
         </ul>
       </li>
       <li>
-        <a href="#" @click="handleDropdownClick('shoppingmall', $event)" :class="{ active: isMenuActive('shoppingmall') }">
+        <a href="#" @click="handleDropdownClick('shoppingmalls', $event)" :class="{ active: isMenuActive('shoppingmalls') }">
           <i class="bx bxs-store icon"></i> 쇼핑몰
           <i class="bx bx-chevron-right icon-right"></i>
         </a>
-        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('shoppingmall') }">
+        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('shoppingmalls') }">
           <li>
-            <NuxtLink to="/admin/shoppingmall/list" :class="{ 'sub-menu-active': isSubMenuActive('/admin/shoppingmall/list') }">
+            <NuxtLink to="/admin/shoppingmalls/list" :class="{ 'sub-menu-active': isSubMenuActive('/admin/shoppingmalls/list') }">
               쇼핑몰 목록
             </NuxtLink>
           </li>
           <li>
-            <NuxtLink to="/admin/shoppingmall/reg" :class="{ 'sub-menu-active': isSubMenuActive('/admin/shoppingmall/reg') }">
+            <NuxtLink to="/admin/shoppingmalls/reg" :class="{ 'sub-menu-active': isSubMenuActive('/admin/shoppingmalls/reg') }">
               쇼핑몰 등록
             </NuxtLink>
           </li>
         </ul>
       </li>
       <li>
-        <a href="#" @click="handleDropdownClick('category', $event)" :class="{ active: isMenuActive('category') }">
+        <a href="#" @click="handleDropdownClick('categories', $event)" :class="{ active: isMenuActive('categories') }">
           <i class="bx bxs-widget icon"></i> 카테고리
           <i class="bx bx-chevron-right icon-right"></i>
         </a>
-        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('category') }">
+        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('categories') }">
           <li>
-            <NuxtLink to="/admin/category/list" :class="{ 'sub-menu-active': isSubMenuActive('/admin/category/list') }">
+            <NuxtLink to="/admin/categories/list" :class="{ 'sub-menu-active': isSubMenuActive('/admin/categories/list') }">
               카테고리 관리
             </NuxtLink>
           </li>
@@ -164,36 +164,36 @@ watch(
       </li>
       <li class="divider" :data-text="isCollapsed ? '-' : 'user'">사용자 관리</li>
       <li>
-        <a href="#" @click="handleDropdownClick('user', $event)" :class="{ active: isMenuActive('user') }">
+        <a href="#" @click="handleDropdownClick('users', $event)" :class="{ active: isMenuActive('users') }">
           <i class="bx bx-user icon"></i> 고객
           <i class="bx bx-chevron-right icon-right"></i>
         </a>
-        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('user') }">
+        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('users') }">
           <li>
-            <NuxtLink to="/admin/user/list" :class="{ 'sub-menu-active': isSubMenuActive('/admin/user/list') }">
+            <NuxtLink to="/admin/users/list" :class="{ 'sub-menu-active': isSubMenuActive('/admin/users/list') }">
               고객 관리
             </NuxtLink>
           </li>
           <li>
-            <NuxtLink to="/admin/user/update" :class="{ 'sub-menu-active': isSubMenuActive('/admin/user/update') }">
+            <NuxtLink to="/admin/users/update" :class="{ 'sub-menu-active': isSubMenuActive('/admin/users/update') }">
               회원 정보#
             </NuxtLink>
           </li>
         </ul>
       </li>
       <li>
-        <a href="#" @click="handleDropdownClick('notice', $event)" :class="{ active: isMenuActive('notice') }">
+        <a href="#" @click="handleDropdownClick('notices', $event)" :class="{ active: isMenuActive('notices') }">
           <i class="bx bxs-notepad icon"></i> 게시판
           <i class="bx bx-chevron-right icon-right"></i>
         </a>
-        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('notice') }">
+        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('notices') }">
           <li>
-            <NuxtLink to="/admin/notice/list" :class="{ 'sub-menu-active': isSubMenuActive('/admin/notice/list') }">
+            <NuxtLink to="/admin/notices/list" :class="{ 'sub-menu-active': isSubMenuActive('/admin/notices/list') }">
               게시판 목록
             </NuxtLink>
           </li>
           <li>
-            <NuxtLink to="/admin/notice/reg" :class="{ 'sub-menu-active': isSubMenuActive('/admin/notice/reg') }">
+            <NuxtLink to="/admin/notices/reg" :class="{ 'sub-menu-active': isSubMenuActive('/admin/notices/reg') }">
               게시판 등록
             </NuxtLink>
           </li>
@@ -201,13 +201,13 @@ watch(
       </li>
       <li class="divider" :data-text="isCollapsed ? '-' : 'report'">데이터 분석</li>
       <li>
-        <a href="#" @click="handleDropdownClick('report', $event)" :class="{ active: isMenuActive('report') }">
+        <a href="#" @click="handleDropdownClick('reports', $event)" :class="{ active: isMenuActive('reports') }">
           <i class="bx bxs-chart icon"></i> 통계
           <i class="bx bx-chevron-right icon-right"></i>
         </a>
-        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('report') }">
+        <ul class="side-dropdown" :class="{ show: shouldShowDropdown('reports') }">
           <li>
-            <NuxtLink to="/admin/report/view" :class="{ 'sub-menu-active': isSubMenuActive('/admin/report/view') }">
+            <NuxtLink to="/admin/reports/view" :class="{ 'sub-menu-active': isSubMenuActive('/admin/reports/view') }">
               조회수 분석
             </NuxtLink>
           </li>
