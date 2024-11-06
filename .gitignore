@@ -1,0 +1,69 @@
+# Front-end specific ignores (Nuxt.js)
+front/.output
+front/.data
+front/.nuxt
+front/.nitro
+front/.cache
+front/dist
+
+# Node dependencies
+front/node_modules
+
+# Logs
+front/logs
+front/*.log
+
+# Misc
+.DS_Store
+.fleet
+.idea
+
+# Local env files
+front/.env
+front/.env.*
+!front/.env.example
+
+# Back-end specific ignores (Spring Boot)
+back/HELP.md
+back/target/
+!back/.mvn/wrapper/maven-wrapper.jar
+!back/**/src/main/**/target/
+!back/**/src/test/**/target/
+
+### STS ###
+back/.apt_generated
+back/.classpath
+back/.factorypath
+back/.project
+back/.settings
+back/.springBeans
+back/.sts4-cache
+
+### IntelliJ IDEA ###
+back/.idea
+back/*.iws
+back/*.iml
+back/*.ipr
+
+### NetBeans ###
+back/nbproject/private/
+back/nbbuild/
+back/dist/
+back/nbdist/
+back/.nb-gradle/
+back/build/
+!back/**/src/main/**/build/
+!back/**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+# Common ignores
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+Thumbs.db

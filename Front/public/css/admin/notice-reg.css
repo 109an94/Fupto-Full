@@ -1,0 +1,201 @@
+.card {
+  background-color: #fff;
+  border: none;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+.card-body {
+  padding: 15px;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+.table th,
+.table td {
+  padding: 8px;
+  border: 1px solid #e0e0e0;
+}
+.table th {
+  background-color: #f8f8f8;
+  font-weight: 500;
+  text-align: center;
+  color: #333;
+  width: 100px;
+}
+
+.select {
+  width: 90px;
+  padding: 6px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.input-text {
+  width: 400px;
+  padding: 6px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.select {
+  background-color: #fff;
+  margin-right: 5px;
+}
+.price {
+  width: 100px;
+}
+.date {
+  width: 100px;
+}
+.btn-calendar {
+  background-color: #e9ecef;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 5px 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.3s;
+}
+.btn-primary {
+  background-color: var(--blue);
+  color: white;
+}
+.btn-primary:hover {
+  background-color: var(--dark-blue);
+}
+.text-center {
+  text-align: center;
+}
+
+/* LIST CSS */
+.active-toggle .custom-control-input:checked ~ .custom-control-label::before {
+  background-color: var(--blue);
+  border-color: var(--dark-blue);
+}
+.btn-outline-secondary {
+  color: #6c757d;
+  border: 1px solid #6c757d;
+  background-color: transparent;
+}
+.btn-outline-secondary:hover {
+  color: #fff;
+  background-color: #6c757d;
+}
+.btn-outline-danger {
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  background-color: transparent;
+}
+.btn-outline-danger:hover {
+  color: #fff;
+  background-color: #dc3545;
+}
+.badge-pill {
+  padding-right: 0.6em;
+  padding-left: 0.6em;
+  border-radius: 10rem;
+}
+.badge-light {
+  color: #212529;
+  background-color: #f8f9fa;
+}
+.custom-switch .custom-control-label::before {
+  left: -2.25rem;
+  width: 1.75rem;
+  pointer-events: all;
+  border-radius: 0.5rem;
+}
+.custom-switch .custom-control-label::after {
+  top: calc(0.25rem + 2px);
+  left: calc(-2.25rem + 2px);
+  width: calc(1rem - 4px);
+  height: calc(1rem - 4px);
+  background-color: #adb5bd;
+  border-radius: 0.5rem;
+  transition: transform 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+.custom-switch .custom-control-input:checked ~ .custom-control-label::after {
+  background-color: #fff;
+  transform: translateX(0.75rem);
+}
+.custom-control {
+  position: relative;
+  z-index: 1;
+  display: block;
+  min-height: 1.5rem;
+  padding-left: 2.5rem;
+}
+.custom-control-input {
+  position: absolute;
+  left: 0;
+  z-index: -1;
+  width: 1rem;
+  height: 1rem;
+  opacity: 0;
+}
+.custom-control-label {
+  position: relative;
+  margin-bottom: 0;
+  vertical-align: top;
+}
+.custom-control-label::before {
+  position: absolute;
+  top: 0.25rem;
+  left: -1.9rem;
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  pointer-events: none;
+  content: "";
+  background-color: #fff;
+  border: 1px solid #adb5bd;
+}
+.custom-control-label::after {
+  position: absolute;
+  top: 0.25rem;
+  left: -1.5rem;
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  content: "";
+  background: no-repeat 50% / 50% 50%;
+}
+.custom-checkbox .custom-control-input:checked ~ .custom-control-label::before {
+  background-color: var(--blue);
+  border-color: var(--blue);
+}
+.custom-checkbox .custom-control-input:checked ~ .custom-control-label::after {
+  content: "";
+  position: absolute;
+  top: 0.25rem;
+  left: -1.5rem;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  background-image: none; /* 기존의 SVG를 제거합니다. */
+}
+.mdi::before {
+  display: inline-block;
+  font: normal normal normal 24px/1 "boxicons";
+  font-size: inherit;
+  text-rendering: auto;
+  line-height: inherit;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+

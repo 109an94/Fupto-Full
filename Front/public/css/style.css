@@ -1,0 +1,61 @@
+@import url("./reset.css");
+@import url("./header.css");
+@import url("./navbar.css");
+@import url("./footer.css");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;200;300;400;500;600;700;800;900&display=swap");
+* {
+  font-family: "Noto Sans KR", sans-serif;
+}
+
+:root {
+  --color-main-light: #58ccff;
+  --color-main-default: #00abf6;
+  --color-main-deep: #1d70f5;
+
+  --color-text-title: #0f0f10;
+  --color-text-default: #2d2f33;
+  --color-text-unselected: #60646b;
+  --color-text-caption: #989ca2;
+
+  --color-ui-notion: #ff0909;
+  --color-ui-backgrounda: #d8e4f2;
+  --color-ui-backgroundb: #d9d9d9;
+  --color-ui-black: #000000;
+  --color-ui-white: #ffffff;
+
+  --color-sub-r: #f74957;
+  --color-sub-shadow: #959595;
+  --color-sub-1: #1d2535;
+
+  --color-button-defualt: #1d70f5;
+  --color-button-hover: #3a71ca;
+  --color-button-pressed: #3b414b;
+
+  --font-bold-h1: 32px;
+  --font-bold-h2: 24px;
+  --font-bold-h3: 18px;
+  --font-bold-body: 16px;
+  --font-bold-caption: 14px;
+  --font-bold-button: 16px;
+  --font-bold-notion: 12px;
+
+  --font-medium-h1: 32px;
+  --font-medium-h2: 24px;
+  --font-medium-h3: 18px;
+  --font-medium-body: 16px;
+  --font-medium-caption: 14px;
+  --font-medium-button: 16px;
+  --font-medium-notion: 12px;
+
+  --font-regular-h1: 32px;
+  --font-regular-h2: 24px;
+  --font-regular-h3: 18px;
+  --font-regular-body: 16px;
+  --font-regular-caption: 14px;
+  --font-regular-button: 16px;
+  --font-regular-notion: 12px;
+
+  --font-bold: 700;
+  --font-midium: 500;
+  --font-regular: 400;
+}

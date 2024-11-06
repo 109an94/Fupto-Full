@@ -1,0 +1,130 @@
+.page-container {
+  display: grid;
+  background-color: #fff;
+  border-radius: 10px;
+  gap: 20px;
+  max-width: 90%;
+  margin-top: 20px;
+  margin-left: 0;
+  margin-right: auto;
+}
+.form-container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+.products-container {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+.product-form {
+  flex: 1;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+h3,
+h4 {
+  margin-top: 0;
+  color: #333;
+}
+.btn {
+  padding: 8px 15px;
+  border: none;
+  background-color: #e0e0e0;
+  cursor: pointer;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
+.btn-primary {
+  background-color: var(--blue);
+  color: white;
+}
+.btn-primary:hover {
+  background-color: var(--dark-blue);
+}
+.form-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+.form-group > label {
+  margin-bottom: 12px;
+}
+.form-control {
+  flex: 1;
+  min-width: 120px;
+  max-width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+label {
+  min-width: 80px;
+  margin-right: 10px;
+  margin-bottom: 5px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+table th:first-child,
+table td:first-child {
+  text-align: center;
+  vertical-align: middle;
+}
+table input[type="checkbox"] {
+  margin: 0;
+  vertical-align: middle;
+}
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+th {
+  background-color: #f2f2f2;
+}
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  width: 100%;
+}
+.ml-2 {
+  margin-left: 15px;
+}
+.mt-2 {
+  margin-top: 15px;
+}
+@media (max-width: 767px) {
+  .page-container {
+    max-width: 65%;
+  }
+
+  .products-container {
+    flex-direction: column;
+  }
+
+  .form-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .form-control {
+    width: 100%;
+  }
+}

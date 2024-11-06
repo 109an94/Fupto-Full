@@ -1,0 +1,28 @@
+.main-footer {
+  height: 215px;
+  margin-top: 10px;
+  border-top: 1px solid var(--color-text-default);
+}
+.content-footer-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: 10px 20px 0px 20px;
+}
+.content-footer_title {
+  font-size: var(--font-bold-body);
+  margin-top: 10px;
+  font-weight: 600;
+}
+.content-footer-content ul {
+  font-size: var(--font-regular-notion);
+}
+.content-footer-content li {
+  margin-top: 10px;
+}
+.content-footer-content span {
+  display: inline-flex;
+  font-size: var(--font-regular-notion);
+  color: var(--color-text-unselected);
+  margin-top: 10px;
+}
