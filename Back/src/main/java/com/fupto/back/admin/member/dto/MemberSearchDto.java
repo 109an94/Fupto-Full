@@ -7,11 +7,18 @@ import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 @Builder
 public class MemberSearchDto {
-    private int page = 1;
-    private int size = 10;
-    private String userId;
-    private String nickname;
+    private Integer page;
+    private Integer size;
+    private String type;
+    private String keyWord;
+
+    public MemberSearchDto() {
+        this.page = 1;
+        this.size = 10;
+        this.type = "userId";
+        this.keyWord = "";
+
+    }
 }

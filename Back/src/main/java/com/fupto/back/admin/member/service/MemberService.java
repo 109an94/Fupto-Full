@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface MemberService {
     List<Member> getList();
+    MemberResponseDto getMemberList(Integer page, Integer size,String type, String keyWord);
     MemberResponseDto getMemberList(MemberSearchDto memberSearchDto);
     MemberListDto getMemberById(Long id);
     List<MemberListDto> getMemberWithDetails();
