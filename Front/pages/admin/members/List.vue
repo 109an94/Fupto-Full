@@ -1,7 +1,7 @@
 <script setup lang="ts">
-// useHead({
-//   link: [{ rel: "stylesheet", href: "/css/report.css" }],
-// });
+useHead({
+  link: [{ rel: "stylesheet", href: "/css/admin/report.css" }],
+});
 
 import {ref, computed, watch, onMounted} from 'vue';
 
@@ -263,9 +263,9 @@ members.value.forEach(members => {
   </main>
 </template>
 
-<style scoped>
-@import '@/public/css/admin/report.css';
-.sub-product {
-  background-color: #f0f0f0;
-}
-</style>
+<!--<style scoped>-->
+<!--@import '@/public/css/admin/report.css';-->
+<!--.sub-product {-->
+<!--  background-color: #f0f0f0;-->
+<!--}-->
+<!--</style>-->

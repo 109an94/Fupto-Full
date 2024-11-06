@@ -1,5 +1,7 @@
 <script setup>
-
+useHead({
+  link: [{ rel: "stylesheet", href: "/css/admin/report.css" }],
+});
 </script>
 
 <template>
@@ -144,7 +146,7 @@
   </main>
 </template>
 
-<style scoped>
-  @import url("@/assets/css/admin/report.css");
+<!--<style scoped>-->
+<!--  @import url("@/assets/css/admin/report.css");-->
 
-</style>
+<!--</style>-->
