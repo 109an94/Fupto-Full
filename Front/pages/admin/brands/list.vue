@@ -29,6 +29,28 @@ const formData = ref({
   endDate: ''
 });
 
+// 모달 표시 여부와 선택된 브랜드 데이터
+const showModal = ref(false);
+const selectedBrand = reactive({ 
+  id: '',
+  korName: '',
+  engName: '',
+  description: '',
+  img: '',
+  url: ''
+});
+
+// 모달 열기 함수
+const openModal = (brand) => {
+    Object.assign(selectedBrand, brand); // 선택된 브랜드 정보를 selectedBrand에 저장
+    showModal.value = true; // 모달 표시
+};
+
+// 모달 닫기 함수
+const closeModal = () => {
+    showModal.value = false; // 모달 숨기기
+};
+
 // 체크박스 상태
 const selectAll = ref(false);
 const selectedItems = ref(new Set());
@@ -333,7 +355,7 @@ onMounted(() => {
                 <th>
                   <input type="checkbox" id="selectAll" :checked="selectAll" @change="handleSelectAll" class="pl-checkbox" />
                 </th>
-                <th>NO.</th>
+                <th>번호</th>
                 <th>브랜드이미지</th>
                 <th>브랜드한글명</th>
                 <th>브랜드영어명</th>
@@ -381,21 +403,15 @@ onMounted(() => {
                     <span class="pl-slider round"></span>
                   </label>
                 </td>
-                <!-- <td>
-                  <div class="custom-control custom-switch active-toggle">
-                    <input type="checkbox" class="custom-control-input" :id="'active' + brand.id" v-model="brand.active" />
-                    <label class="custom-control-label" :for="'active' + brand.id"></label>
-                  </div>
-                </td> -->
                 <td>
-                  <button class="btn btn-outline-secondary btn-sm toggle-brands" data-target="#brands1">
+                  <button class="btn btn-outline-secondary btn-sm toggle-brands" @click="openModal(b)">
                     <i class="mdi mdi-chevron-down"></i>
                   </button>
                   <button class="btn btn-outline-secondary btn-sm">
-                    <i class="mdi mdi-pencil"></i>
+                    <i class="bx bxs-pencil"></i>
                   </button>
                   <button class="btn btn-outline-danger btn-sm">
-                    <i class="mdi mdi-delete"></i>
+                    <i class="bx bx-trash"></i>
                   </button>
                 </td>
                 </tr>
@@ -422,7 +438,7 @@ onMounted(() => {
       </div>
     </div>
     <!-- 모달 -->
-    <!-- <div v-if="showModal" class="modal-overlay" @click="closeModal">
+    <div v-if="showModal" class="modal-overlay" @click="closeModal">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
           <h5 class="modal-title">브랜드 상세 정보</h5>
@@ -430,16 +446,20 @@ onMounted(() => {
             &times;
           </button>
         </div>
+        
         <div class="modal-body">
-          <p>브랜드명: {{ selectedBrand.name }}</p>
-          <p>브랜드 이미지: <img :src="selectedBrand.imgUrl" alt="브랜드 이미지" /></p>
-          <p>브랜드 URL: <a :href="selectedBrand.url" target="_blank">{{ selectedBrand.url }}</a></p>
-          <p>상세설명: 내용없음</p>
+          <p><strong>번호:</strong> {{ selectedBrand.id }}번</p>
+          <p><strong>브랜드 이미지:</strong><br><img :src="selectedBrand.img" alt="브랜드 이미지" /></p>
+          <p><strong>브랜드 한글명:</strong> {{ selectedBrand.korName }}</p>
+          <p><strong>브랜드 영어명:</strong> {{ selectedBrand.engName }}</p>
+          <p><strong>브랜드 URL:</strong><a :href="selectedBrand.url" target="_blank"> {{ selectedBrand.url }}</a></p>
+          <p><strong>상세설명:</strong><br>{{ selectedBrand.description }}</p>
         </div>
+        
         <div class="modal-footer">
           <button class="btn btn-primary" @click="closeModal">닫기</button>
         </div>
       </div>
-    </div> -->
+    </div>
   </main>
 </template>
