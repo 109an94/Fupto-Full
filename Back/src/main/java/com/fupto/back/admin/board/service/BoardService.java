@@ -1,5 +1,6 @@
 package com.fupto.back.admin.board.service;
 
+import com.fupto.back.admin.board.dto.BoardListDto;
 import com.fupto.back.admin.board.dto.BoardResponseDto;
 import com.fupto.back.admin.board.dto.BoardSearchDto;
 
@@ -20,4 +21,6 @@ public interface BoardService {
     BoardResponseDto getList(BoardSearchDto searchDto);
 
     BoardResponseDto getList(Integer page, String korName, List<Long> categoryIds);
+
+    BoardListDto create(BoardListDto boardListDto);
 }

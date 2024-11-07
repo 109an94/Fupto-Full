@@ -71,13 +71,12 @@ public class DefaultBoardService implements BoardService {
 
 
     // 등록
-//    @Override
-//    public BoardListDto create(BoardListDto boardListDto) {
-//        Board board = boardRepository.save(BoardMapper.mapToEntity(boardListDto));
-//
-//        BoardListDto boardone = BoardMapper.mapToDto(boardRepository.findById(board.getId()).get());
-//        return BoardMapper.mapToDto(board);
-//    }
+    @Override
+    public BoardListDto create(BoardListDto boardListDto) {
+        Board board = boardRepository.save(modelMapper.map(boardListDto, Board.class));
+
+        return modelMapper.map(board, BoardListDto.class);
+    }
 
     // 삭제
 //    @Override
