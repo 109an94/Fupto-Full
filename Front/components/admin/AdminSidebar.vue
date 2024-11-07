@@ -7,9 +7,12 @@ const props = defineProps({
 });
 
 const route = useRoute();
-// const isCollapsed = ref(false);
 const activeDropdown = ref(null);
 const activeMenuItem = ref(null);
+const previousState = ref({
+  menuItem: null,
+  dropdown: null
+});
 
 // 드롭다운 토글
 const handleDropdownClick = (section, event) => {
@@ -87,6 +90,27 @@ watch(
     }
   }
 );
+
+
+watch(
+  () => props.isCollapsed,
+  (newValue) => {
+    if (newValue) {
+      // 사이드바가 접힐 때 현재 상태 저장
+      previousState.value = {
+        menuItem: activeMenuItem.value,
+        dropdown: activeDropdown.value
+      };
+      // 드롭다운만 닫기
+      activeDropdown.value = null;
+      // activeMenuItem은 유지
+    } else {
+      // 사이드바가 펼쳐질 때 이전 상태 복원
+      activeMenuItem.value = previousState.value.menuItem;
+      activeDropdown.value = previousState.value.dropdown;
+    }
+  }
+);
 </script>
 
 <template>
@@ -96,7 +120,7 @@ watch(
       <li>
         <NuxtLink to="/admin" :class="{ active: activeMenuItem === 'home' }"> <i class="bx bxs-dashboard icon"></i> 홈 </NuxtLink>
       </li>
-      <li class="divider" :data-text="isCollapsed ? '-' : 'main'">사이트 관리</li>
+      <li class="divider">Main</li>
       <li>
         <a href="#" @click="handleDropdownClick('products', $event)" :class="{ active: isMenuActive('products') }">
           <i class="bx bxs-inbox icon"></i> 상품
@@ -169,7 +193,7 @@ watch(
           </li>
         </ul>
       </li>
-      <li class="divider" :data-text="isCollapsed ? '-' : 'user'">사용자 관리</li>
+      <li class="divider">User</li>
       <li>
         <a href="#" @click="handleDropdownClick('members', $event)" :class="{ active: isMenuActive('members') }">
           <i class="bx bx-user icon"></i> 고객
@@ -206,7 +230,7 @@ watch(
           </li>
         </ul>
       </li>
-      <li class="divider" :data-text="isCollapsed ? '-' : 'report'">데이터 분석</li>
+      <li class="divider">Report</li>
       <li>
         <a href="#" @click="handleDropdownClick('reports', $event)" :class="{ active: isMenuActive('reports') }">
           <i class="bx bxs-chart icon"></i> 통계
