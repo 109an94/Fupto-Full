@@ -360,7 +360,11 @@ const formatDate = (dateString) => {
   const date = new Date(dateString);
 
   const ymd =
-    date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
+    date.getFullYear() +
+    "-" +
+    String(date.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(date.getDate()).padStart(2, "0");
 
   const time =
     String(date.getHours()).padStart(2, "0") +
@@ -459,11 +463,19 @@ onMounted(() => {
                     <option value="create_date">등록일</option>
                     <option value="update_date">수정일</option>
                   </select>
-                  <input ref="startDateInput" type="text" class="input-text date" readonly v-model="formData.startDate" />
+                  <input
+                    ref="startDateInput"
+                    type="text"
+                    class="input-text date"
+                    readonly
+                    v-model="formData.startDate"
+                  />
                   <button type="button" class="btn-calendar" @click="() => startDatePicker?.open()">&#x1F4C5;</button>
                   ~
                   <input ref="endDateInput" type="text" class="input-text date" readonly v-model="formData.endDate" />
-                  <button type="button" class="btn-calendar mr-2" @click="() => endDatePicker?.open()">&#x1F4C5;</button>
+                  <button type="button" class="btn-calendar mr-2" @click="() => endDatePicker?.open()">
+                    &#x1F4C5;
+                  </button>
                   <button type="button" class="btn btn-primary mr-2" @click="setYesterday">어제</button>
                   <button type="button" class="btn btn-primary mr-2" @click="setToday">오늘</button>
                   <button type="button" class="btn btn-primary mr-2" @click="setThisWeek">이번 주</button>
@@ -491,14 +503,20 @@ onMounted(() => {
             <option :value="100">100</option>
           </select>
           <button class="btn btn-outline-secondary mr-2">Export</button>
-          <router-link to="/admin/product/reg" class="btn btn-primary">+ Add Product</router-link>
+          <router-link to="/admin/products/reg" class="btn btn-primary">+ Add Product</router-link>
         </div>
 
         <table class="table product-list-table">
           <thead>
             <tr class="text-md">
               <th>
-                <input type="checkbox" id="selectAll" :checked="selectAll" @change="handleSelectAll" class="pl-checkbox" />
+                <input
+                  type="checkbox"
+                  id="selectAll"
+                  :checked="selectAll"
+                  @change="handleSelectAll"
+                  class="pl-checkbox"
+                />
               </th>
               <th>NO.</th>
               <th>PRODUCT</th>
@@ -548,7 +566,12 @@ onMounted(() => {
                 </td>
                 <td>
                   <label class="pl-switch">
-                    <input type="checkbox" :id="'active' + p.id" v-model="p.active" @change="() => handleActiveChange(p)" />
+                    <input
+                      type="checkbox"
+                      :id="'active' + p.id"
+                      v-model="p.active"
+                      @change="() => handleActiveChange(p)"
+                    />
                     <span class="pl-slider round"></span>
                   </label>
                 </td>
