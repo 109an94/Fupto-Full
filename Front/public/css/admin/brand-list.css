@@ -424,6 +424,10 @@ input:checked + .pl-slider:before {
   margin-bottom: 10px;
 }
 
+.modal-title {
+  font-size: 24px;
+}
+
 .modal-body {
   flex: 1;
 }
