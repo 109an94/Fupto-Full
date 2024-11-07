@@ -52,7 +52,6 @@ li {
 }
 #sidebar.hide {
   max-width: 60px;
-  overflow: hidden;
 }
 #sidebar.hide:hover {
   max-width: 260px;
