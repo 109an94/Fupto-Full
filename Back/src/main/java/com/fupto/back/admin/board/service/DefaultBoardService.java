@@ -1,11 +1,10 @@
-package com.fupto.fupto.admin.board.service;
+package com.fupto.back.admin.board.service;
 
-import com.fupto.fupto.admin.board.dto.BoardListDto;
-import com.fupto.fupto.admin.board.dto.BoardResponseDto;
-
-import com.fupto.fupto.admin.board.dto.BoardSearchDto;
-import com.fupto.fupto.entity.Board;
-import com.fupto.fupto.repository.BoardRepository;
+import com.fupto.back.admin.board.dto.BoardListDto;
+import com.fupto.back.admin.board.dto.BoardResponseDto;
+import com.fupto.back.admin.board.dto.BoardSearchDto;
+import com.fupto.back.entity.Board;
+import com.fupto.back.repository.BoardRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

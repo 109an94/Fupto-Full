@@ -1,9 +1,7 @@
-package com.fupto.fupto.admin.board.service;
+package com.fupto.back.admin.board.service;
 
-import com.fupto.fupto.admin.board.dto.BoardListDto;
-import com.fupto.fupto.admin.board.dto.BoardResponseDto;
-import com.fupto.fupto.admin.board.dto.BoardSearchDto;
-import com.fupto.fupto.entity.Board;
+import com.fupto.back.admin.board.dto.BoardResponseDto;
+import com.fupto.back.admin.board.dto.BoardSearchDto;
 
 import java.util.List;
 

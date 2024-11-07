@@ -1,4 +1,4 @@
-package com.fupto.fupto.admin.board.dto;
+package com.fupto.back.admin.board.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

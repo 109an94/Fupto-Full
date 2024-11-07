@@ -1,4 +1,4 @@
-//package com.fupto.fupto.admin.board.mapper;
+package com.fupto.back.admin.board.mapper;//package com.fupto.fupto.admin.board.mapper;
 //
 //import com.fupto.fupto.admin.board.dto.BoardListDto;
 //import com.fupto.fupto.entity.Board;

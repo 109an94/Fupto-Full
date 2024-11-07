@@ -1,11 +1,14 @@
-package com.fupto.fupto.admin.board.controller;
+package com.fupto.back.admin.board.controller;
 
-import com.fupto.fupto.admin.board.dto.BoardResponseDto;
-import com.fupto.fupto.admin.board.dto.BoardSearchDto;
-import com.fupto.fupto.admin.board.service.BoardService;
-import com.fupto.fupto.repository.BoardRepository;
+import com.fupto.back.admin.board.dto.BoardResponseDto;
+import com.fupto.back.admin.board.dto.BoardSearchDto;
+import com.fupto.back.admin.board.service.BoardService;
+import com.fupto.back.repository.BoardRepository;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
