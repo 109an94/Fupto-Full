@@ -19,14 +19,20 @@ const filterData = ref({
 //---------------methods
 const fetchMembers = async (page = 1) => {
   try{
-    // if (filterData.value.type) {params.append("type", filterData.value.type)};
-    // if (filterData.value.keyWord) {params.append("keyWord", filterData.value.keyWord)};
+    const params = new URLSearchParams({
+      page : page,
+      size : size.value.toString()
+    });
 
+    if (filterData.value.type) params.append("type", filterData.value.type)
+    if (filterData.value.keyWord) params.append("keyWord", filterData.value.keyWord)
+    console.log(params);
 
     const response = await fetch(`http://localhost:8080/api/v1/admin/members/search?${params.toString()}`);
     const data = await response.json();
-    // members.value = data.members;
-    members.value = data; //아직 data 자체가 배열이여서 직접 할당
+    members.value = data.members;
+    // members.value = data; //아직 data 자체가 배열이여서 직접 할당
+
   } catch (error) {
     console.log("데이터 입력 오류 : ",error);
   } finally{
