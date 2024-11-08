@@ -147,7 +147,7 @@ nav {
   align-items: center;
 }
 .representative-product input[type="checkbox"] {
-  transform: scale(1.5);
+  transform: scale(1.6);
 }
 .form-actions {
   display: flex;
@@ -190,6 +190,9 @@ nav {
 }
 .ml-2 {
   margin-left: 10px;
+}
+.mr-2 {
+  margin-right: 10px;
 }
 .mt-2 {
   margin-top: 35px;

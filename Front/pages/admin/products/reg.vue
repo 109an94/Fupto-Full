@@ -1,10 +1,32 @@
 <script setup>
+import { ref, computed, onMounted } from "vue";
+import SearchableSelect from "~/components/admin/SearchableSelect.vue";
+
 useHead({
   link: [{ rel: "stylesheet", href: "/css/admin/product-reg.css" }],
 });
 
 const products = ref([]);
 const nextId = ref(1);
+
+const categories = ref({
+  level1: [],
+  level2: [],
+  level3: [],
+});
+
+const brands = ref([
+  { id: 1, name: "Nike" },
+  { id: 2, name: "Adidas" },
+  { id: 3, name: "Puma" },
+]);
+
+const shops = ref([
+  { id: 1, name: "무신사" },
+  { id: 2, name: "브랜디" },
+  { id: 3, name: "지그재그" },
+  { id: 4, name: "무그" },
+]);
 
 const addProductForm = () => {
   products.value.push({
@@ -26,12 +48,53 @@ const addProductForm = () => {
   });
 };
 
+// 카테고리 데이터 가져오기
+const fetchCategories = async (level, parentId = null) => {
+  try {
+    const params = new URLSearchParams();
+    if (parentId) params.append("parentId", parentId);
+    params.append("level", level);
+
+    const data = await $fetch(`http://localhost:8080/api/v1/admin/products/categories?${params.toString()}`);
+
+    if (level === 1) {
+      categories.value.level1 = data;
+    } else if (level === 2) {
+      categories.value.level2 = data;
+    } else if (level === 3) {
+      categories.value.level3 = data;
+    }
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+  }
+};
+
+// 카테고리 선택 핸들러
+const handleCategory1Change = async (product) => {
+  product.category2 = "";
+  product.category3 = "";
+  categories.value.level2 = [];
+  categories.value.level3 = [];
+
+  if (product.category1) {
+    await fetchCategories(2, product.category1);
+  }
+};
+
+const handleCategory2Change = async (product) => {
+  product.category3 = "";
+  categories.value.level3 = [];
+
+  if (product.category2) {
+    await fetchCategories(3, product.category2);
+  }
+};
+
 const removeProductForm = (id) => {
   const index = products.value.findIndex((p) => p.id === id);
   if (index !== -1) {
     products.value.splice(index, 1);
   }
-  // Renumber the remaining products
   products.value.forEach((product, index) => {
     product.id = index + 1;
   });
@@ -52,7 +115,6 @@ const updateRepresentativeProduct = (id) => {
 };
 
 const handleActiveChange = (product) => {
-  // 토글 버튼 상태 변경 처리
   console.log(`Product ${product.id} active status: ${product.active}`);
 };
 
@@ -83,13 +145,14 @@ const submitForm = () => {
   // 여기에 서버로 데이터를 전송하는 로직 추가
 };
 
-onMounted(() => {
-  addProductForm(); // 초기 상품 폼 추가
-});
-
 const getImageNamesString = computed(() => (productId) => {
   const product = products.value.find((p) => p.id === productId);
   return product ? product.imageNames.join(", ") : "";
+});
+
+onMounted(() => {
+  fetchCategories(1);
+  addProductForm(); // 초기 상품 폼 추가
 });
 </script>
 
@@ -120,7 +183,7 @@ const getImageNamesString = computed(() => (productId) => {
                         />
                         <span class="pl-slider round"></span>
                       </label>
-                      <span class="switch-label">공개 여부</span>
+                      <span class="switch-label mr-2">공개 여부</span>
                     </div>
                     <label class="representative-product">
                       <input
@@ -132,31 +195,38 @@ const getImageNamesString = computed(() => (productId) => {
                     </label>
                   </div>
                 </h3>
-                <!-- 기존 폼 필드들 유지 -->
+                <!-- 기존 폼 필드들 -->
                 <div class="form-row">
                   <label>카테고리 :</label>
-                  <select v-model="product.category1" required>
+                  <select v-model="product.category1" required @change="() => handleCategory1Change(product)">
                     <option value="">1차 카테고리</option>
+                    <option v-for="cat in categories.level1" :key="cat.id" :value="cat.id">
+                      {{ cat.name }}
+                    </option>
                   </select>
-                  <select v-model="product.category2" required class="ml:2">
+                  <select v-model="product.category2" required class="ml:2" @change="() => handleCategory2Change(product)">
                     <option value="">2차 카테고리</option>
+                    <option v-for="cat in categories.level2" :key="cat.id" :value="cat.id">
+                      {{ cat.name }}
+                    </option>
                   </select>
                   <select v-model="product.category3" required class="ml:2">
                     <option value="">3차 카테고리</option>
+                    <option v-for="cat in categories.level3" :key="cat.id" :value="cat.id">
+                      {{ cat.name }}
+                    </option>
                   </select>
                 </div>
+
                 <div class="form-row">
                   <label>브랜드 :</label>
-                  <select v-model="product.brand" required>
-                    <option value="">브랜드 선택</option>
-                  </select>
+                  <SearchableSelect v-model="product.brand" :options="brands" placeholder="브랜드 선택" required />
                 </div>
                 <div class="form-row">
                   <label>쇼핑몰 :</label>
-                  <select v-model="product.shop" required>
-                    <option value="">쇼핑몰 선택</option>
-                  </select>
+                  <SearchableSelect v-model="product.shop" :options="shops" placeholder="쇼핑몰 선택" required />
                 </div>
+
                 <div class="form-row">
                   <label>URL:</label>
                   <input type="url" v-model="product.url" required />
