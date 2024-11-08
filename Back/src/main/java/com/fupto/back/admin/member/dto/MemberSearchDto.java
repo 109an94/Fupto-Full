@@ -11,14 +11,16 @@ import lombok.NoArgsConstructor;
 public class MemberSearchDto {
     private Integer page;
     private Integer size;
-    private String type;
-    private String keyWord;
+    private String memberType;
+    private String gender;
+    private String searchType;
+    private String searchKeyWord;
 
     public MemberSearchDto() {
         this.page = 1;
         this.size = 10;
-        this.type = "userId";
-        this.keyWord = "";
+        this.searchType = "userId";
+        this.searchKeyWord = "";
 
     }
 }

@@ -34,23 +34,34 @@ public class DefaultMemberService implements MemberService{
 
     @Override
     public MemberResponseDto getMemberList(MemberSearchDto SearchDto) {
-        return getMemberList(SearchDto.getPage(),SearchDto.getSize(),SearchDto.getType(),SearchDto.getKeyWord());
+        return getMemberList(SearchDto.getPage()
+                ,SearchDto.getSize()
+                ,SearchDto.getGender()
+                ,SearchDto.getSearchType()
+                ,SearchDto.getSearchKeyWord());
     }
 
     @Override
-    public MemberResponseDto getMemberList(Integer page, Integer size,String type, String keyWord) {
+    public MemberResponseDto getMemberList(Integer page,
+                                           Integer size,
+                                           String gender,
+                                           String searchType,
+                                           String searchKeyWord) {
 
         //페이지 처리
         Pageable pageable = PageRequest.of(page - 1,
                 size,
-                Sort.by(type).descending());
+                Sort.by(searchType).descending());
 
         // userId와 nickname 설정
-        String userId = type.equals("userId") ? keyWord : null;
-        String nickname = type.equals("nickname") ? keyWord : null;
-
+        String userId = searchType.equals("userId") ? searchKeyWord : null;
+        String nickname = searchType.equals("nickname") ? searchKeyWord : null;
+        String email = searchType.equals("email") ? searchKeyWord : null;
+            //genderf 는 String 타입으로안해도 되는 데 가독성을 위해 f로 변환
+        String genderf = (gender == null || gender.isEmpty()) ? null : gender;
+        String memberType = "ROLE_USER";
         // 레포지토리 메소드 호출
-        Page<Member> memberPage = memberRepository.searchMember(userId, nickname, pageable);
+        Page<Member> memberPage = memberRepository.searchMember(memberType, genderf, userId, nickname, email, pageable);
 
         List<MemberListDto> memberListDtos = memberPage
                 .getContent()

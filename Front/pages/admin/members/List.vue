@@ -13,8 +13,13 @@ const currentPage = ref(0);
 const page = ref(10);
 const size = ref(10);
 const filterData = ref({
-  type: "userId",
-  keyWord :""
+  // date
+  // login
+  // membertype
+  // gender
+  // search
+  searchType: "userId",
+  searchKeyWord :""
 })
 //---------------methods
 const fetchMembers = async (page = 1) => {
@@ -23,10 +28,15 @@ const fetchMembers = async (page = 1) => {
       page : page,
       size : size.value.toString()
     });
+    // date
+    // login
+    // membertype
 
-    if (filterData.value.type) params.append("type", filterData.value.type)
-    if (filterData.value.keyWord) params.append("keyWord", filterData.value.keyWord)
-    console.log(params);
+    // gender
+
+    // search
+    if (filterData.value.searchType) params.append("searchType", filterData.value.searchType)
+    if (filterData.value.searchKeyWord) params.append("searchKeyWord", filterData.value.searchKeyWord)
 
     const response = await fetch(`http://localhost:8080/api/v1/admin/members/search?${params.toString()}`);
     const data = await response.json();
@@ -194,12 +204,12 @@ members.value.forEach(members => {
                 <tr>
                   <th>검색명</th>
                   <td colspan="3">
-                    <select v-model="filterData.type" class="">
+                    <select v-model="filterData.searchType" class="">
                       <option value="userId">아이디</option>
                       <option value="nickname">이름</option>
                       <option value="email">이메일</option>
                     </select>
-                    <input type="text" class=""  v-model="filterData.keyWord">
+                    <input type="text" class=""  v-model="filterData.searchKeyWord">
                   </td>
                 </tr>
                 </tbody>
