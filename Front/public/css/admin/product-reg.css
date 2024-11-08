@@ -146,6 +146,9 @@ nav {
   display: flex;
   align-items: center;
 }
+.representative-product input[type="checkbox"] {
+  transform: scale(1.5);
+}
 .form-actions {
   display: flex;
   flex-direction: row;
@@ -187,4 +190,76 @@ nav {
 }
 .ml-2 {
   margin-left: 10px;
+}
+.mt-2 {
+  margin-top: 35px;
+}
+.form-header-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+}
+
+.switch-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.switch-label {
+  font-size: 16px;
+  color: #342e37;
+}
+
+.pl-switch {
+  position: relative;
+  display: inline-block;
+  width: 35px;
+  height: 20px;
+}
+
+.pl-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.pl-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.pl-slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+.pl-slider.round {
+  border-radius: 34px;
+}
+
+.pl-slider.round:before {
+  border-radius: 50%;
+}
+
+input:checked + .pl-slider {
+  background-color: #2196f3;
+}
+
+input:checked + .pl-slider:before {
+  transform: translateX(15px);
 }

@@ -9,6 +9,7 @@ const nextId = ref(1);
 const addProductForm = () => {
   products.value.push({
     id: nextId.value++,
+    active: true,
     isRepresentative: false,
     category1: "",
     category2: "",
@@ -38,9 +39,21 @@ const removeProductForm = (id) => {
 };
 
 const updateRepresentativeProduct = (id) => {
-  products.value.forEach((product) => {
-    product.isRepresentative = product.id === id;
-  });
+  const currentProduct = products.value.find((product) => product.id === id);
+  if (currentProduct && currentProduct.isRepresentative) {
+    products.value.forEach((product) => {
+      product.isRepresentative = false;
+    });
+  } else {
+    products.value.forEach((product) => {
+      product.isRepresentative = product.id === id;
+    });
+  }
+};
+
+const handleActiveChange = (product) => {
+  // 토글 버튼 상태 변경 처리
+  console.log(`Product ${product.id} active status: ${product.active}`);
 };
 
 const triggerFileUpload = (id) => {
@@ -96,17 +109,30 @@ const getImageNamesString = computed(() => (productId) => {
               <div v-for="(product, index) in products" :key="product.id" :id="`product-form-${product.id}`" class="product-form">
                 <h3 class="n-heading:6">
                   상품 {{ product.id }}
-                  <label class="representative-product">
-                    <input
-                      type="checkbox"
-                      v-model="product.isRepresentative"
-                      :value="product.id"
-                      class="mr:1"
-                      @change="updateRepresentativeProduct(product.id)"
-                    />
-                    <span class="ml-2">대표 상품</span>
-                  </label>
+                  <div class="form-header-controls">
+                    <div class="switch-container">
+                      <label class="pl-switch">
+                        <input
+                          type="checkbox"
+                          :id="'active' + product.id"
+                          v-model="product.active"
+                          @change="() => handleActiveChange(product)"
+                        />
+                        <span class="pl-slider round"></span>
+                      </label>
+                      <span class="switch-label">공개 여부</span>
+                    </div>
+                    <label class="representative-product">
+                      <input
+                        type="checkbox"
+                        :checked="product.isRepresentative"
+                        @change="updateRepresentativeProduct(product.id)"
+                      />
+                      <span class="switch-label ml-2">대표 상품</span>
+                    </label>
+                  </div>
                 </h3>
+                <!-- 기존 폼 필드들 유지 -->
                 <div class="form-row">
                   <label>카테고리 :</label>
                   <select v-model="product.category1" required>
@@ -189,16 +215,13 @@ const getImageNamesString = computed(() => (productId) => {
                   v-if="index > 0"
                   type="button"
                   @click="removeProductForm(product.id)"
-                  class="n-btn n-btn-color:danger mt:2"
+                  class="n-btn n-btn-color:danger mt-2"
                 >
                   이 상품 제거
                 </button>
               </div>
             </div>
             <div class="form-actions">
-              <button v-if="index > 0" type="button" @click="removeProductForm(product.id)" class="n-btn n-btn-color:danger mt:2">
-                이 상품 제거
-              </button>
               <button type="button" @click="addProductForm" class="n-btn n-btn-color:main">+ 상품 추가</button>
               <button type="submit" class="n-btn n-btn-color:main">등 록</button>
               <a href="#" class="n-btn n-btn-color:danger">취 소</a>
