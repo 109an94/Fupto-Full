@@ -12,9 +12,10 @@ public interface MemberService {
     List<Member> getList();
     MemberResponseDto getMemberList(Integer page,
                                     Integer size,
+                                    String memberType,
                                     String gender,
-                                    String type,
-                                    String keyWord);
+                                    String searchType,
+                                    String searchKeyWord);
     MemberResponseDto getMemberList(MemberSearchDto memberSearchDto);
     MemberListDto getMemberById(Long id);
     List<MemberListDto> getMemberWithDetails();

@@ -36,6 +36,7 @@ public class DefaultMemberService implements MemberService{
     public MemberResponseDto getMemberList(MemberSearchDto SearchDto) {
         return getMemberList(SearchDto.getPage()
                 ,SearchDto.getSize()
+                ,SearchDto.getMemberType()
                 ,SearchDto.getGender()
                 ,SearchDto.getSearchType()
                 ,SearchDto.getSearchKeyWord());
@@ -44,6 +45,7 @@ public class DefaultMemberService implements MemberService{
     @Override
     public MemberResponseDto getMemberList(Integer page,
                                            Integer size,
+                                           String memberType,
                                            String gender,
                                            String searchType,
                                            String searchKeyWord) {
@@ -59,9 +61,9 @@ public class DefaultMemberService implements MemberService{
         String email = searchType.equals("email") ? searchKeyWord : null;
             //genderf 는 String 타입으로안해도 되는 데 가독성을 위해 f로 변환
         String genderf = (gender == null || gender.isEmpty()) ? null : gender;
-        String memberType = "ROLE_USER";
+        String memberTypef = (memberType == null || memberType.isEmpty()) ? null : memberType;
         // 레포지토리 메소드 호출
-        Page<Member> memberPage = memberRepository.searchMember(memberType, genderf, userId, nickname, email, pageable);
+        Page<Member> memberPage = memberRepository.searchMember(memberTypef, genderf, userId, nickname, email, pageable);
 
         List<MemberListDto> memberListDtos = memberPage
                 .getContent()
