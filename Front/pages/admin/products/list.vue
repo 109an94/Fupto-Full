@@ -74,8 +74,8 @@ const fetchProducts = async () => {
       params.append("endDate", formData.value.endDate);
     }
 
-    const response = await fetch(`http://localhost:8080/api/v1/admin/products?${params.toString()}`);
-    const data = await response.json();
+    const data = await $fetch(`http://localhost:8080/api/v1/admin/products?${params.toString()}`);
+
     products.value = data.products;
     totalElements.value = data.totalElements;
     totalPages.value = data.totalPages;
@@ -88,8 +88,8 @@ const fetchProducts = async () => {
 // 매핑된 상품만 가져오기
 const fetchMappingProducts = async (productId) => {
   try {
-    const response = await fetch(`http://localhost:8080/api/v1/admin/products/${productId}/mapping`);
-    const data = await response.json();
+    const data = await $fetch(`http://localhost:8080/api/v1/admin/products/${productId}/mapping`);
+
     mappedProducts.value[productId] = data;
   } catch (error) {
     console.error("Error fetching mapping products:", error);
@@ -103,8 +103,7 @@ const fetchCategories = async (level, parentId = null) => {
     if (parentId) params.append("parentId", parentId);
     params.append("level", level);
 
-    const response = await fetch(`http://localhost:8080/api/v1/admin/products/categories?${params.toString()}`);
-    const data = await response.json();
+    const data = await $fetch(`http://localhost:8080/api/v1/admin/products/categories?${params.toString()}`);
 
     if (level === 1) {
       categories.value.level1 = data;
@@ -122,14 +121,12 @@ const fetchCategories = async (level, parentId = null) => {
 const updateActive = async (productId, active) => {
   try {
     console.log(`Updating active status: productId=${productId}, active=${active}`);
-    const response = await fetch(`http://localhost:8080/api/v1/admin/products/${productId}/active?active=${active}`, {
+    await $fetch(`http://localhost:8080/api/v1/admin/products/${productId}/active?active=${active}`, {
       method: "PATCH",
     });
-    if (!response.ok) {
-      throw new Error("Active 상태 변경에 실패했습니다.");
-    }
   } catch (error) {
     console.error("Error updating active status:", error);
+    throw new Error("Active 상태 변경에 실패했습니다.");
   }
 };
 
@@ -143,35 +140,27 @@ const updateState = async (productId, isMainProduct = false) => {
   try {
     if (isMainProduct) {
       // 대표상품 삭제
-      const response = await fetch(`http://localhost:8080/api/v1/admin/products/${productId}/promote`, {
+      await $fetch(`http://localhost:8080/api/v1/admin/products/${productId}/promote`, {
         method: "PATCH",
       });
-
-      if (!response.ok) {
-        throw new Error("상품 삭제 처리 중 오류가 발생했습니다.");
-      }
-
       // 대표상품 삭제 시 전체 목록 새로고침
       fetchProducts();
     } else {
       // 매핑상품 삭제
-      const response = await fetch(`http://localhost:8080/api/v1/admin/products/${productId}/state`, {
+      await $fetch(`http://localhost:8080/api/v1/admin/products/${productId}/state`, {
         method: "PATCH",
       });
 
-      if (!response.ok) {
-        throw new Error("상품 삭제 처리 중 오류가 발생했습니다.");
-      }
-
       // 매핑상품 삭제 시 해당 대표상품의 매핑 목록만 새로고침
       const parentProduct = products.value.find((p) => mappedProducts.value[p.id]?.some((mp) => mp.id === productId));
+
       if (parentProduct) {
         await fetchMappingProducts(parentProduct.id);
       }
     }
   } catch (error) {
     console.error("Error updating state:", error);
-    alert(error.message);
+    alert(error.message || "상품 삭제 처리 중 오류가 발생했습니다.");
   }
 };
 
@@ -360,11 +349,7 @@ const formatDate = (dateString) => {
   const date = new Date(dateString);
 
   const ymd =
-    date.getFullYear() +
-    "-" +
-    String(date.getMonth() + 1).padStart(2, "0") +
-    "-" +
-    String(date.getDate()).padStart(2, "0");
+    date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
 
   const time =
     String(date.getHours()).padStart(2, "0") +
@@ -463,19 +448,11 @@ onMounted(() => {
                     <option value="create_date">등록일</option>
                     <option value="update_date">수정일</option>
                   </select>
-                  <input
-                    ref="startDateInput"
-                    type="text"
-                    class="input-text date"
-                    readonly
-                    v-model="formData.startDate"
-                  />
+                  <input ref="startDateInput" type="text" class="input-text date" readonly v-model="formData.startDate" />
                   <button type="button" class="btn-calendar" @click="() => startDatePicker?.open()">&#x1F4C5;</button>
                   ~
                   <input ref="endDateInput" type="text" class="input-text date" readonly v-model="formData.endDate" />
-                  <button type="button" class="btn-calendar mr-2" @click="() => endDatePicker?.open()">
-                    &#x1F4C5;
-                  </button>
+                  <button type="button" class="btn-calendar mr-2" @click="() => endDatePicker?.open()">&#x1F4C5;</button>
                   <button type="button" class="btn btn-primary mr-2" @click="setYesterday">어제</button>
                   <button type="button" class="btn btn-primary mr-2" @click="setToday">오늘</button>
                   <button type="button" class="btn btn-primary mr-2" @click="setThisWeek">이번 주</button>
@@ -510,13 +487,7 @@ onMounted(() => {
           <thead>
             <tr class="text-md">
               <th>
-                <input
-                  type="checkbox"
-                  id="selectAll"
-                  :checked="selectAll"
-                  @change="handleSelectAll"
-                  class="pl-checkbox"
-                />
+                <input type="checkbox" id="selectAll" :checked="selectAll" @change="handleSelectAll" class="pl-checkbox" />
               </th>
               <th>NO.</th>
               <th>PRODUCT</th>
@@ -566,12 +537,7 @@ onMounted(() => {
                 </td>
                 <td>
                   <label class="pl-switch">
-                    <input
-                      type="checkbox"
-                      :id="'active' + p.id"
-                      v-model="p.active"
-                      @change="() => handleActiveChange(p)"
-                    />
+                    <input type="checkbox" :id="'active' + p.id" v-model="p.active" @change="() => handleActiveChange(p)" />
                     <span class="pl-slider round"></span>
                   </label>
                 </td>
