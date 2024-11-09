@@ -1,10 +1,9 @@
 package com.fupto.back.admin.product.service;
 
+import com.fupto.back.admin.product.dto.*;
+import com.fupto.back.repository.BrandRepository;
+import com.fupto.back.repository.ShoppingMallRepository;
 import jakarta.persistence.EntityNotFoundException;
-import com.fupto.back.admin.product.dto.CategorySelectDto;
-import com.fupto.back.admin.product.dto.ProductListDto;
-import com.fupto.back.admin.product.dto.ProductResponseDto;
-import com.fupto.back.admin.product.dto.ProductSearchDto;
 import com.fupto.back.entity.Category;
 import com.fupto.back.entity.Product;
 import com.fupto.back.repository.CategoryRepository;
@@ -25,13 +24,19 @@ public class DefaultProductService implements ProductService {
 
     private ProductRepository productRepository;
     private CategoryRepository categoryRepository;
+    private BrandRepository brandRepository;
+    private ShoppingMallRepository shoppingMallRepository;
     private ModelMapper modelMapper;
 
     public DefaultProductService(ProductRepository productRepository,
                                  CategoryRepository categoryRepository,
+                                 BrandRepository brandRepository,
+                                 ShoppingMallRepository shoppingMallRepository,
                                  ModelMapper modelMapper) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.brandRepository = brandRepository;
+        this.shoppingMallRepository = shoppingMallRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -103,6 +108,32 @@ public class DefaultProductService implements ProductService {
                         .builder()
                         .id(category.getId())
                         .name(category.getName())
+                        .build())
+                .toList();
+    }
+
+    @Override
+    public List<BrandSelectDto> getBrands() {
+        return brandRepository.findByActiveIsTrue()
+                .stream()
+                .map(brand -> BrandSelectDto
+                        .builder()
+                        .id(brand.getId())
+                        .engName(brand.getEngName())
+                        .korName(brand.getKorName())
+                        .build())
+                .toList();
+    }
+
+    @Override
+    public List<ShoppingMallSelectDto> getShoppingMalls() {
+        return shoppingMallRepository.findByActiveIsTrue()
+                .stream()
+                .map(shop -> ShoppingMallSelectDto
+                        .builder()
+                        .id(shop.getId())
+                        .engName(shop.getEngName())
+                        .korName(shop.getKorName())
                         .build())
                 .toList();
     }

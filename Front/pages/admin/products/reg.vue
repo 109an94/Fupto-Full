@@ -15,18 +15,8 @@ const categories = ref({
   level3: [],
 });
 
-const brands = ref([
-  { id: 1, name: "Nike" },
-  { id: 2, name: "Adidas" },
-  { id: 3, name: "Puma" },
-]);
-
-const shops = ref([
-  { id: 1, name: "무신사" },
-  { id: 2, name: "브랜디" },
-  { id: 3, name: "지그재그" },
-  { id: 4, name: "무그" },
-]);
+const brands = ref([]);
+const shops = ref([]);
 
 const addProductForm = () => {
   products.value.push({
@@ -90,6 +80,32 @@ const handleCategory2Change = async (product) => {
   }
 };
 
+const fetchBrands = async () => {
+  try {
+    const data = await $fetch("http://localhost:8080/api/v1/admin/products/brands");
+
+    brands.value = data.map((brand) => ({
+      id: brand.id,
+      name: `${brand.engName}(${brand.korName})`,
+    }));
+  } catch (error) {
+    console.error("Error fetching brands:", error);
+  }
+};
+
+const fetchShops = async () => {
+  try {
+    const data = await $fetch("http://localhost:8080/api/v1/admin/products/shopping-malls");
+
+    shops.value = data.map((shop) => ({
+      id: shop.id,
+      name: `${shop.engName}(${shop.korName})`,
+    }));
+  } catch (error) {
+    console.error("Error fetching shopping malls:", error);
+  }
+};
+
 const removeProductForm = (id) => {
   const index = products.value.findIndex((p) => p.id === id);
   if (index !== -1) {
@@ -150,9 +166,9 @@ const getImageNamesString = computed(() => (productId) => {
   return product ? product.imageNames.join(", ") : "";
 });
 
-onMounted(() => {
-  fetchCategories(1);
-  addProductForm(); // 초기 상품 폼 추가
+onMounted(async () => {
+  await Promise.all([fetchCategories(1), fetchBrands(), fetchShops()]);
+  addProductForm();
 });
 </script>
 

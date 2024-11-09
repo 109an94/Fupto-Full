@@ -1,9 +1,6 @@
 package com.fupto.back.admin.product.service;
 
-import com.fupto.back.admin.product.dto.CategorySelectDto;
-import com.fupto.back.admin.product.dto.ProductListDto;
-import com.fupto.back.admin.product.dto.ProductResponseDto;
-import com.fupto.back.admin.product.dto.ProductSearchDto;
+import com.fupto.back.admin.product.dto.*;
 
 import java.util.List;
 
@@ -15,6 +12,12 @@ public interface ProductService {
 
     ProductListDto getById(Long id);
 
+    List<CategorySelectDto> getCategoriesByLevelAndParent(Integer level, Long parentId);
+
+    List<BrandSelectDto> getBrands();
+
+    List<ShoppingMallSelectDto> getShoppingMalls();
+
     ProductListDto create(ProductListDto productListDto);
 
     ProductListDto update(ProductListDto productListDto);
@@ -25,7 +28,6 @@ public interface ProductService {
 
     void delete(Long id);
 
-    List<CategorySelectDto> getCategoriesByLevelAndParent(Integer level, Long parentId);
 
     void promoteAndDelete(Long id);
 }

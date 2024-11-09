@@ -1,6 +1,8 @@
 package com.fupto.back.admin.product.controller;
 
 import com.fupto.back.admin.product.dto.CategorySelectDto;
+import com.fupto.back.admin.product.dto.BrandSelectDto;
+import com.fupto.back.admin.product.dto.ShoppingMallSelectDto;
 import com.fupto.back.admin.product.dto.ProductListDto;
 import com.fupto.back.admin.product.dto.ProductResponseDto;
 import com.fupto.back.admin.product.dto.ProductSearchDto;
@@ -31,6 +33,16 @@ public class ProductController {
             @RequestParam Integer level,
             @RequestParam(required = false) Long parentId) {
         return ResponseEntity.ok(productService.getCategoriesByLevelAndParent(level, parentId));
+    }
+
+    @GetMapping("/brands")
+    public ResponseEntity<List<BrandSelectDto>> getBrands() {
+        return ResponseEntity.ok(productService.getBrands());
+    }
+
+    @GetMapping("/shopping-malls")
+    public ResponseEntity<List<ShoppingMallSelectDto>> getShoppingMalls() {
+        return ResponseEntity.ok(productService.getShoppingMalls());
     }
 
     @GetMapping("{id}/mapping")
