@@ -22,16 +22,16 @@ const addProductForm = () => {
   products.value.push({
     id: nextId.value++,
     active: true,
-    isRepresentative: false,
+    presentId: false,
     category1: "",
     category2: "",
     category3: "",
-    brand: "",
-    shop: "",
+    brandId: "",
+    shoppingMallId: "",
     url: "",
-    name: "",
-    originalPrice: "",
-    discountedPrice: "",
+    productName: "",
+    retailPrice: "",
+    salePrice: "",
     description: "",
     images: [],
     imageNames: [],
@@ -117,17 +117,23 @@ const removeProductForm = (id) => {
   nextId.value = products.value.length + 1;
 };
 
-const updateRepresentativeProduct = (id) => {
+const updatepresentIdProduct = (id) => {
   const currentProduct = products.value.find((product) => product.id === id);
-  if (currentProduct && currentProduct.isRepresentative) {
+
+  if (!currentProduct.presentId) {
     products.value.forEach((product) => {
-      product.isRepresentative = false;
+      product.presentId = false;
     });
   } else {
     products.value.forEach((product) => {
-      product.isRepresentative = product.id === id;
+      product.presentId = product.id === id;
     });
   }
+
+  console.log(
+    "Updated products:",
+    products.value.map((p) => ({ id: p.id, presentId: p.presentId }))
+  );
 };
 
 const handleActiveChange = (product) => {
@@ -156,9 +162,49 @@ const removeImage = (productId, imageIndex) => {
   }
 };
 
-const submitForm = () => {
-  console.log(products.value);
-  // 여기에 서버로 데이터를 전송하는 로직 추가
+const submitForm = async () => {
+  try {
+    const formData = new FormData();
+
+    const productsData = products.value.map((product) => ({
+      formId: product.id,
+      active: product.active,
+      presentId: product.presentId,
+      categoryId: product.category3,
+      brandId: product.brandId,
+      shoppingMallId: product.shoppingMallId,
+      url: product.url,
+      productName: product.productName,
+      retailPrice: parseInt(product.retailPrice),
+      salePrice: parseInt(product.salePrice),
+      description: product.description,
+    }));
+
+    const productsBlob = new Blob([JSON.stringify(productsData)], {
+      type: "application/json",
+    });
+    formData.append("data", productsBlob);
+
+    products.value.forEach((product) => {
+      const fileInput = document.querySelector(`#product-form-${product.id} input[type="file"]`);
+      if (fileInput && fileInput.files.length > 0) {
+        Array.from(fileInput.files).forEach((file) => {
+          formData.append(`files_${product.id}`, file);
+        });
+      }
+    });
+
+    await $fetch("http://localhost:8080/api/v1/admin/products", {
+      method: "POST",
+      body: formData,
+    });
+
+    alert("상품 등록이 완료 되었습니다.");
+    await navigateTo("/admin/products/list");
+  } catch (error) {
+    console.error("Error submitting form:", error);
+    alert("상품 등록 중 오류가 발생했습니다.");
+  }
 };
 
 const getImageNamesString = computed(() => (productId) => {
@@ -202,11 +248,7 @@ onMounted(async () => {
                       <span class="switch-label mr-2">공개 여부</span>
                     </div>
                     <label class="representative-product">
-                      <input
-                        type="checkbox"
-                        :checked="product.isRepresentative"
-                        @change="updateRepresentativeProduct(product.id)"
-                      />
+                      <input type="checkbox" v-model="product.presentId" @change="updatepresentIdProduct(product.id)" />
                       <span class="switch-label ml-2">대표 상품</span>
                     </label>
                   </div>
@@ -236,11 +278,11 @@ onMounted(async () => {
 
                 <div class="form-row">
                   <label>브랜드 :</label>
-                  <SearchableSelect v-model="product.brand" :options="brands" placeholder="브랜드 선택" required />
+                  <SearchableSelect v-model="product.brandId" :options="brands" placeholder="브랜드 선택" required />
                 </div>
                 <div class="form-row">
                   <label>쇼핑몰 :</label>
-                  <SearchableSelect v-model="product.shop" :options="shops" placeholder="쇼핑몰 선택" required />
+                  <SearchableSelect v-model="product.shoppingMallId" :options="shops" placeholder="쇼핑몰 선택" required />
                 </div>
 
                 <div class="form-row">
@@ -249,15 +291,15 @@ onMounted(async () => {
                 </div>
                 <div class="form-row">
                   <label>상품이름 :</label>
-                  <input type="text" v-model="product.name" required />
+                  <input type="text" v-model="product.productName" required />
                 </div>
                 <div class="form-row">
                   <label>소비자가 :</label>
-                  <input type="number" v-model="product.originalPrice" required />
+                  <input type="number" v-model="product.retailPrice" required />
                 </div>
                 <div class="form-row">
                   <label>할인가 :</label>
-                  <input type="number" v-model="product.discountedPrice" required />
+                  <input type="number" v-model="product.salePrice" required />
                 </div>
                 <div class="form-row">
                   <label>상세설명 :</label>

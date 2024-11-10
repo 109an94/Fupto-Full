@@ -68,11 +68,15 @@ const fetchProducts = async () => {
     if (formData.value.active) params.append("active", formData.value.active === "1");
     if (formData.value.startDate) {
       params.append("dateType", formData.value.dateType);
-      params.append("startDate", formData.value.startDate);
+      const date = new Date(formData.value.startDate);
+      params.append("startDate", date.toISOString());
     }
     if (formData.value.endDate) {
-      params.append("endDate", formData.value.endDate);
+      const date = new Date(formData.value.endDate);
+      params.append("endDate", date.toISOString());
     }
+
+    console.log("Search Parameters:", params.toString());
 
     const data = await $fetch(`http://localhost:8080/api/v1/admin/products?${params.toString()}`);
 
@@ -339,26 +343,27 @@ const isExpanded = (productId) => expandedRows.value.has(productId);
 // 검색 핸들러
 const handleSearch = (event) => {
   event.preventDefault();
-  currentPage.value = 0; // 검색시 첫 페이지로 이동
+  currentPage.value = 0;
   fetchProducts();
 };
 
 // 날짜 포맷팅 함수
 const formatDate = (dateString) => {
   if (!dateString) return "";
+
+  // UTC 시간을 그대로 사용 (이미 KST로 저장되어 있으므로)
   const date = new Date(dateString);
 
-  const ymd =
-    date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
+  const ymd = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(
+    2,
+    "0"
+  )}`;
 
-  const time =
-    String(date.getHours()).padStart(2, "0") +
-    ":" +
-    String(date.getMinutes()).padStart(2, "0") +
-    ":" +
-    String(date.getSeconds()).padStart(2, "0");
+  const time = `${String(date.getUTCHours()).padStart(2, "0")}:${String(date.getUTCMinutes()).padStart(2, "0")}:${String(
+    date.getUTCSeconds()
+  ).padStart(2, "0")}`;
 
-  return [ymd, time]; // 배열로 반환
+  return [ymd, time];
 };
 
 // 숫자 포맷팅 함수
@@ -517,7 +522,7 @@ onMounted(() => {
                 <td>{{ p.id }}</td>
                 <td class="product-cell">
                   <div class="d-flex align-items-center">
-                    <img src="https://via.placeholder.com/70" :alt="p.productName" class="product-img" />
+                    <img :src="p.imagePath || 'https://via.placeholder.com/70'" :alt="p.productName" class="product-img" />
                     <div class="product-info ml-2">
                       <span class="text-md">{{ p.productName }}</span>
                       <small class="d-block text-muted text-sm">{{ p.brandEngName }}</small>
@@ -576,7 +581,11 @@ onMounted(() => {
                         <td>{{ mp.id }}</td>
                         <td class="product-cell">
                           <div class="d-flex align-items-center">
-                            <img src="https://via.placeholder.com/70" :alt="mp.productName" class="product-img" />
+                            <img
+                              :src="mp.imagePath || 'https://via.placeholder.com/70'"
+                              :alt="mp.productName"
+                              class="product-img"
+                            />
                             <div class="product-info ml-2">
                               <span class="text-md">{{ mp.productName }}</span>
                               <small class="d-block text-muted text-sm">{{ mp.brandEngName }}</small>

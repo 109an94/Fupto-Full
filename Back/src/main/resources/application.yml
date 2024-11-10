@@ -4,7 +4,15 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+  servlet:
+    multipart:
+      max-file-size: 100MB #개별 파일 사이즈
+      max-request-size: 300MB #여러개 올때 총 사이즈
 
 server:
   servlet:
     context-path: /api/v1
+
+file:
+  upload:
+    path: uploads
