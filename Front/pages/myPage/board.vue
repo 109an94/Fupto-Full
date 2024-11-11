@@ -1,4 +1,7 @@
 <script setup>
+useHead({
+  link: [{ rel: "stylesheet", href: "/css/myLayout.css" }],
+});
 
 </script>
 
@@ -14,7 +17,3 @@
   <div class="image-box"><img src="" alt="이미지 8"></div>
   </div>
 </template>
-
-<style scoped>
-@import url("@/assets/css/my.css");
-</style>

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.util.List;
 
 public interface BrandRepository extends JpaRepository<Brand, Long> {
     @Query("SELECT b FROM Brand b WHERE " +
@@ -32,4 +33,5 @@ public interface BrandRepository extends JpaRepository<Brand, Long> {
             Pageable pageable
     );
 
+    List<Brand> findByActiveIsTrueOrderByEngNameAsc();
 }

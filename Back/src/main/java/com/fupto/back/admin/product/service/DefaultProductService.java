@@ -1,38 +1,67 @@
 package com.fupto.back.admin.product.service;
 
+import com.fupto.back.admin.product.dto.*;
+import com.fupto.back.entity.PriceHistory;
+import com.fupto.back.entity.ProductImage;
+import com.fupto.back.repository.*;
 import jakarta.persistence.EntityNotFoundException;
-import com.fupto.back.admin.product.dto.CategorySelectDto;
-import com.fupto.back.admin.product.dto.ProductListDto;
-import com.fupto.back.admin.product.dto.ProductResponseDto;
-import com.fupto.back.admin.product.dto.ProductSearchDto;
 import com.fupto.back.entity.Category;
 import com.fupto.back.entity.Product;
-import com.fupto.back.repository.CategoryRepository;
-import com.fupto.back.repository.ProductRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @Service("adminProductService")
+@Transactional
 public class DefaultProductService implements ProductService {
+
+    @Value("${file.upload.path}")
+    private String uploadPath;
 
     private ProductRepository productRepository;
     private CategoryRepository categoryRepository;
+    private BrandRepository brandRepository;
+    private ShoppingMallRepository shoppingMallRepository;
+    private PriceHistoryRepository priceHistoryRepository;
+    private ProductImageRepository productImageRepository;
     private ModelMapper modelMapper;
+    private FileService fileService;
 
     public DefaultProductService(ProductRepository productRepository,
                                  CategoryRepository categoryRepository,
-                                 ModelMapper modelMapper) {
+                                 BrandRepository brandRepository,
+                                 ShoppingMallRepository shoppingMallRepository,
+                                 PriceHistoryRepository priceHistoryRepository,
+                                    ProductImageRepository productImageRepository,
+                                 ModelMapper modelMapper,
+                                 FileService fileService) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.brandRepository = brandRepository;
+        this.shoppingMallRepository = shoppingMallRepository;
+        this.priceHistoryRepository = priceHistoryRepository;
+        this.productImageRepository = productImageRepository;
         this.modelMapper = modelMapper;
+        this.fileService = fileService;
     }
 
     @Override
@@ -52,7 +81,8 @@ public class DefaultProductService implements ProductService {
                 searchDto.getActive() != null ||
                 searchDto.getPresentId() != null ||
                 (searchDto.getSearchKeyword() != null && !searchDto.getSearchKeyword().isEmpty()) ||
-                searchDto.getMinPrice() != null || searchDto.getMaxPrice() != null) {
+                searchDto.getMinPrice() != null || searchDto.getMaxPrice() != null ||
+                searchDto.getStartDate() != null || searchDto.getEndDate() != null) {
             productPage = productRepository.findBySearchCriteria(
                     category1,
                     category2,
@@ -65,8 +95,8 @@ public class DefaultProductService implements ProductService {
                     searchDto.getMinPrice(),
                     searchDto.getMaxPrice(),
                     searchDto.getDateType(),
-                    convertToInstant(searchDto.getStartDate()),
-                    convertToInstant(searchDto.getEndDate()),
+                    searchDto.getStartDate(),
+                    searchDto.getEndDate(),
                     pageable
             );
         } else {
@@ -108,6 +138,47 @@ public class DefaultProductService implements ProductService {
     }
 
     @Override
+    public List<BrandSelectDto> getBrands() {
+        return brandRepository.findByActiveIsTrueOrderByEngNameAsc()
+                .stream()
+                .map(brand -> BrandSelectDto
+                        .builder()
+                        .id(brand.getId())
+                        .engName(brand.getEngName())
+                        .korName(brand.getKorName())
+                        .build())
+                .toList();
+    }
+
+    @Override
+    public List<ShoppingMallSelectDto> getShoppingMalls() {
+        return shoppingMallRepository.findByActiveIsTrueOrderByEngNameAsc()
+                .stream()
+                .map(shop -> ShoppingMallSelectDto
+                        .builder()
+                        .id(shop.getId())
+                        .engName(shop.getEngName())
+                        .korName(shop.getKorName())
+                        .build())
+                .toList();
+    }
+
+    @Override
+    public Resource getProductImage(Long id) throws IOException {
+        ProductImage productImage = productImageRepository.findByProductIdAndDisplayOrder(id, 1)
+                .orElseThrow(() -> new EntityNotFoundException("대표 이미지를 찾을 수 없습니다."));
+
+        Path imagePath = Paths.get(uploadPath, productImage.getFilePath());
+        Resource resource = new FileSystemResource(imagePath.toFile());
+
+        if (!resource.exists()) {
+            throw new FileNotFoundException("이미지 파일을 찾을 수 없습니다.");
+        }
+
+        return resource;
+    }
+
+    @Override
     public List<ProductListDto> getMappingProducts(Long mappingId) {
         List<Product> products = productRepository.findAllByMappingIdAndStateIsTrue(mappingId);
 
@@ -126,11 +197,108 @@ public class DefaultProductService implements ProductService {
     }
 
     @Override
-    public ProductListDto create(ProductListDto productListDto) {
-        Product product = productRepository.save(modelMapper.map(productListDto, Product.class));
-        Product newProduct = productRepository.findById(product.getId()).orElse(null);
-        return modelMapper.map(newProduct, ProductListDto.class);
+    public List<ProductListDto> create(List<ProductRegDto> regDtos,
+                                       Map<Integer, List<MultipartFile>> filesMap,
+                                       Map<Integer, Map<String, MultipartFile>> filesByNameMap) {
+        List<ProductListDto> results = new ArrayList<>();
+
+        ProductRegDto representativeDto = regDtos.stream()
+                .filter(dto -> dto.getPresentId())
+                .findFirst()
+                .orElse(null);
+
+        if (representativeDto != null) {
+            Product representativeProduct = createSingleProduct(
+                    representativeDto,
+                    filesMap.get(representativeDto.getFormId()),
+                    filesByNameMap.get(representativeDto.getFormId()),
+                    null
+            );
+
+            representativeProduct.setMappingId(representativeProduct.getId());
+            representativeProduct = productRepository.save(representativeProduct);
+            results.add(convertToProductListDto(representativeProduct));
+
+            for (ProductRegDto regDto : regDtos) {
+                if (!regDto.getPresentId()) {
+                    Product product = createSingleProduct(
+                            regDto,
+                            filesMap.get(regDto.getFormId()),
+                            filesByNameMap.get(regDto.getFormId()),
+                            representativeProduct.getId()
+                    );
+                    results.add(convertToProductListDto(product));
+                }
+            }
+        } else {
+            for (ProductRegDto regDto : regDtos) {
+                Product product = createSingleProduct(
+                        regDto,
+                        filesMap.get(regDto.getFormId()),
+                        filesByNameMap.get(regDto.getFormId()),
+                        null
+                );
+                results.add(convertToProductListDto(product));
+            }
+        }
+
+        return results;
     }
+
+    private Product createSingleProduct(ProductRegDto regDto,
+                                        List<MultipartFile> files,
+                                        Map<String, MultipartFile> filesByName,
+                                        Long mappingId) {
+        Product product = Product.builder()
+                .productName(regDto.getProductName())
+                .retailPrice(regDto.getRetailPrice())
+                .url(regDto.getUrl())
+                .description(regDto.getDescription())
+                .presentId(regDto.getPresentId())
+                .mappingId(mappingId)
+                .active(regDto.getActive())
+                .state(true)
+                .category(categoryRepository.findById(regDto.getCategoryId()).orElseThrow())
+                .brand(brandRepository.findById(regDto.getBrandId()).orElseThrow())
+                .shoppingMall(shoppingMallRepository.findById(regDto.getShoppingMallId()).orElseThrow())
+                .productImages(new ArrayList<>())
+                .build();
+
+        product = productRepository.save(product);
+
+        PriceHistory priceHistory = PriceHistory.builder()
+                .product(product)
+                .salePrice(regDto.getSalePrice())
+                .build();
+        priceHistoryRepository.save(priceHistory);
+
+        // 순서대로 이미지 저장
+        if (regDto.getImageFileNames() != null && !regDto.getImageFileNames().isEmpty()) {
+            for (int i = 0; i < regDto.getImageFileNames().size(); i++) {
+                String fileName = regDto.getImageFileNames().get(i);
+                MultipartFile file = filesByName.get(fileName);
+
+                if (file != null) {
+                    try {
+                        String filePath = fileService.saveFile(file, product.getId());
+                        ProductImage image = ProductImage.builder()
+                                .product(product)
+                                .fileName(filePath.substring(filePath.lastIndexOf("/") + 1))
+                                .originalName(file.getOriginalFilename())
+                                .filePath(filePath)
+                                .displayOrder(i + 1)
+                                .build();
+                        product.getProductImages().add(image);
+                    } catch (IOException e) {
+                        log.error("Failed to save file", e);
+                    }
+                }
+            }
+        }
+
+        return product;
+    }
+
 
     @Override
     public ProductListDto update(ProductListDto productListDto) {
@@ -235,13 +403,6 @@ public class DefaultProductService implements ProductService {
         productRepository.deleteById(id);
     }
 
-    private Instant convertToInstant(LocalDate localDate) {
-        if (localDate == null) {
-            return null;
-        }
-        return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
-    }
-
     private ProductListDto convertToProductListDto(Product product) {
         ProductListDto productListDto = modelMapper.map(product, ProductListDto.class);
 
@@ -256,8 +417,17 @@ public class DefaultProductService implements ProductService {
         productListDto.setBrandEngName(product.getBrand().getEngName());
         productListDto.setCategoryName(categoryPath);
         productListDto.setShoppingMallEngName(product.getShoppingMall().getEngName());
-        productListDto.setSalePrice(product.getPriceHistories().isEmpty() ?
-                null : product.getPriceHistories().getLast().getSalePrice());
+
+        // 가장 최근 가격만 조회
+        Integer latestPrice = priceHistoryRepository.findLatestPriceByProductId(product.getId());
+        productListDto.setSalePrice(latestPrice);
+
+        product.getProductImages().stream()
+                .filter(image -> image.getDisplayOrder() == 1)
+                .findFirst()
+                .ifPresent(image -> productListDto.setImagePath(
+                        "http://localhost:8080/api/v1/admin/products/" + product.getId() + "/image"
+                ));
 
         return productListDto;
     }

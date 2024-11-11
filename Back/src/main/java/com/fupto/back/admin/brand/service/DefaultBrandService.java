@@ -1,25 +1,39 @@
 package com.fupto.back.admin.brand.service;
 
+import com.fupto.back.admin.brand.dto.BrandCreateDto;
 import com.fupto.back.admin.brand.dto.BrandListDto;
 import com.fupto.back.admin.brand.dto.BrandResponseDto;
 import com.fupto.back.admin.brand.dto.BrandSearchDto;
 import com.fupto.back.entity.Brand;
+import com.fupto.back.entity.Product;
 import com.fupto.back.repository.BrandRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service("adminBrandService")
 public class DefaultBrandService implements BrandService {
+
+    @Value("${file.upload.path}")
+    private String uploadPath;
 
     private BrandRepository brandRepository;
     private ModelMapper modelMapper;
@@ -99,5 +113,57 @@ public class DefaultBrandService implements BrandService {
                 .pages(pages)
                 .brands(brandListDtos)
                 .build();
+    }
+
+    @Override
+    public BrandListDto updateActive(Long id, Boolean active) {
+        // 브랜드 조회
+        Brand brand = brandRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("브랜드를 찾을 수 없습니다."));
+
+        // 활성 상태 업데이트
+        brand.setActive(active);
+        brand.setUpdateDate(Instant.now());  // 갱신 날짜 설정
+
+        // 변경된 브랜드 저장
+        Brand updatedBrand = brandRepository.save(brand);
+
+        // Builder 패턴을 사용하여 DTO 생성 후 반환
+        return convertToBrandListDto(updatedBrand);
+    }
+
+    @Override
+    public BrandListDto createBrand(BrandCreateDto brandCreateDto, MultipartFile file) throws IOException {
+        Brand brand = modelMapper.map(brandCreateDto, Brand.class);
+
+        if (file != null && !file.isEmpty()) {
+            String fileName = saveFile(file);
+            brand.setImg(fileName);
+        }
+
+        brand.setState(true);
+        brand.setCreateDate(Instant.now());
+        brand.setUpdateDate(Instant.now());
+
+        Brand savedBrand = brandRepository.save(brand);
+        return convertToBrandListDto(savedBrand);
+    }
+
+    private String saveFile(MultipartFile file) throws IOException {
+        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        Path uploadDir = Paths.get(uploadPath);
+
+        if (!Files.exists(uploadDir)) {
+            Files.createDirectories(uploadDir);
+        }
+
+        Path filePath = uploadDir.resolve(fileName);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        return fileName;
+    }
+
+    // ModelMapper를 사용하여 Brand 객체를 BrandListDto로 변환
+    private BrandListDto convertToBrandListDto(Brand brand) {
+        return modelMapper.map(brand, BrandListDto.class);
     }
 }

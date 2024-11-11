@@ -5,6 +5,7 @@ import com.fupto.back.admin.member.dto.MemberResponseDto;
 import com.fupto.back.admin.member.dto.MemberSearchDto;
 import com.fupto.back.entity.Member;
 
+import java.time.Instant;
 import java.util.List;
 
 
@@ -15,7 +16,10 @@ public interface MemberService {
                                     String memberType,
                                     String gender,
                                     String searchType,
-                                    String searchKeyWord);
+                                    String searchKeyWord,
+                                    String dateType,
+                                    String startDate,
+                                    String endDate);
     MemberResponseDto getMemberList(MemberSearchDto memberSearchDto);
     MemberListDto getMemberById(Long id);
     List<MemberListDto> getMemberWithDetails();

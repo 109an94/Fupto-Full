@@ -1,17 +1,25 @@
 package com.fupto.back.admin.product.controller;
 
-import com.fupto.back.admin.product.dto.CategorySelectDto;
-import com.fupto.back.admin.product.dto.ProductListDto;
-import com.fupto.back.admin.product.dto.ProductResponseDto;
-import com.fupto.back.admin.product.dto.ProductSearchDto;
+import com.fupto.back.admin.product.dto.*;
 import com.fupto.back.admin.product.service.ProductService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController("adminProductController")
 @RequestMapping("admin/products")
+@Slf4j
 public class ProductController {
     private ProductService productService;
 
@@ -21,8 +29,6 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<ProductResponseDto> getList(ProductSearchDto searchDto) {
-        System.out.println("startDate: " + searchDto.getStartDate());
-        System.out.println("endDate: " + searchDto.getEndDate());
         return ResponseEntity.ok(productService.getList(searchDto));
     }
 
@@ -33,10 +39,36 @@ public class ProductController {
         return ResponseEntity.ok(productService.getCategoriesByLevelAndParent(level, parentId));
     }
 
+    @GetMapping("/brands")
+    public ResponseEntity<List<BrandSelectDto>> getBrands() {
+        return ResponseEntity.ok(productService.getBrands());
+    }
+
+    @GetMapping("/shopping-malls")
+    public ResponseEntity<List<ShoppingMallSelectDto>> getShoppingMalls() {
+        return ResponseEntity.ok(productService.getShoppingMalls());
+    }
+
     @GetMapping("{id}/mapping")
     public ResponseEntity<List<ProductListDto>> getMappingProducts(
             @PathVariable("id") Long id) {
         return ResponseEntity.ok(productService.getMappingProducts(id));
+    }
+
+    @GetMapping("/{id}/image")
+    public ResponseEntity<Resource> getProductImage(@PathVariable Long id) throws IOException {
+        Resource imageResource = productService.getProductImage(id);
+        String contentType = Files.probeContentType(
+                Paths.get(imageResource.getURI())
+        );
+
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(imageResource);
     }
 
     @GetMapping("{id}")
@@ -47,18 +79,39 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductListDto> create(@RequestBody ProductListDto productListDto){
-        return ResponseEntity.ok(productService.create(productListDto));
+    public ResponseEntity<List<ProductListDto>> create(
+            @RequestPart("data") List<ProductRegDto> productRegDtos,
+            MultipartHttpServletRequest request) {
+        try {
+            Map<Integer, List<MultipartFile>> filesMap = new HashMap<>();
+            Map<Integer, Map<String, MultipartFile>> filesByNameMap = new HashMap<>();
+
+            for (ProductRegDto dto : productRegDtos) {
+                List<MultipartFile> files = request.getFiles("files_" + dto.getFormId());
+                filesMap.put(dto.getFormId(), files);
+
+                Map<String, MultipartFile> fileMap = new HashMap<>();
+                if (files != null) {
+                    for (MultipartFile file : files) {
+                        fileMap.put(file.getOriginalFilename(), file);
+                    }
+                }
+                filesByNameMap.put(dto.getFormId(), fileMap);
+            }
+
+            return ResponseEntity.ok(productService.create(productRegDtos, filesMap, filesByNameMap));
+        } catch (Exception e) {
+            log.error("Error creating products", e);
+            throw e;
+        }
     }
 
-    // 일반 상품 삭제
     @PatchMapping("{id}/state")
     public ResponseEntity<String> updateState(@PathVariable("id") Long id) {
         productService.updateState(id);
         return ResponseEntity.ok("성공적으로 처리되었습니다.");
     }
 
-    // 대표상품 삭제 시 첫번째 매핑상품을 대표상품으로 승격시키는 엔드포인트
     @PatchMapping("{id}/promote")
     public ResponseEntity<String> promoteAndDelete(@PathVariable("id") Long id) {
         productService.promoteAndDelete(id);

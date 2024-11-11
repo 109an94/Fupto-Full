@@ -107,6 +107,26 @@ const fetchBrands = async () => {
 //   }
 // };
 
+// active 상태 변경
+const updateActive = async (brandId, active) => {
+  try {
+    console.log(`Updating active status: brandId=${brandId}, active=${active}`);
+    const response = await fetch(`http://localhost:8080/api/v1/admin/brands/${brandId}/active?active=${active}`, {
+      method: "PATCH",
+    });
+    if (!response.ok) {
+      throw new Error("Active 상태 변경에 실패했습니다.");
+    }
+  } catch (error) {
+    console.error("Error updating active status:", error);
+  }
+};
+
+// active 토글 핸들러
+const handleActiveChange = async (brand) => {
+  await updateActive(brand.id, brand.active);
+};
+
 // 페이지네이션 핸들러
 const pageChange = (newPage) => {
   if (newPage < 1 || newPage > totalPages.value) return;
@@ -399,7 +419,7 @@ onMounted(() => {
                 <td class="text-md">{{ formatDate(b.updateDate)[0] }}<br>{{ formatDate(b.updateDate)[1] }}</td>
                 <td>
                   <label class="pl-switch">
-                    <input type="checkbox" :id="'active' + b.id" v-model="b.active" />
+                    <input type="checkbox" :id="'active' + b.id" v-model="b.active" @change="() => handleActiveChange(b)"/>
                     <span class="pl-slider round"></span>
                   </label>
                 </td>

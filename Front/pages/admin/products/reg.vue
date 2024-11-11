@@ -15,36 +15,27 @@ const categories = ref({
   level3: [],
 });
 
-const brands = ref([
-  { id: 1, name: "Nike" },
-  { id: 2, name: "Adidas" },
-  { id: 3, name: "Puma" },
-]);
-
-const shops = ref([
-  { id: 1, name: "무신사" },
-  { id: 2, name: "브랜디" },
-  { id: 3, name: "지그재그" },
-  { id: 4, name: "무그" },
-]);
+const brands = ref([]);
+const shops = ref([]);
 
 const addProductForm = () => {
   products.value.push({
+    presentId: nextId.value === 1,
     id: nextId.value++,
     active: true,
-    isRepresentative: false,
     category1: "",
     category2: "",
     category3: "",
-    brand: "",
-    shop: "",
-    url: "",
-    name: "",
-    originalPrice: "",
-    discountedPrice: "",
+    brandId: "",
+    shoppingMallId: "",
+    url: "https://",
+    productName: "",
+    retailPrice: "",
+    salePrice: "",
     description: "",
     images: [],
     imageNames: [],
+    fileList: [],
   });
 };
 
@@ -90,6 +81,32 @@ const handleCategory2Change = async (product) => {
   }
 };
 
+const fetchBrands = async () => {
+  try {
+    const data = await $fetch("http://localhost:8080/api/v1/admin/products/brands");
+
+    brands.value = data.map((brand) => ({
+      id: brand.id,
+      name: `${brand.engName}(${brand.korName})`,
+    }));
+  } catch (error) {
+    console.error("Error fetching brands:", error);
+  }
+};
+
+const fetchShops = async () => {
+  try {
+    const data = await $fetch("http://localhost:8080/api/v1/admin/products/shopping-malls");
+
+    shops.value = data.map((shop) => ({
+      id: shop.id,
+      name: `${shop.engName}(${shop.korName})`,
+    }));
+  } catch (error) {
+    console.error("Error fetching shopping malls:", error);
+  }
+};
+
 const removeProductForm = (id) => {
   const index = products.value.findIndex((p) => p.id === id);
   if (index !== -1) {
@@ -101,21 +118,37 @@ const removeProductForm = (id) => {
   nextId.value = products.value.length + 1;
 };
 
-const updateRepresentativeProduct = (id) => {
+const updatepresentIdProduct = (id) => {
   const currentProduct = products.value.find((product) => product.id === id);
-  if (currentProduct && currentProduct.isRepresentative) {
+
+  if (!currentProduct.presentId) {
     products.value.forEach((product) => {
-      product.isRepresentative = false;
+      product.presentId = false;
     });
   } else {
     products.value.forEach((product) => {
-      product.isRepresentative = product.id === id;
+      product.presentId = product.id === id;
     });
   }
+
+  console.log(
+    "Updated products:",
+    products.value.map((p) => ({ id: p.id, presentId: p.presentId }))
+  );
 };
 
 const handleActiveChange = (product) => {
   console.log(`Product ${product.id} active status: ${product.active}`);
+};
+
+const formatNumber = (value) => {
+  if (!value) return "";
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
+const unformatNumber = (value) => {
+  if (!value) return "";
+  return value.toString().replace(/,/g, "");
 };
 
 const triggerFileUpload = (id) => {
@@ -127,22 +160,69 @@ const handleFileUpload = (event, id) => {
   const files = event.target.files;
   const product = products.value.find((p) => p.id === id);
   if (product) {
-    product.images = [...product.images, ...Array.from(files).map((file) => URL.createObjectURL(file))];
-    product.imageNames = [...product.imageNames, ...Array.from(files).map((file) => file.name)];
+    product.fileList = [...(product.fileList || []), ...Array.from(files)];
+
+    product.images = product.fileList.map((file) => URL.createObjectURL(file));
+    product.imageNames = product.fileList.map((file) => file.name);
   }
 };
 
 const removeImage = (productId, imageIndex) => {
   const product = products.value.find((p) => p.id === productId);
-  if (product) {
+  if (product && product.fileList) {
+    URL.revokeObjectURL(product.images[imageIndex]);
+
+    product.fileList.splice(imageIndex, 1);
     product.images.splice(imageIndex, 1);
     product.imageNames.splice(imageIndex, 1);
   }
 };
 
-const submitForm = () => {
-  console.log(products.value);
-  // 여기에 서버로 데이터를 전송하는 로직 추가
+const submitForm = async () => {
+  try {
+    const productsData = products.value.map((product) => ({
+      formId: product.id,
+      active: product.active,
+      presentId: product.presentId,
+      categoryId: product.category3,
+      brandId: product.brandId,
+      shoppingMallId: product.shoppingMallId,
+      url: product.url,
+      productName: product.productName,
+      retailPrice: parseInt(product.retailPrice),
+      salePrice: parseInt(product.salePrice),
+      description: product.description,
+      imageFileNames: product.fileList?.map((file) => file.name) || [],
+    }));
+
+    const formData = new FormData();
+    formData.append(
+      "data",
+      new Blob([JSON.stringify(productsData)], {
+        type: "application/json",
+      })
+    );
+
+    // 파일 추가
+    products.value.forEach((product) => {
+      if (product.fileList && product.fileList.length > 0) {
+        product.fileList.forEach((file) => {
+          formData.append(`files_${product.id}`, file);
+        });
+      }
+    });
+
+    await $fetch("http://localhost:8080/api/v1/admin/products", {
+      method: "POST",
+      body: formData,
+    });
+
+    alert("상품 등록이 완료 되었습니다.");
+    await navigateTo("/admin/products/list");
+  } catch (error) {
+    console.error("Error submitting form:", error);
+    alert("상품 등록 중 오류가 발생했습니다.");
+  }
 };
 
 const getImageNamesString = computed(() => (productId) => {
@@ -150,9 +230,9 @@ const getImageNamesString = computed(() => (productId) => {
   return product ? product.imageNames.join(", ") : "";
 });
 
-onMounted(() => {
-  fetchCategories(1);
-  addProductForm(); // 초기 상품 폼 추가
+onMounted(async () => {
+  await Promise.all([fetchCategories(1), fetchBrands(), fetchShops()]);
+  addProductForm();
 });
 </script>
 
@@ -186,11 +266,7 @@ onMounted(() => {
                       <span class="switch-label mr-2">공개 여부</span>
                     </div>
                     <label class="representative-product">
-                      <input
-                        type="checkbox"
-                        :checked="product.isRepresentative"
-                        @change="updateRepresentativeProduct(product.id)"
-                      />
+                      <input type="checkbox" v-model="product.presentId" @change="updatepresentIdProduct(product.id)" />
                       <span class="switch-label ml-2">대표 상품</span>
                     </label>
                   </div>
@@ -220,11 +296,11 @@ onMounted(() => {
 
                 <div class="form-row">
                   <label>브랜드 :</label>
-                  <SearchableSelect v-model="product.brand" :options="brands" placeholder="브랜드 선택" required />
+                  <SearchableSelect v-model="product.brandId" :options="brands" placeholder="브랜드 선택" required />
                 </div>
                 <div class="form-row">
                   <label>쇼핑몰 :</label>
-                  <SearchableSelect v-model="product.shop" :options="shops" placeholder="쇼핑몰 선택" required />
+                  <SearchableSelect v-model="product.shoppingMallId" :options="shops" placeholder="쇼핑몰 선택" required />
                 </div>
 
                 <div class="form-row">
@@ -233,19 +309,29 @@ onMounted(() => {
                 </div>
                 <div class="form-row">
                   <label>상품이름 :</label>
-                  <input type="text" v-model="product.name" required />
+                  <input type="text" v-model="product.productName" required />
                 </div>
                 <div class="form-row">
                   <label>소비자가 :</label>
-                  <input type="number" v-model="product.originalPrice" required />
+                  <input
+                    type="number"
+                    :value="formatNumber(product.retailPrice)"
+                    @input="(e) => (product.retailPrice = unformatNumber(e.target.value))"
+                    required
+                  />
                 </div>
                 <div class="form-row">
                   <label>할인가 :</label>
-                  <input type="number" v-model="product.discountedPrice" required />
+                  <input
+                    type="number"
+                    :value="formatNumber(product.salePrice)"
+                    @input="(e) => (product.salePrice = unformatNumber(e.target.value))"
+                    required
+                  />
                 </div>
                 <div class="form-row">
                   <label>상세설명 :</label>
-                  <textarea v-model="product.description" required rows="8"></textarea>
+                  <textarea v-model="product.description" required rows="8" style="white-space: pre-wrap"></textarea>
                 </div>
                 <div class="form-row">
                   <label>사진추가 :</label>

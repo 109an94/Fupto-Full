@@ -2,6 +2,27 @@
 useHead({
   link: [{ rel: "stylesheet", href: "/css/admin/report.css" }],
 });
+
+//---------state-------
+const route = useRoute();
+const members = ref([]);
+
+//--------methods----------
+const fetchMembers = async () =>{
+  const id = route.params.id
+  const response = await fetch(`http://localhost:8080/api/v1/admin/members/${id}`)
+  const data = await response.json();
+
+  members.value = data;
+}
+
+//-------lifecycle hooks--------
+onMounted(() => {
+  fetchMembers()
+})
+
+
+
 </script>
 
 <template>
@@ -14,7 +35,7 @@ useHead({
       <li class="divider">/</li>
       <li><a href="#" class="active">회원정보</a></li>
     </ul>
-  <div class="data">
+  <div class="data" v-if="members">
     <div class="content-data">
       <div class="card">
         <div style="text-align: center">
@@ -28,15 +49,15 @@ useHead({
                 </tr>
                 <tr>
                   <th>이름</th>
-                  <td>최원석</td>
+                  <td>{{ members.nickname }}</td>
                 </tr>
                 <tr>
                   <th>닉네임</th>
-                  <td>fupto만세다임마</td>
+                  <td>{{members.userId}}</td>
                 </tr>
                 <tr>
                   <th>이메일</th>
-                  <td>fupto@fupto.io</td>
+                  <td>{{ members.email }}</td>
                 </tr>
                 <tr>
                   <th>나이</th>
@@ -44,7 +65,7 @@ useHead({
                 </tr>
                 <tr>
                   <th>번호</th>
-                  <td>010-4087-9502</td>
+                  <td>{{ members.tel }}</td>
                 </tr>
                 <tr>
                   <th>성별</th>
@@ -74,11 +95,11 @@ useHead({
             <tbody>
               <tr>
                 <th >가입일</th>
-                <td>2024.12.15 </td>
+                <td>{{ members.createDate }}</td>
               </tr>
               <tr>
                 <th>최근 로그인</th>
-                <td>2024.12.17 </td>
+                <td> {{ members.loginDate }} </td>
               </tr>
               <tr>
                 <th>접속 IP</th>

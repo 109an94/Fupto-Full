@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Data
@@ -26,6 +27,6 @@ public class ProductSearchDto {
     private Integer minPrice;
     private Integer maxPrice;
     private String dateType;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private Instant startDate;
+    private Instant endDate;
 }
