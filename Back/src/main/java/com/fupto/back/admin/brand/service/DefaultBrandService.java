@@ -21,14 +21,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service("adminBrandService")
 public class DefaultBrandService implements BrandService {
+
+    @Value("${file.upload.path}")
+    private String uploadPath;
 
     private BrandRepository brandRepository;
     private ModelMapper modelMapper;
@@ -127,31 +132,35 @@ public class DefaultBrandService implements BrandService {
         return convertToBrandListDto(updatedBrand);
     }
 
-    public BrandListDto create(BrandCreateDto brandCreateDto, MultipartFile file) {
+    @Override
+    public BrandListDto createBrand(BrandCreateDto brandCreateDto, MultipartFile file) throws IOException {
         Brand brand = modelMapper.map(brandCreateDto, Brand.class);
-        brand.setActive(brandCreateDto.getActive().equals("visible"));
+
+        if (file != null && !file.isEmpty()) {
+            String fileName = saveFile(file);
+            brand.setImg(fileName);
+        }
+
+        brand.setState(true);
         brand.setCreateDate(Instant.now());
         brand.setUpdateDate(Instant.now());
-
-//        if (file != null && !file.isEmpty()) {
-//            String fileName = saveFile(file);
-//            brand.setImg(fileName);
-//        }
 
         Brand savedBrand = brandRepository.save(brand);
         return convertToBrandListDto(savedBrand);
     }
 
-//    private String saveFile(MultipartFile file) {
-//        try {
-//            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-//            Path filePath = Paths.get(uploadDir).resolve(fileName);
-//            Files.copy(file.getInputStream(), filePath);
-//            return fileName;
-//        } catch (IOException e) {
-//            throw new RuntimeException("파일 저장 중 오류가 발생했습니다.", e);
-//        }
-//    }
+    private String saveFile(MultipartFile file) throws IOException {
+        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        Path uploadDir = Paths.get(uploadPath);
+
+        if (!Files.exists(uploadDir)) {
+            Files.createDirectories(uploadDir);
+        }
+
+        Path filePath = uploadDir.resolve(fileName);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        return fileName;
+    }
 
     // ModelMapper를 사용하여 Brand 객체를 BrandListDto로 변환
     private BrandListDto convertToBrandListDto(Brand brand) {

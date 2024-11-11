@@ -13,6 +13,6 @@ public class BrandCreateDto {
     private String korName;
     private String engName;
     private String url;
-    private String active;
+    private Boolean active;
     private String description;
 }

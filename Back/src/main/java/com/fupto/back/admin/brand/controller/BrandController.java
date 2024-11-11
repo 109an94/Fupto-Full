@@ -1,5 +1,6 @@
 package com.fupto.back.admin.brand.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fupto.back.admin.brand.dto.BrandCreateDto;
 import com.fupto.back.admin.brand.dto.BrandListDto;
 import com.fupto.back.admin.brand.dto.BrandResponseDto;
@@ -28,12 +29,20 @@ public class BrandController {
     }
 
     @PostMapping(value = "/reg", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BrandListDto> create(
-            @RequestPart("brandData") BrandCreateDto brandCreateDto,
-            @RequestPart(value = "file", required = false) MultipartFile file
-    ) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(brandService.create(brandCreateDto, file));
+    public ResponseEntity<BrandListDto> registerBrand(
+            @RequestPart("brandData") String brandDataJson,
+            @RequestPart("file") MultipartFile file) {
+        try {
+            // brandDataJson 로그 찍기
+            System.out.println("Received brand data: " + brandDataJson);
+            System.out.println(file.getOriginalFilename());
+            ObjectMapper objectMapper = new ObjectMapper();
+            BrandCreateDto brandCreateDto = objectMapper.readValue(brandDataJson, BrandCreateDto.class);
+            BrandListDto createdBrand = brandService.createBrand(brandCreateDto, file);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdBrand);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
     @PatchMapping("{id}/active")
