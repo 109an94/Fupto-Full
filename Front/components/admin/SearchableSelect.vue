@@ -122,7 +122,7 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   user-select: none;
-  flex: 1; /* 부모 컨테이너에 맞게 확장 */
+  flex: 1;
 }
 
 .select-trigger {
