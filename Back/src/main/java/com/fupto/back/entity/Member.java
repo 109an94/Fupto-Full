@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -48,5 +49,11 @@ public class Member {
 
     @Column(name = "role", nullable = false, length = 10)
     private String role;
+
+    @Column(name = "login_date")
+    private Instant loginDate;
+
+    @Column(name = "birth_date")
+    private Instant birthDate;
 
 }

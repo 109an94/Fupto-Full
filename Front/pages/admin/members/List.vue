@@ -1,11 +1,14 @@
 <script setup lang="ts">
+import {useRouter} from "vue-router";
+import {ref, computed, watch, onMounted} from 'vue';
+
 useHead({
   link: [{ rel: "stylesheet", href: "/css/admin/report.css" }],
 });
 
-import {ref, computed, watch, onMounted} from 'vue';
 
 //----------------state--------------
+const router = useRouter()
 const members = ref([]);
 const isLoading = ref(false);
 const totalPages = ref(0);
@@ -21,7 +24,11 @@ const filterData = ref({
   gender:"",
   // search
   searchType: "userId",
-  searchKeyWord :""
+  searchKeyWord :"",
+  // date
+  dateType : "regDate",
+  startDate : "",
+  endDate : ""
 })
 //---------------methods
 const fetchMembers = async (page = 1) => {
@@ -37,8 +44,12 @@ const fetchMembers = async (page = 1) => {
     // gender
     if (filterData.value.gender) params.append("gender", filterData.value.gender);
     // search
-    if (filterData.value.searchType) params.append("searchType", filterData.value.searchType)
-    if (filterData.value.searchKeyWord) params.append("searchKeyWord", filterData.value.searchKeyWord)
+    if (filterData.value.searchType) params.append("searchType", filterData.value.searchType);
+    if (filterData.value.searchKeyWord) params.append("searchKeyWord", filterData.value.searchKeyWord);
+
+    if (filterData.value.dateType) params.append("dateType",filterData.value.dateType);
+    if (filterData.value.startDate) params.append("startDate",filterData.value.startDate);
+    if (filterData.value.endDate) params.append("endDate",filterData.value.endDate);
 
     const response = await fetch(`http://localhost:8080/api/v1/admin/members/search?${params.toString()}`);
     const data = await response.json();
@@ -81,6 +92,10 @@ const searchHandler = (event) =>{
   event.preventDefault();
   currentPage.value = 0;
   fetchMembers();
+}
+
+const urlHandler = (id) =>{
+  router.push(`/admin/members/${id}`)
 }
 
 
@@ -165,13 +180,14 @@ members.value.forEach(members => {
                 <tr>
                   <th>날짜</th>
                   <td colspan="3">
-                    <select class="">
-                      <option>가입일</option>
-                      <option>접속일</option>
+                    <select v-model="filterData.dateType" class="">
+                      <option value="regDate">가입일</option>
+                      <option value="updateDate">수정일</option>
+                      <option value="loginDate">접속일</option>
                     </select>
-                    <input type="date">
+                    <input type="date" v-model="filterData.startDate">
                     <span>~</span>
-                    <input type="date">
+                    <input type="date"  v-model="filterData.endDate">
                     <button class="btn-url active">오늘</button>
                     <button class="btn-url">주간</button>
                     <button class="btn-url">월간</button>
@@ -249,7 +265,7 @@ members.value.forEach(members => {
                 <th @click="sort('gender')">성별 <span v-if="sortColumn === 'gender'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span></th>
                 <th @click="sort('memberType')">회원 유형 <span v-if="sortColumn === 'memberType'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span></th>
               </tr>
-                <tr v-for="m in members" :key="m.id" onclick="location.href='Update'">
+                <tr v-for="m in members" :key="m.id" @click="urlHandler(m.id)">
                   <td><input type="checkbox" v-model="m.selected"></td>
                   <td>{{ m.nickname }}</td>
                   <td>{{ m.userId }}</td>
@@ -259,46 +275,6 @@ members.value.forEach(members => {
                   <td>{{ m.gender }}</td>
                   <td>{{ m.memberType || '일반'}}</td>
               </tr>
-<!--              <tr>-->
-<!--                <td style=""><input type="checkbox"></td>-->
-<!--                <td>최원석</td>-->
-<!--                <td>fupto</td>-->
-<!--                <td>fupto@fupto.com</td>-->
-<!--                <td>2024.10.18</td>-->
-<!--                <td>31</td>-->
-<!--                <td>남성</td>-->
-<!--                <td>일반</td>-->
-<!--              </tr>-->
-<!--              <tr>-->
-<!--                <td style=""><input type="checkbox"></td>-->
-<!--                <td>이건주</td>-->
-<!--                <td>fupto</td>-->
-<!--                <td>fupto@fupto.com</td>-->
-<!--                <td>2024.10.18</td>-->
-<!--                <td>31</td>-->
-<!--                <td>남성</td>-->
-<!--                <td>일반</td>-->
-<!--              </tr>-->
-<!--              <tr>-->
-<!--                <td style=""><input type="checkbox"></td>-->
-<!--                <td>손우재</td>-->
-<!--                <td>fupto</td>-->
-<!--                <td>fupto@fupto.com</td>-->
-<!--                <td>2024.10.18</td>-->
-<!--                <td>31</td>-->
-<!--                <td>남성</td>-->
-<!--                <td>일반</td>-->
-<!--              </tr>-->
-<!--              <tr>-->
-<!--                <td style=""><input type="checkbox"></td>-->
-<!--                <td>박형민</td>-->
-<!--                <td>fupto</td>-->
-<!--                <td>fupto@fupto.com</td>-->
-<!--                <td>2024.10.18</td>-->
-<!--                <td>31</td>-->
-<!--                <td>남성</td>-->
-<!--                <td>일반</td>-->
-<!--              </tr>-->
             </tbody>
           </table>
         </div>

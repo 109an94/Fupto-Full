@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.List;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -18,13 +19,26 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             "and (:gender is null or m.gender = :gender)"+
             "and (:userId is null or m.userId like %:userId%)"+
             "and (:nickname is null or m.nickname like %:nickname%)"+
-            "and (:email is null or m.email like %:email%)"
-    )
+            "and (:email is null or m.email like %:email%)"+
+            "and (" +
+            "(:dateType = 'regDate' and " +
+            "(:startDate is null or m.createDate >= :startDate) and" +
+            "(:endDate is null or m.createDate <= :endDate))" +
+            "or (:dateType = 'updateDate' and" +
+            "(:startDate is null or m.updateDate >= :startDate) and" +
+            "(:endDate is null or m.updateDate <= :endDate))"+
+            "or (:dateType = 'loginDate' and" +
+            "(:startDate is null or m.loginDate >= :startDate) and" +
+            "(:endDate is null or m.loginDate <= :endDate))"+
+            ")")
     Page<Member> searchMember(
             @Param("role") String memberType,
             @Param("gender") String gender,
-            @Param("userId") String userId,
+            @Param("userId") String userId, //searchType 대신 null 을 받으면 패스
             @Param("nickname") String nickname,
             @Param("email") String email,
+                String dateType,
+                Instant startDate,
+                Instant endDate,
              Pageable pageable);
 }
