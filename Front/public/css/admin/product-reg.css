@@ -44,6 +44,10 @@ nav {
   border-radius: 4px;
   font-size: 14px;
 }
+.form-row select,
+.form-row .searchable-select {
+  font-size: 15px;
+}
 .n-btn {
   padding: 8px 15px;
   font-size: 14px;

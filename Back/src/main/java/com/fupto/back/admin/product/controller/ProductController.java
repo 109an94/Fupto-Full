@@ -82,33 +82,36 @@ public class ProductController {
     public ResponseEntity<List<ProductListDto>> create(
             @RequestPart("data") List<ProductRegDto> productRegDtos,
             MultipartHttpServletRequest request) {
-
         try {
-            log.info("Received productRegDtos: {}", productRegDtos);  // 받은 데이터 확인
-
             Map<Integer, List<MultipartFile>> filesMap = new HashMap<>();
+            Map<Integer, Map<String, MultipartFile>> filesByNameMap = new HashMap<>();
+
             for (ProductRegDto dto : productRegDtos) {
                 List<MultipartFile> files = request.getFiles("files_" + dto.getFormId());
-                log.info("Files for product {}: count={}", dto.getFormId(),
-                        files != null ? files.size() : "null");  // 파일 개수 확인
                 filesMap.put(dto.getFormId(), files);
+
+                Map<String, MultipartFile> fileMap = new HashMap<>();
+                if (files != null) {
+                    for (MultipartFile file : files) {
+                        fileMap.put(file.getOriginalFilename(), file);
+                    }
+                }
+                filesByNameMap.put(dto.getFormId(), fileMap);
             }
 
-            return ResponseEntity.ok(productService.create(productRegDtos, filesMap));
+            return ResponseEntity.ok(productService.create(productRegDtos, filesMap, filesByNameMap));
         } catch (Exception e) {
             log.error("Error creating products", e);
             throw e;
         }
     }
 
-    // 일반 상품 삭제
     @PatchMapping("{id}/state")
     public ResponseEntity<String> updateState(@PathVariable("id") Long id) {
         productService.updateState(id);
         return ResponseEntity.ok("성공적으로 처리되었습니다.");
     }
 
-    // 대표상품 삭제 시 첫번째 매핑상품을 대표상품으로 승격
     @PatchMapping("{id}/promote")
     public ResponseEntity<String> promoteAndDelete(@PathVariable("id") Long id) {
         productService.promoteAndDelete(id);

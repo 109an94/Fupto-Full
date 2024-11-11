@@ -24,7 +24,9 @@ public interface ProductService {
 
     Resource getProductImage(Long id) throws IOException;
 
-    List<ProductListDto> create(List<ProductRegDto> productRegDtos, Map<Integer, List<MultipartFile>> filesMap);
+    List<ProductListDto> create(List<ProductRegDto> regDtos,
+                                Map<Integer, List<MultipartFile>> filesMap,
+                                Map<Integer, Map<String, MultipartFile>> filesByNameMap);
 
     ProductListDto update(ProductListDto productListDto);
 

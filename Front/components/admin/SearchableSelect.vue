@@ -143,7 +143,7 @@ onUnmounted(() => {
 }
 
 .arrow {
-  font-size: 12px;
+  font-size: 10px;
   transition: transform 0.2s ease;
 }
 

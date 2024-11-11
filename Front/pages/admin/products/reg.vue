@@ -35,6 +35,7 @@ const addProductForm = () => {
     description: "",
     images: [],
     imageNames: [],
+    fileList: [],
   });
 };
 
@@ -159,14 +160,19 @@ const handleFileUpload = (event, id) => {
   const files = event.target.files;
   const product = products.value.find((p) => p.id === id);
   if (product) {
-    product.images = [...product.images, ...Array.from(files).map((file) => URL.createObjectURL(file))];
-    product.imageNames = [...product.imageNames, ...Array.from(files).map((file) => file.name)];
+    product.fileList = [...(product.fileList || []), ...Array.from(files)];
+
+    product.images = product.fileList.map((file) => URL.createObjectURL(file));
+    product.imageNames = product.fileList.map((file) => file.name);
   }
 };
 
 const removeImage = (productId, imageIndex) => {
   const product = products.value.find((p) => p.id === productId);
-  if (product) {
+  if (product && product.fileList) {
+    URL.revokeObjectURL(product.images[imageIndex]);
+
+    product.fileList.splice(imageIndex, 1);
     product.images.splice(imageIndex, 1);
     product.imageNames.splice(imageIndex, 1);
   }
@@ -174,8 +180,6 @@ const removeImage = (productId, imageIndex) => {
 
 const submitForm = async () => {
   try {
-    const formData = new FormData();
-
     const productsData = products.value.map((product) => ({
       formId: product.id,
       active: product.active,
@@ -188,17 +192,21 @@ const submitForm = async () => {
       retailPrice: parseInt(product.retailPrice),
       salePrice: parseInt(product.salePrice),
       description: product.description,
+      imageFileNames: product.fileList?.map((file) => file.name) || [],
     }));
 
-    const productsBlob = new Blob([JSON.stringify(productsData)], {
-      type: "application/json",
-    });
-    formData.append("data", productsBlob);
+    const formData = new FormData();
+    formData.append(
+      "data",
+      new Blob([JSON.stringify(productsData)], {
+        type: "application/json",
+      })
+    );
 
+    // 파일 추가
     products.value.forEach((product) => {
-      const fileInput = document.querySelector(`#product-form-${product.id} input[type="file"]`);
-      if (fileInput && fileInput.files.length > 0) {
-        Array.from(fileInput.files).forEach((file) => {
+      if (product.fileList && product.fileList.length > 0) {
+        product.fileList.forEach((file) => {
           formData.append(`files_${product.id}`, file);
         });
       }
@@ -306,7 +314,7 @@ onMounted(async () => {
                 <div class="form-row">
                   <label>소비자가 :</label>
                   <input
-                    type="text"
+                    type="number"
                     :value="formatNumber(product.retailPrice)"
                     @input="(e) => (product.retailPrice = unformatNumber(e.target.value))"
                     required
@@ -315,7 +323,7 @@ onMounted(async () => {
                 <div class="form-row">
                   <label>할인가 :</label>
                   <input
-                    type="text"
+                    type="number"
                     :value="formatNumber(product.salePrice)"
                     @input="(e) => (product.salePrice = unformatNumber(e.target.value))"
                     required

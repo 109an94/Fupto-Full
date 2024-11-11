@@ -197,39 +197,47 @@ public class DefaultProductService implements ProductService {
     }
 
     @Override
-    public List<ProductListDto> create(List<ProductRegDto> regDtos, Map<Integer, List<MultipartFile>> filesMap) {
+    public List<ProductListDto> create(List<ProductRegDto> regDtos,
+                                       Map<Integer, List<MultipartFile>> filesMap,
+                                       Map<Integer, Map<String, MultipartFile>> filesByNameMap) {
         List<ProductListDto> results = new ArrayList<>();
 
-        // 1. 대표 상품 먼저 찾기
         ProductRegDto representativeDto = regDtos.stream()
                 .filter(dto -> dto.getPresentId())
                 .findFirst()
                 .orElse(null);
 
         if (representativeDto != null) {
-            // 2. 대표 상품 먼저 저장
-            Product representativeProduct = createSingleProduct(representativeDto,
-                    filesMap.get(representativeDto.getFormId()), null);
+            Product representativeProduct = createSingleProduct(
+                    representativeDto,
+                    filesMap.get(representativeDto.getFormId()),
+                    filesByNameMap.get(representativeDto.getFormId()),
+                    null
+            );
 
-            // 3. 대표 상품의 mapping_id를 자신의 id로 업데이트
             representativeProduct.setMappingId(representativeProduct.getId());
             representativeProduct = productRepository.save(representativeProduct);
-
             results.add(convertToProductListDto(representativeProduct));
 
-            // 4. 나머지 상품들 저장 (mapping_id를 대표상품 ID로 설정)
             for (ProductRegDto regDto : regDtos) {
                 if (!regDto.getPresentId()) {
-                    Product product = createSingleProduct(regDto,
+                    Product product = createSingleProduct(
+                            regDto,
                             filesMap.get(regDto.getFormId()),
-                            representativeProduct.getId());
+                            filesByNameMap.get(regDto.getFormId()),
+                            representativeProduct.getId()
+                    );
                     results.add(convertToProductListDto(product));
                 }
             }
         } else {
-            // 대표 상품이 없는 경우 그냥 순서대로 저장
             for (ProductRegDto regDto : regDtos) {
-                Product product = createSingleProduct(regDto, filesMap.get(regDto.getFormId()), null);
+                Product product = createSingleProduct(
+                        regDto,
+                        filesMap.get(regDto.getFormId()),
+                        filesByNameMap.get(regDto.getFormId()),
+                        null
+                );
                 results.add(convertToProductListDto(product));
             }
         }
@@ -237,8 +245,10 @@ public class DefaultProductService implements ProductService {
         return results;
     }
 
-    private Product createSingleProduct(ProductRegDto regDto, List<MultipartFile> files, Long mappingId) {
-        // 1. 상품 기본 정보 저장
+    private Product createSingleProduct(ProductRegDto regDto,
+                                        List<MultipartFile> files,
+                                        Map<String, MultipartFile> filesByName,
+                                        Long mappingId) {
         Product product = Product.builder()
                 .productName(regDto.getProductName())
                 .retailPrice(regDto.getRetailPrice())
@@ -251,33 +261,37 @@ public class DefaultProductService implements ProductService {
                 .category(categoryRepository.findById(regDto.getCategoryId()).orElseThrow())
                 .brand(brandRepository.findById(regDto.getBrandId()).orElseThrow())
                 .shoppingMall(shoppingMallRepository.findById(regDto.getShoppingMallId()).orElseThrow())
-                .productImages(new ArrayList<>())  // 컬렉션 초기화
+                .productImages(new ArrayList<>())
                 .build();
 
         product = productRepository.save(product);
 
-        // 2. 가격 이력 저장
         PriceHistory priceHistory = PriceHistory.builder()
                 .product(product)
                 .salePrice(regDto.getSalePrice())
                 .build();
         priceHistoryRepository.save(priceHistory);
 
-        // 3. 이미지 파일 저장
-        if (files != null && !files.isEmpty()) {
-            for (int i = 0; i < files.size(); i++) {
-                try {
-                    String filePath = fileService.saveFile(files.get(i), product.getId());
-                    ProductImage image = ProductImage.builder()
-                            .product(product)
-                            .fileName(filePath.substring(filePath.lastIndexOf("/") + 1))
-                            .originalName(files.get(i).getOriginalFilename())
-                            .filePath(filePath)
-                            .displayOrder(i + 1)
-                            .build();
-                    product.getProductImages().add(image);
-                } catch (IOException e) {
-                    log.error("Failed to save file", e);
+        // 순서대로 이미지 저장
+        if (regDto.getImageFileNames() != null && !regDto.getImageFileNames().isEmpty()) {
+            for (int i = 0; i < regDto.getImageFileNames().size(); i++) {
+                String fileName = regDto.getImageFileNames().get(i);
+                MultipartFile file = filesByName.get(fileName);
+
+                if (file != null) {
+                    try {
+                        String filePath = fileService.saveFile(file, product.getId());
+                        ProductImage image = ProductImage.builder()
+                                .product(product)
+                                .fileName(filePath.substring(filePath.lastIndexOf("/") + 1))
+                                .originalName(file.getOriginalFilename())
+                                .filePath(filePath)
+                                .displayOrder(i + 1)
+                                .build();
+                        product.getProductImages().add(image);
+                    } catch (IOException e) {
+                        log.error("Failed to save file", e);
+                    }
                 }
             }
         }
