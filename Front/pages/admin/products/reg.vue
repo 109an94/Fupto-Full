@@ -1,4 +1,7 @@
 <script setup>
+import { ref, computed, onMounted } from "vue";
+import SearchableSelect from "~/components/admin/SearchableSelect.vue";
+
 useHead({
   link: [{ rel: "stylesheet", href: "/css/admin/product-reg.css" }],
 });
@@ -6,23 +9,101 @@ useHead({
 const products = ref([]);
 const nextId = ref(1);
 
+const categories = ref({
+  level1: [],
+  level2: [],
+  level3: [],
+});
+
+const brands = ref([]);
+const shops = ref([]);
+
 const addProductForm = () => {
   products.value.push({
     id: nextId.value++,
-    isRepresentative: false,
+    active: true,
+    presentId: false,
     category1: "",
     category2: "",
     category3: "",
-    brand: "",
-    shop: "",
+    brandId: "",
+    shoppingMallId: "",
     url: "",
-    name: "",
-    originalPrice: "",
-    discountedPrice: "",
+    productName: "",
+    retailPrice: "",
+    salePrice: "",
     description: "",
     images: [],
     imageNames: [],
   });
+};
+
+// 카테고리 데이터 가져오기
+const fetchCategories = async (level, parentId = null) => {
+  try {
+    const params = new URLSearchParams();
+    if (parentId) params.append("parentId", parentId);
+    params.append("level", level);
+
+    const data = await $fetch(`http://localhost:8080/api/v1/admin/products/categories?${params.toString()}`);
+
+    if (level === 1) {
+      categories.value.level1 = data;
+    } else if (level === 2) {
+      categories.value.level2 = data;
+    } else if (level === 3) {
+      categories.value.level3 = data;
+    }
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+  }
+};
+
+// 카테고리 선택 핸들러
+const handleCategory1Change = async (product) => {
+  product.category2 = "";
+  product.category3 = "";
+  categories.value.level2 = [];
+  categories.value.level3 = [];
+
+  if (product.category1) {
+    await fetchCategories(2, product.category1);
+  }
+};
+
+const handleCategory2Change = async (product) => {
+  product.category3 = "";
+  categories.value.level3 = [];
+
+  if (product.category2) {
+    await fetchCategories(3, product.category2);
+  }
+};
+
+const fetchBrands = async () => {
+  try {
+    const data = await $fetch("http://localhost:8080/api/v1/admin/products/brands");
+
+    brands.value = data.map((brand) => ({
+      id: brand.id,
+      name: `${brand.engName}(${brand.korName})`,
+    }));
+  } catch (error) {
+    console.error("Error fetching brands:", error);
+  }
+};
+
+const fetchShops = async () => {
+  try {
+    const data = await $fetch("http://localhost:8080/api/v1/admin/products/shopping-malls");
+
+    shops.value = data.map((shop) => ({
+      id: shop.id,
+      name: `${shop.engName}(${shop.korName})`,
+    }));
+  } catch (error) {
+    console.error("Error fetching shopping malls:", error);
+  }
 };
 
 const removeProductForm = (id) => {
@@ -30,17 +111,33 @@ const removeProductForm = (id) => {
   if (index !== -1) {
     products.value.splice(index, 1);
   }
-  // Renumber the remaining products
   products.value.forEach((product, index) => {
     product.id = index + 1;
   });
   nextId.value = products.value.length + 1;
 };
 
-const updateRepresentativeProduct = (id) => {
-  products.value.forEach((product) => {
-    product.isRepresentative = product.id === id;
-  });
+const updatepresentIdProduct = (id) => {
+  const currentProduct = products.value.find((product) => product.id === id);
+
+  if (!currentProduct.presentId) {
+    products.value.forEach((product) => {
+      product.presentId = false;
+    });
+  } else {
+    products.value.forEach((product) => {
+      product.presentId = product.id === id;
+    });
+  }
+
+  console.log(
+    "Updated products:",
+    products.value.map((p) => ({ id: p.id, presentId: p.presentId }))
+  );
+};
+
+const handleActiveChange = (product) => {
+  console.log(`Product ${product.id} active status: ${product.active}`);
 };
 
 const triggerFileUpload = (id) => {
@@ -65,18 +162,59 @@ const removeImage = (productId, imageIndex) => {
   }
 };
 
-const submitForm = () => {
-  console.log(products.value);
-  // 여기에 서버로 데이터를 전송하는 로직 추가
-};
+const submitForm = async () => {
+  try {
+    const formData = new FormData();
 
-onMounted(() => {
-  addProductForm(); // 초기 상품 폼 추가
-});
+    const productsData = products.value.map((product) => ({
+      formId: product.id,
+      active: product.active,
+      presentId: product.presentId,
+      categoryId: product.category3,
+      brandId: product.brandId,
+      shoppingMallId: product.shoppingMallId,
+      url: product.url,
+      productName: product.productName,
+      retailPrice: parseInt(product.retailPrice),
+      salePrice: parseInt(product.salePrice),
+      description: product.description,
+    }));
+
+    const productsBlob = new Blob([JSON.stringify(productsData)], {
+      type: "application/json",
+    });
+    formData.append("data", productsBlob);
+
+    products.value.forEach((product) => {
+      const fileInput = document.querySelector(`#product-form-${product.id} input[type="file"]`);
+      if (fileInput && fileInput.files.length > 0) {
+        Array.from(fileInput.files).forEach((file) => {
+          formData.append(`files_${product.id}`, file);
+        });
+      }
+    });
+
+    await $fetch("http://localhost:8080/api/v1/admin/products", {
+      method: "POST",
+      body: formData,
+    });
+
+    alert("상품 등록이 완료 되었습니다.");
+    await navigateTo("/admin/products/list");
+  } catch (error) {
+    console.error("Error submitting form:", error);
+    alert("상품 등록 중 오류가 발생했습니다.");
+  }
+};
 
 const getImageNamesString = computed(() => (productId) => {
   const product = products.value.find((p) => p.id === productId);
   return product ? product.imageNames.join(", ") : "";
+});
+
+onMounted(async () => {
+  await Promise.all([fetchCategories(1), fetchBrands(), fetchShops()]);
+  addProductForm();
 });
 </script>
 
@@ -96,56 +234,72 @@ const getImageNamesString = computed(() => (productId) => {
               <div v-for="(product, index) in products" :key="product.id" :id="`product-form-${product.id}`" class="product-form">
                 <h3 class="n-heading:6">
                   상품 {{ product.id }}
-                  <label class="representative-product">
-                    <input
-                      type="checkbox"
-                      v-model="product.isRepresentative"
-                      :value="product.id"
-                      class="mr:1"
-                      @change="updateRepresentativeProduct(product.id)"
-                    />
-                    <span class="ml-2">대표 상품</span>
-                  </label>
+                  <div class="form-header-controls">
+                    <div class="switch-container">
+                      <label class="pl-switch">
+                        <input
+                          type="checkbox"
+                          :id="'active' + product.id"
+                          v-model="product.active"
+                          @change="() => handleActiveChange(product)"
+                        />
+                        <span class="pl-slider round"></span>
+                      </label>
+                      <span class="switch-label mr-2">공개 여부</span>
+                    </div>
+                    <label class="representative-product">
+                      <input type="checkbox" v-model="product.presentId" @change="updatepresentIdProduct(product.id)" />
+                      <span class="switch-label ml-2">대표 상품</span>
+                    </label>
+                  </div>
                 </h3>
+                <!-- 기존 폼 필드들 -->
                 <div class="form-row">
                   <label>카테고리 :</label>
-                  <select v-model="product.category1" required>
+                  <select v-model="product.category1" required @change="() => handleCategory1Change(product)">
                     <option value="">1차 카테고리</option>
+                    <option v-for="cat in categories.level1" :key="cat.id" :value="cat.id">
+                      {{ cat.name }}
+                    </option>
                   </select>
-                  <select v-model="product.category2" required class="ml:2">
+                  <select v-model="product.category2" required class="ml:2" @change="() => handleCategory2Change(product)">
                     <option value="">2차 카테고리</option>
+                    <option v-for="cat in categories.level2" :key="cat.id" :value="cat.id">
+                      {{ cat.name }}
+                    </option>
                   </select>
                   <select v-model="product.category3" required class="ml:2">
                     <option value="">3차 카테고리</option>
+                    <option v-for="cat in categories.level3" :key="cat.id" :value="cat.id">
+                      {{ cat.name }}
+                    </option>
                   </select>
                 </div>
+
                 <div class="form-row">
                   <label>브랜드 :</label>
-                  <select v-model="product.brand" required>
-                    <option value="">브랜드 선택</option>
-                  </select>
+                  <SearchableSelect v-model="product.brandId" :options="brands" placeholder="브랜드 선택" required />
                 </div>
                 <div class="form-row">
                   <label>쇼핑몰 :</label>
-                  <select v-model="product.shop" required>
-                    <option value="">쇼핑몰 선택</option>
-                  </select>
+                  <SearchableSelect v-model="product.shoppingMallId" :options="shops" placeholder="쇼핑몰 선택" required />
                 </div>
+
                 <div class="form-row">
                   <label>URL:</label>
                   <input type="url" v-model="product.url" required />
                 </div>
                 <div class="form-row">
                   <label>상품이름 :</label>
-                  <input type="text" v-model="product.name" required />
+                  <input type="text" v-model="product.productName" required />
                 </div>
                 <div class="form-row">
                   <label>소비자가 :</label>
-                  <input type="number" v-model="product.originalPrice" required />
+                  <input type="number" v-model="product.retailPrice" required />
                 </div>
                 <div class="form-row">
                   <label>할인가 :</label>
-                  <input type="number" v-model="product.discountedPrice" required />
+                  <input type="number" v-model="product.salePrice" required />
                 </div>
                 <div class="form-row">
                   <label>상세설명 :</label>
@@ -189,16 +343,13 @@ const getImageNamesString = computed(() => (productId) => {
                   v-if="index > 0"
                   type="button"
                   @click="removeProductForm(product.id)"
-                  class="n-btn n-btn-color:danger mt:2"
+                  class="n-btn n-btn-color:danger mt-2"
                 >
                   이 상품 제거
                 </button>
               </div>
             </div>
             <div class="form-actions">
-              <button v-if="index > 0" type="button" @click="removeProductForm(product.id)" class="n-btn n-btn-color:danger mt:2">
-                이 상품 제거
-              </button>
               <button type="button" @click="addProductForm" class="n-btn n-btn-color:main">+ 상품 추가</button>
               <button type="submit" class="n-btn n-btn-color:main">등 록</button>
               <a href="#" class="n-btn n-btn-color:danger">취 소</a>

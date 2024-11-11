@@ -1,11 +1,12 @@
 package com.fupto.back.admin.product.service;
 
-import com.fupto.back.admin.product.dto.CategorySelectDto;
-import com.fupto.back.admin.product.dto.ProductListDto;
-import com.fupto.back.admin.product.dto.ProductResponseDto;
-import com.fupto.back.admin.product.dto.ProductSearchDto;
+import com.fupto.back.admin.product.dto.*;
+import org.springframework.core.io.Resource;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public interface ProductService {
 
@@ -15,7 +16,15 @@ public interface ProductService {
 
     ProductListDto getById(Long id);
 
-    ProductListDto create(ProductListDto productListDto);
+    List<CategorySelectDto> getCategoriesByLevelAndParent(Integer level, Long parentId);
+
+    List<BrandSelectDto> getBrands();
+
+    List<ShoppingMallSelectDto> getShoppingMalls();
+
+    Resource getProductImage(Long id) throws IOException;
+
+    List<ProductListDto> create(List<ProductRegDto> productRegDtos, Map<Integer, List<MultipartFile>> filesMap);
 
     ProductListDto update(ProductListDto productListDto);
 
@@ -24,8 +33,6 @@ public interface ProductService {
     ProductListDto updateActive(Long id, Boolean active);
 
     void delete(Long id);
-
-    List<CategorySelectDto> getCategoriesByLevelAndParent(Integer level, Long parentId);
 
     void promoteAndDelete(Long id);
 }

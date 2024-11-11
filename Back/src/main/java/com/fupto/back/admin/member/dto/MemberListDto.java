@@ -21,6 +21,7 @@ public class MemberListDto {
     private Instant createDate;
     private Instant updateDate;
     private String userId;
+    private String role;
     //private 소셜 로그인은 어떻게?
     //회원 유형 데이터 테이블은 어떻게? 권한설정?
 

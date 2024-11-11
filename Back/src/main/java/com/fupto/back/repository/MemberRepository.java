@@ -13,10 +13,18 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     List<Member> findAll();
 
     @Query("select m from Member m " +
-            "where (:userId is null or m.userId like %:userId%)"+
-            "and (:nickname is null or m.nickname like %:nickname%)")
+            "where" +
+            "(:role is null or m.role = :role)"+
+            "and (:gender is null or m.gender = :gender)"+
+            "and (:userId is null or m.userId like %:userId%)"+
+            "and (:nickname is null or m.nickname like %:nickname%)"+
+            "and (:email is null or m.email like %:email%)"
+    )
     Page<Member> searchMember(
+            @Param("role") String memberType,
+            @Param("gender") String gender,
             @Param("userId") String userId,
-            @Param("nickname") String nickname
-            , Pageable pageable);
+            @Param("nickname") String nickname,
+            @Param("email") String email,
+             Pageable pageable);
 }
