@@ -139,7 +139,7 @@ public class DefaultProductService implements ProductService {
 
     @Override
     public List<BrandSelectDto> getBrands() {
-        return brandRepository.findByActiveIsTrue()
+        return brandRepository.findByActiveIsTrueOrderByEngNameAsc()
                 .stream()
                 .map(brand -> BrandSelectDto
                         .builder()
@@ -152,7 +152,7 @@ public class DefaultProductService implements ProductService {
 
     @Override
     public List<ShoppingMallSelectDto> getShoppingMalls() {
-        return shoppingMallRepository.findByActiveIsTrue()
+        return shoppingMallRepository.findByActiveIsTrueOrderByEngNameAsc()
                 .stream()
                 .map(shop -> ShoppingMallSelectDto
                         .builder()
