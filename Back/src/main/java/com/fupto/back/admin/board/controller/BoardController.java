@@ -4,9 +4,12 @@ import com.fupto.back.admin.board.dto.BoardListDto;
 import com.fupto.back.admin.board.dto.BoardResponseDto;
 import com.fupto.back.admin.board.dto.BoardSearchDto;
 import com.fupto.back.admin.board.service.BoardService;
+import com.fupto.back.entity.Board;
 import com.fupto.back.repository.BoardRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -21,31 +24,15 @@ public class BoardController {
         this.boardRepository = boardRepository;
     }
 
-//     등록
-    @PostMapping("/reg")
-    public ResponseEntity<BoardListDto> create(
-            @RequestBody BoardListDto boardListDto) {
-        System.out.println(boardListDto);
-        return ResponseEntity.ok(boardService.create(boardListDto));
-    }
-
+    @GetMapping
+    public List<Board> getList() {return  boardRepository.findAll();}
     // 목록 - 페이징
     @GetMapping("/list")
-    public ResponseEntity<BoardResponseDto> getList(
-            @ModelAttribute BoardSearchDto searchDto
-            ) {
-        if(searchDto.getPage() == null || searchDto.getPage() < 1) {
-            searchDto.setPage(1);
-        }
+    public ResponseEntity<BoardResponseDto> getSearchList(@ModelAttribute BoardSearchDto searchDto){
         return ResponseEntity.ok(boardService.getList(searchDto));
     }
 }
 
-    //삭제
-//    @DeleteMapping
-//    public void deleteById(Long id) {
-//        boardService.delete(id);
-//    }
 
 
 

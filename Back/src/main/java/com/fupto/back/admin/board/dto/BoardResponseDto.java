@@ -16,6 +16,7 @@ public class BoardResponseDto {
     private long totalPages;
     private boolean nextPage;
     private boolean prevPage;
+
     private List<Long> pages;
     private List<BoardListDto> boards;
 }

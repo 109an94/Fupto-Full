@@ -17,6 +17,7 @@ public class BoardListDto {
     private String title;
     private String content;
     private Instant createDate;
+    private Boolean active;
 
     private String boardCategoryName;
     private String regMemberNickName;

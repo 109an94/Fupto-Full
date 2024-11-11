@@ -15,6 +15,8 @@ import java.util.List;
 public class BoardSearchDto {
     private Integer page;
     private Integer size;
-    private String keyword;
-    private List<Long> categoryIds;
+//    private String searchKeyword;
+//    private String searchType;
+//    private List<Long> categoryName;
+    private String boardCategoryName;
 }

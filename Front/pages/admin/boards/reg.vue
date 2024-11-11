@@ -46,7 +46,7 @@ const handleSubmit = () => {
 
   try {
     // 서버에 POST 요청 보내기
-    const response = await fetch('http://localhost:8080/api/v1/admin/boards/reg', {
+    const response = fetch('http://localhost:8080/api/v1/admin/boards/reg', {
       method: 'POST',
       body: formData,
     });

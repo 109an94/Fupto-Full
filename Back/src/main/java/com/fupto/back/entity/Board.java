@@ -1,8 +1,8 @@
 package com.fupto.back.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
@@ -11,10 +11,6 @@ import java.time.Instant;
 @Setter
 @Entity
 @Table(name = "board")
-@ToString
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
 public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,17 +25,18 @@ public class Board {
     private String content;
 
     @ColumnDefault("current_timestamp()")
-    @Column(name = "create_date", insertable = false, updatable = false)
+    @Column(name = "create_date", nullable = false)
     private Instant createDate;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "reg_member_id", nullable = false)
-    @JsonBackReference
     private Member regMember;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "board_category_id", nullable = false)
-    @JsonBackReference
-    private BoardCategory boardCategory;
+    private BoardCategory boardCategoryId;
+
+    @Column(name = "active", nullable = false)
+    private Boolean active = false;
 
 }
