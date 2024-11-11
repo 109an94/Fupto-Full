@@ -20,15 +20,15 @@ const shops = ref([]);
 
 const addProductForm = () => {
   products.value.push({
+    presentId: nextId.value === 1,
     id: nextId.value++,
     active: true,
-    presentId: false,
     category1: "",
     category2: "",
     category3: "",
     brandId: "",
     shoppingMallId: "",
-    url: "",
+    url: "https://",
     productName: "",
     retailPrice: "",
     salePrice: "",
@@ -138,6 +138,16 @@ const updatepresentIdProduct = (id) => {
 
 const handleActiveChange = (product) => {
   console.log(`Product ${product.id} active status: ${product.active}`);
+};
+
+const formatNumber = (value) => {
+  if (!value) return "";
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
+const unformatNumber = (value) => {
+  if (!value) return "";
+  return value.toString().replace(/,/g, "");
 };
 
 const triggerFileUpload = (id) => {
@@ -295,15 +305,25 @@ onMounted(async () => {
                 </div>
                 <div class="form-row">
                   <label>소비자가 :</label>
-                  <input type="number" v-model="product.retailPrice" required />
+                  <input
+                    type="text"
+                    :value="formatNumber(product.retailPrice)"
+                    @input="(e) => (product.retailPrice = unformatNumber(e.target.value))"
+                    required
+                  />
                 </div>
                 <div class="form-row">
                   <label>할인가 :</label>
-                  <input type="number" v-model="product.salePrice" required />
+                  <input
+                    type="text"
+                    :value="formatNumber(product.salePrice)"
+                    @input="(e) => (product.salePrice = unformatNumber(e.target.value))"
+                    required
+                  />
                 </div>
                 <div class="form-row">
                   <label>상세설명 :</label>
-                  <textarea v-model="product.description" required rows="8"></textarea>
+                  <textarea v-model="product.description" required rows="8" style="white-space: pre-wrap"></textarea>
                 </div>
                 <div class="form-row">
                   <label>사진추가 :</label>
