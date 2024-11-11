@@ -31,12 +31,10 @@ import java.util.List;
 public class DefaultBrandService implements BrandService {
 
     private BrandRepository brandRepository;
-    private final String uploadDir;
     private ModelMapper modelMapper;
 
-    public DefaultBrandService(BrandRepository brandRepository, ModelMapper modelMapper, @Value("${file.upload-dir}") String uploadDir) {
+    public DefaultBrandService(BrandRepository brandRepository, ModelMapper modelMapper) {
         this.brandRepository = brandRepository;
-        this.uploadDir = uploadDir;
         this.modelMapper = modelMapper;
     }
 
@@ -135,25 +133,25 @@ public class DefaultBrandService implements BrandService {
         brand.setCreateDate(Instant.now());
         brand.setUpdateDate(Instant.now());
 
-        if (file != null && !file.isEmpty()) {
-            String fileName = saveFile(file);
-            brand.setImg(fileName);
-        }
+//        if (file != null && !file.isEmpty()) {
+//            String fileName = saveFile(file);
+//            brand.setImg(fileName);
+//        }
 
         Brand savedBrand = brandRepository.save(brand);
         return convertToBrandListDto(savedBrand);
     }
 
-    private String saveFile(MultipartFile file) {
-        try {
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path filePath = Paths.get(uploadDir).resolve(fileName);
-            Files.copy(file.getInputStream(), filePath);
-            return fileName;
-        } catch (IOException e) {
-            throw new RuntimeException("파일 저장 중 오류가 발생했습니다.", e);
-        }
-    }
+//    private String saveFile(MultipartFile file) {
+//        try {
+//            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+//            Path filePath = Paths.get(uploadDir).resolve(fileName);
+//            Files.copy(file.getInputStream(), filePath);
+//            return fileName;
+//        } catch (IOException e) {
+//            throw new RuntimeException("파일 저장 중 오류가 발생했습니다.", e);
+//        }
+//    }
 
     // ModelMapper를 사용하여 Brand 객체를 BrandListDto로 변환
     private BrandListDto convertToBrandListDto(Brand brand) {
