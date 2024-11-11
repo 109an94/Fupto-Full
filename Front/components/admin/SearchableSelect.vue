@@ -122,7 +122,7 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   user-select: none;
-  flex: 1; /* 부모 컨테이너에 맞게 확장 */
+  flex: 1;
 }
 
 .select-trigger {
@@ -135,7 +135,7 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   min-height: 38px;
-  width: 100%; /* 부모 컨테이너에 맞게 확장 */
+  width: 100%;
 }
 
 .select-trigger.required {
@@ -165,7 +165,7 @@ onUnmounted(() => {
   max-height: 300px;
   display: flex;
   flex-direction: column;
-  width: 100%; /* 추가: 부모 너비의 100%를 차지하도록 함 */
+  width: 100%;
 }
 
 .search-container {

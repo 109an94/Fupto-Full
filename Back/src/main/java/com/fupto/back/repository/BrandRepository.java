@@ -33,5 +33,5 @@ public interface BrandRepository extends JpaRepository<Brand, Long> {
             Pageable pageable
     );
 
-    List<Brand> findByActiveIsTrue();
+    List<Brand> findByActiveIsTrueOrderByEngNameAsc();
 }

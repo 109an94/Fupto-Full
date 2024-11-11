@@ -29,8 +29,6 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<ProductResponseDto> getList(ProductSearchDto searchDto) {
-        System.out.println("startDate: " + searchDto.getStartDate());
-        System.out.println("endDate: " + searchDto.getEndDate());
         return ResponseEntity.ok(productService.getList(searchDto));
     }
 
@@ -98,7 +96,7 @@ public class ProductController {
 
             return ResponseEntity.ok(productService.create(productRegDtos, filesMap));
         } catch (Exception e) {
-            log.error("Error creating products", e);  // 에러 상세 로그
+            log.error("Error creating products", e);
             throw e;
         }
     }
