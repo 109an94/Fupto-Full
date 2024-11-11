@@ -3,6 +3,7 @@ package com.fupto.back.admin.member.dto;
 import lombok.*;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -20,6 +21,9 @@ public class MemberListDto {
     private String email;
     private Instant createDate;
     private Instant updateDate;
+
+    private Instant loginDate;
+    private Instant birthDate;
     private String userId;
     private String role;
     //private 소셜 로그인은 어떻게?

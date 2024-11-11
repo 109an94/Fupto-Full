@@ -13,6 +13,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +43,10 @@ public class DefaultMemberService implements MemberService{
                 ,SearchDto.getMemberType()
                 ,SearchDto.getGender()
                 ,SearchDto.getSearchType()
-                ,SearchDto.getSearchKeyWord());
+                ,SearchDto.getSearchKeyWord()
+                ,SearchDto.getDateType()
+                ,SearchDto.getStartDate()
+                ,SearchDto.getEndDate());
     }
 
     @Override
@@ -48,22 +55,38 @@ public class DefaultMemberService implements MemberService{
                                            String memberType,
                                            String gender,
                                            String searchType,
-                                           String searchKeyWord) {
+                                           String searchKeyWord,
+                                           String dateType,
+                                           String startDate,
+                                           String endDate) {
 
         //페이지 처리
         Pageable pageable = PageRequest.of(page - 1,
                 size,
                 Sort.by(searchType).descending());
 
-        // userId와 nickname 설정
+        // userId와 nickname 설정 searchType = null  / userid nickname email
         String userId = searchType.equals("userId") ? searchKeyWord : null;
         String nickname = searchType.equals("nickname") ? searchKeyWord : null;
         String email = searchType.equals("email") ? searchKeyWord : null;
+
             //genderf 는 String 타입으로안해도 되는 데 가독성을 위해 f로 변환
         String genderf = (gender == null || gender.isEmpty()) ? null : gender;
         String memberTypef = (memberType == null || memberType.isEmpty()) ? null : memberType;
         // 레포지토리 메소드 호출
-        Page<Member> memberPage = memberRepository.searchMember(memberTypef, genderf, userId, nickname, email, pageable);
+        String dateTypef = (dateType != null && !dateType.isEmpty()) ? dateType :"regDate";
+        Instant startDateI = (startDate == null)?null
+                :LocalDate.parse(startDate)
+                .atStartOfDay(ZoneId.of("UTC"))
+                .toInstant();
+        Instant endDateI = (endDate == null)?null
+                :LocalDate.parse(endDate)
+                .atTime(LocalTime.MAX)
+                .atZone(ZoneId.of("UTC"))
+                .toInstant();
+        System.out.println(startDate);
+        System.out.println(startDateI);
+        Page<Member> memberPage = memberRepository.searchMember(memberTypef, genderf, userId, nickname, email, dateTypef,startDateI,endDateI ,pageable);
 
         List<MemberListDto> memberListDtos = memberPage
                 .getContent()

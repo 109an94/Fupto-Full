@@ -1,5 +1,7 @@
 <script setup>
-
+useHead({
+  link: [{ rel: "stylesheet", href: "/css/myLayout.css" }],
+});
 </script>
 
 <template>
@@ -48,7 +50,3 @@
     </div>
   </div>
 </template>
-
-<style scoped>
-  @import url("@/assets/css/my.css");
-</style>
