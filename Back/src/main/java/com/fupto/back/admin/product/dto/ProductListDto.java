@@ -28,4 +28,6 @@ public class ProductListDto {
     private String categoryName;
     private String shoppingMallEngName;
     private Integer salePrice;
+
+    private String imagePath;
 }

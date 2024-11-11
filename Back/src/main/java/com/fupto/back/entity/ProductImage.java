@@ -14,23 +14,35 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "price_history")
-public class PriceHistory {
+@Table(name = "product_image")
+public class ProductImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "sale_price", nullable = false)
-    private Integer salePrice;
+    @Column(name = "file_name")
+    private String fileName;
+
+    @Column(name = "original_name")
+    private String originalName;
+
+    @Column(name = "file_path", length = 1000)
+    private String filePath;
+
+    @Column(name = "display_order")
+    private Integer displayOrder;
 
     @ColumnDefault("current_timestamp()")
     @Column(name = "create_date", insertable = false, updatable = false)
     private Instant createDate;
 
+    @ColumnDefault("current_timestamp()")
+    @Column(name = "update_date", insertable = false)
+    private Instant updateDate;
+
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     @JsonBackReference
     private Product product;
-
 }

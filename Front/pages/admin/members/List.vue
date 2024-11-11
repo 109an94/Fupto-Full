@@ -13,8 +13,15 @@ const currentPage = ref(0);
 const page = ref(10);
 const size = ref(10);
 const filterData = ref({
-  type: "userId",
-  keyWord :""
+  // date
+  // login
+  // membertype
+  memberType:"",
+  // gender
+  gender:"",
+  // search
+  searchType: "userId",
+  searchKeyWord :""
 })
 //---------------methods
 const fetchMembers = async (page = 1) => {
@@ -23,14 +30,21 @@ const fetchMembers = async (page = 1) => {
       page : page,
       size : size.value.toString()
     });
-
-    if (filterData.value.type) params.append("type", filterData.value.type)
-    if (filterData.value.keyWord) params.append("keyWord", filterData.value.keyWord)
-    console.log(params);
+    // date
+    // login
+    // membertype
+    if (filterData.value.memberType) params.append("memberType", filterData.value.memberType);
+    // gender
+    if (filterData.value.gender) params.append("gender", filterData.value.gender);
+    // search
+    if (filterData.value.searchType) params.append("searchType", filterData.value.searchType)
+    if (filterData.value.searchKeyWord) params.append("searchKeyWord", filterData.value.searchKeyWord)
 
     const response = await fetch(`http://localhost:8080/api/v1/admin/members/search?${params.toString()}`);
     const data = await response.json();
     members.value = data.members;
+    console.log(params.toString());
+    console.log(data.members);
     // members.value = data; //아직 data 자체가 배열이여서 직접 할당
 
   } catch (error) {
@@ -179,27 +193,28 @@ members.value.forEach(members => {
                 <tr>
                   <th>회원 유형</th>
                   <td>
-                    <select class="">
-                      <option>일반</option>
-                      <option>입점</option>
-                      <option>관리자</option>
+                    <select v-model="filterData.memberType" class="">
+                      <option value="">전체</option>
+                      <option value="ROLE_USER">일반</option>
+                      <option value="ROLE_ADMIN">관리자</option>
                     </select>
                   </td>
                   <th>성별</th>
                   <td>
-                    <input type="radio" id="men" name="성별" checked ><label for="men">남성</label>
-                    <input type="radio" id="women" name="성별"><label for="women">여성</label>
+                    <input type="radio" id="men" name="성별" v-model="filterData.gender" value="" checked><label for="men">전체</label>
+                    <input type="radio" id="men" name="성별" v-model="filterData.gender" value="남성"><label for="men">남성</label>
+                    <input type="radio" id="women" name="성별" v-model="filterData.gender" value="여성"><label for="women">여성</label>
                   </td>
                 </tr>
                 <tr>
                   <th>검색명</th>
                   <td colspan="3">
-                    <select v-model="filterData.type" class="">
+                    <select v-model="filterData.searchType" class="">
                       <option value="userId">아이디</option>
                       <option value="nickname">이름</option>
                       <option value="email">이메일</option>
                     </select>
-                    <input type="text" class=""  v-model="filterData.keyWord">
+                    <input type="text" class=""  v-model="filterData.searchKeyWord">
                   </td>
                 </tr>
                 </tbody>

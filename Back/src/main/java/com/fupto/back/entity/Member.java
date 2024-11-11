@@ -29,7 +29,7 @@ public class Member {
     @Column(name = "gender", nullable = false, length = 10)
     private String gender;
 
-    @Column(name = "tel", length = 10)
+    @Column(name = "tel", length = 11)
     private String tel;
 
     @Column(name = "email", nullable = false, length = 256)
@@ -45,5 +45,8 @@ public class Member {
 
     @Column(name = "user_id", nullable = false, length = 50)
     private String userId;
+
+    @Column(name = "role", nullable = false, length = 10)
+    private String role;
 
 }
