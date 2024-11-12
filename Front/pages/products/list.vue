@@ -5,6 +5,9 @@ useHead({
   link: [{ rel: "stylesheet", href: "/css/product-list.css" }],
 });
 
+const route = useRoute();
+const gender = ref(route.query.gender); // URL에서 gender 파라미터 가져오기
+
 // 필터 드롭다운
 const isActive = ref(false);
 const selectedOption = ref("인기순");
@@ -45,6 +48,13 @@ const handleClickOutside = (e) => {
   }
 };
 
+watch(
+  () => route.query.gender,
+  (newGender) => {
+    gender.value = newGender;
+  }
+);
+
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
 });
@@ -53,7 +63,7 @@ onMounted(() => {
 <template>
   <main>
     <div class="main-content-wrapper">
-      <FuptoAside />
+      <FuptoAside :initialGender="gender" />
       <div class="product-content">
         <section class="category-frame">
           <h1 style="display: none">카테고리</h1>
