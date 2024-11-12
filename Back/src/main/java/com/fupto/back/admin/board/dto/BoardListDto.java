@@ -8,18 +8,18 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class BoardListDto {
-
     private Long id;
     private String title;
-    private String content;
+    private String type;
     private Instant createDate;
     private Boolean active;
 
     private String boardCategoryName;
     private String regMemberNickName;
 
+    private String boardImagePath;
 }

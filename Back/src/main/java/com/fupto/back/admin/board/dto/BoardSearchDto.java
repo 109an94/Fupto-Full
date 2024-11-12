@@ -5,22 +5,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-
 public class BoardSearchDto {
     private Integer page = 1;
     private Integer size = 1;
-    private String sort = "create_time";
-    private String order = "desc";
+    private String sort = "createDate";
+    private String boardCategoryName; // 공지사항, 커뮤니티, FAQ, 고객센터
     private Boolean active;
+    private String searchType; // 제목,작성자, 내용
+    private String searchKeyWord;
+//    private String dateType;
+//    private String startDate;
+//    private String endDate;
 
-//    private String boardCategoryName;
-    private String searchKeyword; //
-    private String searchType;    // 제목, 글쓴이, 내용
 
 }

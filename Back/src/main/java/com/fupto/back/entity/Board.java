@@ -1,6 +1,5 @@
 package com.fupto.back.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,15 +30,16 @@ public class Board {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "reg_member_id", nullable = false)
-    @JsonManagedReference
-    private Member member;
+    private Member regMember;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "board_category_id", nullable = false)
-    @JsonManagedReference
     private BoardCategory boardCategory;
 
     @Column(name = "active", nullable = false)
     private Boolean active = false;
+
+    @Column(name = "img")
+    private String img;
 
 }
