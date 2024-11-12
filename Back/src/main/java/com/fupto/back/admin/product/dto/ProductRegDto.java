@@ -2,6 +2,8 @@ package com.fupto.back.admin.product.dto;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,4 +21,6 @@ public class ProductRegDto {
     private Integer retailPrice;
     private Integer salePrice;
     private String description;
+
+    private List<String> imageFileNames;
 }
