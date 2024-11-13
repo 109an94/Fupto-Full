@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import {useRouter} from "vue-router";
 import {ref, computed, watch, onMounted} from 'vue';
 
@@ -30,7 +30,7 @@ const filterData = ref({
   startDate : "",
   endDate : ""
 })
-//---------------methods
+//---------------methods-------------
 const fetchMembers = async (page = 1) => {
   try{
     const params = new URLSearchParams({
@@ -65,19 +65,23 @@ const fetchMembers = async (page = 1) => {
   }
 }
 
-const calculateAge = (createDate : string) =>{
-  const birthDate = new Date(createDate);
+//나이 계산하는 매서드
+const calculateAge = (birthDate) => {
   const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
-  if (monthDiff < 0||(monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+  const birthDateObj = new Date(birthDate);
+  let age = today.getFullYear() - birthDateObj.getFullYear();
+  const monthDiff = today.getMonth() - birthDateObj.getMonth();
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate()
+      < birthDateObj.getDate())) {
     age--;
   }
   return age;
 }
 
-const regDate = (creatDate) => {
-  const date = new Date(creatDate);
+//Instant 뒷자리 일자 남기는 매서드
+const delectTime = (createDate) => {
+  const date = new Date(createDate);
   return date.toISOString().split('T')[0];
 }
 
@@ -101,56 +105,6 @@ const urlHandler = (id) =>{
 
 
 //----------------
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  joinDate: string;
-  age: number;
-  gender: string;
-  memberType: string;
-  selected: boolean;
-}
-
-const users = ref<User[]>([
-  { id: 'fupto1', name: '최원석', email: 'fupto@fupto.com', joinDate: '2024.10.18', age: 31, gender: '남성', memberType: '일반', selected: false },
-  { id: 'fupto2', name: '이건주', email: 'fupto@fupto.com', joinDate: '2024.10.18', age: 31, gender: '남성', memberType: '일반', selected: false },
-  { id: 'fupto3', name: '손우재', email: 'fupto@fupto.com', joinDate: '2024.10.18', age: 31, gender: '남성', memberType: '일반', selected: false },
-  { id: 'fupto4', name: '박형민', email: 'fupto@fupto.com', joinDate: '2024.10.18', age: 31, gender: '남성', memberType: '일반', selected: false },
-]);
-
-const sortColumn = ref('');
-const sortOrder = ref('asc');
-const selectAll = ref(false);
-
-const sort = (column: string) => {
-  if (sortColumn.value === column) {
-    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
-  } else {
-    sortColumn.value = column;
-    sortOrder.value = 'asc';
-  }
-};
-
-const sortedUsers = computed(() => {
-  return [...members.value].sort((a, b) => {
-    const aValue = a[sortColumn.value as keyof members];
-    const bValue = b[sortColumn.value as keyof members];
-
-    if (aValue < bValue) return sortOrder.value === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortOrder.value === 'asc' ? 1 : -1;
-    return 0;
-  });
-});
-
-const toggleAll = () => {
-  members.value.forEach(members => members.selected = selectAll.value);
-};
-
-// selectAll 값을 모든 사용자의 선택 상태에 따라 업데이트
-const updateSelectAll = () => {
-  selectAll.value = members.value.every(members => members.selected);
-};
 
 // 각 사용자의 선택 상태가 변경될 때마다 updateSelectAll 함수 호출
 members.value.forEach(members => {
@@ -270,8 +224,8 @@ members.value.forEach(members => {
                   <td>{{ m.nickname }}</td>
                   <td>{{ m.userId }}</td>
                   <td>{{ m.email }}</td>
-                  <td>{{ regDate(m.createDate) }}</td>
-                  <td>{{ calculateAge(m.createDate)}}</td>
+                  <td>{{ delectTime(m.createDate) }}</td>
+                  <td>{{ calculateAge(m.birthDate)}}</td>
                   <td>{{ m.gender }}</td>
                   <td>{{ m.memberType || '일반'}}</td>
               </tr>

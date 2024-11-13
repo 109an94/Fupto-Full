@@ -1,89 +1,80 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 
 useHead({
   link: [{ rel: "stylesheet", href: "/css/aside.css" }],
 });
 
+// props로 초기 성별 받기
+const props = defineProps({
+  initialGender: {
+    type: String,
+    default: null,
+  },
+});
+
 /*성별 관련*/
-const selectedGender = ref("male");
-const toggleGender = (gender) => {
+const selectedGender = ref(props.initialGender);
+
+const toggleGender = async (gender) => {
   selectedGender.value = gender;
+  const genderId = gender === "male" ? "1" : "2";
+  await loadSecondCategories(genderId);
+  await loadBrands();
 };
-
 /*카테고리 관련*/
-const categories = ref([
-  {
-    id: "category-tops",
-    name: "상의",
-    checked: false,
-    isExpanded: false,
-    subCategories: [
-      { id: "tops-all", name: "All", checked: true },
-      { id: "tops-tshirts", name: "T-Shirts", checked: false },
-      { id: "tops-shirts", name: "Shirts", checked: false },
-      { id: "tops-sweaters", name: "Sweaters", checked: false },
-      { id: "tops-hoodies", name: "Hoodies", checked: false },
-    ],
-  },
-  {
-    id: "category-bottoms",
-    name: "하의",
-    checked: false,
-    isExpanded: false,
-    subCategories: [
-      { id: "bottoms-all", name: "All", checked: true },
-      { id: "bottoms-pants", name: "Pants", checked: false },
-      { id: "bottoms-jeans", name: "Jeans", checked: false },
-      { id: "bottoms-shorts", name: "Shorts", checked: false },
-      { id: "bottoms-skirts", name: "Skirts", checked: false },
-    ],
-  },
-  {
-    id: "category-shoes",
-    name: "신발",
-    checked: false,
-    isExpanded: false,
-    subCategories: [
-      { id: "shoes-all", name: "All", checked: true },
-      { id: "shoes-sneakers", name: "Sneakers", checked: false },
-      { id: "shoes-boots", name: "Boots", checked: false },
-      { id: "shoes-sandals", name: "Sandals", checked: false },
-      { id: "shoes-formal", name: "Formal", checked: false },
-    ],
-  },
-  {
-    id: "category-accessories",
-    name: "액세서리",
-    checked: false,
-    isExpanded: false,
-    subCategories: [
-      { id: "accessories-all", name: "All", checked: true },
-      { id: "acc-belts", name: "Belts", checked: false },
-      { id: "acc-hats", name: "Hats", checked: false },
-      { id: "acc-jewelry", name: "Jewelry", checked: false },
-      { id: "acc-watches", name: "Watches", checked: false },
-    ],
-  },
-  {
-    id: "category-bags",
-    name: "가방",
-    checked: false,
-    isExpanded: false,
-    subCategories: [
-      { id: "bags-all", name: "All", checked: true },
-      { id: "bags-backpacks", name: "Backpacks", checked: false },
-      { id: "bags-shoulder", name: "Shoulder Bags", checked: false },
-      { id: "bags-tote", name: "Tote Bags", checked: false },
-      { id: "bags-clutch", name: "Clutch", checked: false },
-    ],
-  },
-]);
+const categories = ref([]);
 
-const toggleCategory = (category) => {
-  category.isExpanded = category.checked;
+// 2차 카테고리 로드
+const loadSecondCategories = async (genderId) => {
+  if (!genderId) return;
+
+  const config = useRuntimeConfig();
+  const { data } = await useFetch("/products/categories", {
+    baseURL: config.public.apiBase,
+    params: { parentId: genderId },
+  });
+
+  if (data.value) {
+    categories.value = data.value.map((category) => ({
+      id: category.id,
+      name: category.name,
+      checked: false,
+      isExpanded: false,
+      subCategories: [{ id: `${category.id}-all`, name: "All", checked: true }],
+    }));
+  }
 };
 
+// 3차 카테고리 로드 (2차 카테고리 클릭시)
+const loadThirdCategories = async (category) => {
+  const config = useRuntimeConfig();
+  const { data } = await useFetch("/products/categories", {
+    baseURL: config.public.apiBase,
+    params: { parentId: category.id },
+  });
+
+  if (data.value) {
+    category.subCategories = [
+      { id: `${category.id}-all`, name: "All", checked: true },
+      ...data.value.map((subCat) => ({
+        id: subCat.id,
+        name: subCat.name,
+        checked: false,
+      })),
+    ];
+  }
+};
+
+// 기존 toggleCategory 함수 수정
+const toggleCategory = async (category) => {
+  category.isExpanded = category.checked;
+  if (category.checked && category.subCategories.length === 1) {
+    await loadThirdCategories(category);
+  }
+};
+
+// handleSubCategoryChange는 기존 그대로 유지
 const handleSubCategoryChange = (category, subCategory) => {
   if (subCategory.id.endsWith("-all")) {
     if (subCategory.checked) {
@@ -101,6 +92,7 @@ const handleSubCategoryChange = (category, subCategory) => {
   }
 };
 
+// clearAll도 기존 그대로 유지
 const clearAll = () => {
   categories.value.forEach((category) => {
     category.checked = false;
@@ -113,28 +105,36 @@ const clearAll = () => {
 
 /*브랜드 관련*/
 const searchQuery = ref("");
+const brands = ref([]);
 
-const brands = ref([
-  { id: "division", name: "(DI)VISION", checked: false },
-  { id: "032c", name: "032C", checked: false },
-  { id: "alyx", name: "1017 ALYX 9SM", checked: false },
-  { id: "1989studio", name: "1989 studio", checked: false },
-  { id: "44label", name: "44 LABEL GROUP", checked: false },
-  { id: "87avril90", name: "87 AVRIL 90", checked: false },
-  { id: "acoldwall", name: "A-COLD-WALL", checked: false },
-  { id: "apc", name: "A.P.C.", checked: false },
-]);
+// 브랜드 로드
+const loadBrands = async () => {
+  const config = useRuntimeConfig();
+  const { data } = await useFetch("/products/brands", {
+    baseURL: config.public.apiBase,
+  });
 
+  if (data.value) {
+    brands.value = data.value.map((brand) => ({
+      id: brand.id,
+      name: `${brand.engName}(${brand.korName})`,
+      checked: false,
+    }));
+  }
+};
+
+// filteredBrands는 기존 그대로 유지
 const filteredBrands = computed(() => {
   return brands.value.filter((brand) => brand.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
 });
 
+// clearBrands도 기존 그대로 유지
 const clearBrands = () => {
   brands.value.forEach((brand) => (brand.checked = false));
   searchQuery.value = "";
 };
 
-/*가격 관련*/
+/*가격 관련 - 기존 그대로 유지*/
 const minPrice = ref("");
 const maxPrice = ref("");
 
@@ -142,6 +142,27 @@ const clearPriceRange = () => {
   minPrice.value = "";
   maxPrice.value = "";
 };
+
+// URL의 gender 파라미터 감지하여 성별 설정
+watch(
+  () => props.initialGender,
+  (newGender) => {
+    if (newGender) {
+      selectedGender.value = newGender === "1" ? "male" : "female";
+      loadSecondCategories(newGender);
+      loadBrands();
+    }
+  },
+  { immediate: true }
+);
+
+// 초기 데이터 로드
+onMounted(async () => {
+  if (props.initialGender) {
+    await loadSecondCategories(props.initialGender);
+    await loadBrands();
+  }
+});
 </script>
 
 <template>

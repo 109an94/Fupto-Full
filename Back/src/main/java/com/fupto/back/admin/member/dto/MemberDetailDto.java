@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.List;
 
 @Builder
 @NoArgsConstructor
@@ -29,6 +30,8 @@ public class MemberDetailDto {
     private Instant updateDate;
         //작성글
     //게시글
+    private long boardCount;
+    private List<BoardListDto> boardList;
     //덧글
     //자랑없음
     //문의없음

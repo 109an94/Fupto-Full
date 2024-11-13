@@ -1,45 +1,36 @@
 package com.fupto.back.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
-
-import java.time.Instant;
 
 @Getter
 @Setter
-@Entity
-@Table(name = "board")
 @ToString
-@AllArgsConstructor
+@Entity
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
+@Table(name = "board")
 public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "title", nullable = false, length = 1000)
+    @Column(name = "title", nullable = false, length = 300)
     private String title;
 
-    @Lob
-    @Column(name = "content", nullable = false)
-    private String content;
+    @Column(name = "contents", nullable = false, length = 1000)
+    private String contents;
 
-    @ColumnDefault("current_timestamp()")
-    @Column(name = "create_date", insertable = false, updatable = false)
-    private Instant createDate;
+    @Column(name = "author", nullable = false, length = 200)
+    private String author;
+
+    @Column(name = "password", nullable = false, length = 200)
+    private String password;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "reg_member_id", nullable = false)
-    @JsonBackReference
     private Member regMember;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "board_category_id", nullable = false)
-    @JsonBackReference
-    private BoardCategory boardCategory;
 
 }

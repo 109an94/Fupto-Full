@@ -1,9 +1,9 @@
 package com.fupto.back.admin.member.service;
 
-import com.fupto.back.admin.member.dto.MemberListDto;
-import com.fupto.back.admin.member.dto.MemberResponseDto;
-import com.fupto.back.admin.member.dto.MemberSearchDto;
+import com.fupto.back.admin.member.dto.*;
+import com.fupto.back.entity.Board;
 import com.fupto.back.entity.Member;
+import com.fupto.back.repository.BoardRepository;
 import com.fupto.back.repository.MemberRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -19,16 +19,20 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class DefaultMemberService implements MemberService{
 
     private final MemberRepository memberRepository;
     private final ModelMapper modelMapper;
+    private final BoardRepository boardRepository;
 
-    public DefaultMemberService(MemberRepository memberRepository, ModelMapper modelMapper) {
+    public DefaultMemberService(MemberRepository memberRepository, ModelMapper modelMapper, BoardRepository boardRepository) {
         this.memberRepository = memberRepository;
         this.modelMapper = modelMapper;
+        this.boardRepository = boardRepository;
     }
 
     @Override
@@ -84,8 +88,6 @@ public class DefaultMemberService implements MemberService{
                 .atTime(LocalTime.MAX)
                 .atZone(ZoneId.of("UTC"))
                 .toInstant();
-        System.out.println(startDate);
-        System.out.println(startDateI);
         Page<Member> memberPage = memberRepository.searchMember(memberTypef, genderf, userId, nickname, email, dateTypef,startDateI,endDateI ,pageable);
 
         List<MemberListDto> memberListDtos = memberPage
@@ -102,7 +104,7 @@ public class DefaultMemberService implements MemberService{
         List<Long> pages = new ArrayList<>();
         for (long i = 1; i <= totalPages; i++) {
             pages.add(i);
-        };
+        }
 
         return MemberResponseDto.builder()
                 .totalCount(totalCount)
@@ -114,15 +116,8 @@ public class DefaultMemberService implements MemberService{
                 .build();
     }
 
-    @Override
-    public MemberListDto getMemberById(Long id) {
-        Member member = memberRepository.findById(id).orElse(null);
-        MemberListDto memberListDto = modelMapper.map(member, MemberListDto.class);
 
-        return memberListDto;
-    }
-
-    @Override
+    @Override//이제 안씀 따로 받아오는 게 목표
     @Transactional(readOnly = true)
     public List<MemberListDto> getMemberWithDetails() {
         List<Member> members = memberRepository.findAll();
@@ -139,5 +134,38 @@ public class DefaultMemberService implements MemberService{
         System.out.println(memberListDto);
 
         return memberListDto;
+    }
+    @Override
+    public MemberDetailDto getMemberById(Long id) {
+        Member member = memberRepository.findById(id).orElse(null);
+        if (member == null){
+            return null;
+        }
+
+        MemberDetailDto memberDetail = modelMapper.map(member, MemberDetailDto.class);
+        List<Board> boards = boardRepository.findByRegMemberId(id);
+        System.out.println(boards);
+
+        List<BoardListDto> boardListDtos = boards.stream()
+                .map(this::getBoard)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        memberDetail.setBoardCount(boardListDtos.size());
+        memberDetail.setBoardList(boardListDtos);
+        System.out.println(boardListDtos.size());
+
+        return memberDetail;
+    }
+
+    private BoardListDto getBoard (Board board){
+        if (board == null){
+            return null;
+        }
+        BoardListDto dto = new BoardListDto();
+        dto.setId(board.getId());
+        dto.setTitle(board.getTitle());
+//        dto.setDate(board.getDate());
+
+        return dto;
     }
 }
