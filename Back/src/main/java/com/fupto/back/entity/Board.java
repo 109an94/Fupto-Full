@@ -31,9 +31,9 @@ public class Board {
     @Column(name = "password", nullable = false, length = 200)
     private String password;
 
-//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-//    @JoinColumn(name = "reg_member_id",nullable = true)
-//    private Member regMember;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "reg_member_id",nullable = true)
+    private Member regMember;
 
     @ColumnDefault("current_timestamp()")
     @Column(name = "created_at", nullable = false)
