@@ -1,12 +1,8 @@
 package com.fupto.back.entity;
 
-<<<<<<< HEAD
 import com.fupto.back.admin.board.dto.BoardRequestsDto;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
@@ -16,18 +12,6 @@ import java.time.Instant;
 @Data
 @Entity
 @NoArgsConstructor
-=======
-import jakarta.persistence.*;
-import lombok.*;
-
-@Getter
-@Setter
-@ToString
-@Entity
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
->>>>>>> 63ddb87f6ed60decd1963344edbc09225c17c3b1
 @Table(name = "board")
 public class Board {
     @Id
@@ -40,7 +24,6 @@ public class Board {
 
     @Column(name = "contents", nullable = false, length = 1000)
     private String contents;
-<<<<<<< HEAD
 
     @Column(name = "author", nullable = false, length = 200)
     private String author;
@@ -89,17 +72,3 @@ public class Board {
     }
 }
 
-=======
-
-    @Column(name = "author", nullable = false, length = 200)
-    private String author;
-
-    @Column(name = "password", nullable = false, length = 200)
-    private String password;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "reg_member_id", nullable = false)
-    private Member regMember;
-
-}
->>>>>>> 63ddb87f6ed60decd1963344edbc09225c17c3b1
