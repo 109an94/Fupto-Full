@@ -2,6 +2,7 @@ package com.fupto.back.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fupto.back.Favorite;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -86,4 +87,9 @@ public class Product {
     public void increaseViewCount() {
         this.viewCount += 1;
     }
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Favorite> favorites;
+
 }

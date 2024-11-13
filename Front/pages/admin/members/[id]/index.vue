@@ -140,13 +140,10 @@ onMounted(() => {
               </tr>
               <tr>
                 <th rowspan="4">작성글</th>
-                <td> 게시글 :<span> 0개</span> </td>
+                <td> 게시글 :<span>&#160;{{ member.boardCount }}개</span> </td>
               </tr>
               <tr>
                 <td> 덧글 :<span> 0개</span> </td>
-              </tr>
-              <tr>
-                <td> 자랑 :<span> 0개</span> </td>
               </tr>
               <tr>
                 <td> 문의 :<span> 0개</span> </td>
