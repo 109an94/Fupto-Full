@@ -1,7 +1,10 @@
 package com.fupto.back.entity;
 
+import com.fupto.back.admin.board.dto.BoardRequestsDto;
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
@@ -9,7 +12,9 @@ import java.time.Instant;
 
 @Getter
 @Setter
+@Data
 @Entity
+@NoArgsConstructor
 @Table(name = "board")
 public class Board {
     @Id
@@ -17,29 +22,56 @@ public class Board {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "title", nullable = false, length = 1000)
+    @Column(name = "title", nullable = false, length = 300)
     private String title;
 
-    @Lob
-    @Column(name = "content", nullable = false)
-    private String content;
+    @Column(name = "contents", nullable = false, length = 1000)
+    private String contents;
+
+    @Column(name = "author", nullable = false, length = 200)
+    private String author;
+
+    @Column(name = "password", nullable = false, length = 200)
+    private String password;
+
+//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "reg_member_id",nullable = true)
+//    private Member regMember;
 
     @ColumnDefault("current_timestamp()")
-    @Column(name = "create_date", nullable = false)
-    private Instant createDate;
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "reg_member_id", nullable = false)
-    private Member regMember;
+    @ColumnDefault("current_timestamp()")
+    @Column(name = "modified_at", nullable = false)
+    private Instant modifiedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "board_category_id", nullable = false)
-    private BoardCategory boardCategory;
+    @PrePersist
+    public void prePersist() {
+        Instant now = Instant.now();
+        if (this.createdAt == null) {
+            this.createdAt = now;
+        }
+        if (this.modifiedAt == null) {
+            this.modifiedAt = now;
+        }
+    }
 
-    @Column(name = "active", nullable = false)
-    private Boolean active = false;
+    @PreUpdate
+    public void preUpdate() {
+        this.modifiedAt = Instant.now();  // 수정 시에만 modifiedAt 갱신
+    }
 
-    @Column(name = "img")
-    private String img;
+    public void update(BoardRequestsDto requestsDto) {
+        this.title = requestsDto.getTitle();
+        this.contents = requestsDto.getContents();
+    }
 
+    public Board (BoardRequestsDto requestsDto) {
+        this.title = requestsDto.getTitle();
+        this.contents = requestsDto.getContents();
+        this.author = requestsDto.getAuthor();
+        this.password = requestsDto.getPassword();
+    }
 }
+

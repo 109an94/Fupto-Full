@@ -1,80 +1,72 @@
 package com.fupto.back.admin.board.service;
 
-import com.fupto.back.admin.board.dto.BoardListDto;
+import com.fupto.back.admin.board.dto.BoardRequestsDto;
 import com.fupto.back.admin.board.dto.BoardResponseDto;
-import com.fupto.back.admin.board.dto.BoardSearchDto;
+import com.fupto.back.admin.board.dto.SuccessResponseDto;
+import com.fupto.back.admin.board.service.BoardService;
 import com.fupto.back.entity.Board;
 import com.fupto.back.repository.BoardRepository;
-import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class DefaultBoardService implements BoardService {
 
     private final BoardRepository boardRepository;
-    private final ModelMapper modelMapper;
 
-    public DefaultBoardService(BoardRepository boardRepository) {
-
-        this.boardRepository = boardRepository;
-        this.modelMapper = new ModelMapper();
-    }
-
+    // 전체 조회
     @Override
-    public List<Board> getBoards() {
-        return boardRepository.findAll();
+    public List<BoardResponseDto> getList() {
+        return boardRepository.findAllByOrderByModifiedAtDesc().stream().map(BoardResponseDto::new).toList();
     }
 
+    // 등록
     @Override
-    public List<BoardListDto> getList() {
-//        List<Board> boards = boardRepository.findAll();
-        List<BoardListDto> boardListDtos = getBoards()
-                .stream()
-                .map(board -> {
-                    BoardListDto boardListDto = modelMapper.map(board, BoardListDto.class);
-                    return boardListDto;
-                })
-                .toList();
-
-        return boardListDtos;
+    public BoardResponseDto createPost(BoardRequestsDto requestsDto) {
+        Board board = new Board();
+        board.setTitle(requestsDto.getTitle());
+        board.setContents(requestsDto.getContents());
+        board.setAuthor(requestsDto.getAuthor());  // author 필드에 값 설정
+        board.setPassword(requestsDto.getPassword());
+        boardRepository.save(board);
+        return new BoardResponseDto(board);
     }
 
+    // id 조회
     @Override
-    public BoardListDto getBoardById(Long id) {
-        Board board = boardRepository.findById(id).orElse(null);
-        BoardListDto boardListDto = modelMapper.map(board, BoardListDto.class);
-
-        return boardListDto;
+    public BoardResponseDto getPost(Long id) {
+        return boardRepository.findById(id).map(BoardResponseDto::new)
+                .orElseThrow(() -> new IllegalArgumentException("아이디가 존재하지 않습니다."));
     }
 
+    // 게시글 수정
     @Override
-    public BoardResponseDto getSearch(BoardSearchDto boardSearchDto) {
+    public BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception {
+        Board board = boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("아이디가 존재하지 않습니다."));
+        if (!requestsDto.getPassword().equals(board.getPassword()))
+            throw new Exception("비밀번호가 일치하지 않습니다.");
 
-        Pageable pageable = PageRequest.of(boardSearchDto.getPage()-1,
-                boardSearchDto.getSize(),
-                Sort.by(boardSearchDto.getSort()).descending());
+        board.update(requestsDto);
+        boardRepository.save(board);
 
-        Page<Board> boards;
-        if (){}
-
-
-        List<BoardListDto> boardListDtos = boards
-                .getContent()
-                .stream()
-                .map(board -> {BoardListDto boardListDto = modelMapper.map(board, BoardListDto.class);})
-                .toList();
-
-        return BoardResponseDto.builder()
-                .boards(boardListDtos)
-                .build();
+        return new BoardResponseDto(board);
     }
 
+    // 게시글 삭제
+    @Override
+    public SuccessResponseDto deletePost(Long id, BoardRequestsDto requestsDto) throws Exception {
+        Board board = boardRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
+        );
+        if (!requestsDto.getPassword().equals(board.getPassword()))
+            throw new Exception("비밀번호가 일치하지 않습니다.");
 
+        boardRepository.deleteById(id);
+        return new SuccessResponseDto(true);
+    }
 }
+
+
