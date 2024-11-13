@@ -1,7 +1,7 @@
 package com.fupto.back.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fupto.back.Favorite;
+import com.fupto.back.entity.Favorite;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
