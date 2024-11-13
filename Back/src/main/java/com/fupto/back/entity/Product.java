@@ -48,6 +48,10 @@ public class Product {
     @Column(name = "state")
     private Boolean state;
 
+    @Column(name = "view_count")
+    @Builder.Default
+    private Long viewCount = 0L;
+
     @ColumnDefault("current_timestamp()")
     @Column(name = "create_date", insertable = false, updatable = false)
     private Instant createDate;
@@ -78,4 +82,8 @@ public class Product {
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<ProductImage> productImages;
+
+    public void increaseViewCount() {
+        this.viewCount += 1;
+    }
 }

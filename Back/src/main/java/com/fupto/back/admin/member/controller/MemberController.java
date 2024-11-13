@@ -1,5 +1,6 @@
 package com.fupto.back.admin.member.controller;
 
+import com.fupto.back.admin.member.dto.MemberDetailDto;
 import com.fupto.back.admin.member.dto.MemberListDto;
 import com.fupto.back.admin.member.dto.MemberResponseDto;
 import com.fupto.back.admin.member.dto.MemberSearchDto;
@@ -33,8 +34,8 @@ public class MemberController{
     }
 
     @GetMapping("{id}")
-    public MemberListDto getMemberById(@PathVariable Long id){
-        return memberService.getMemberById(id);
+    public ResponseEntity<MemberDetailDto> getMemberById(@PathVariable Long id){
+        return ResponseEntity.ok(memberService.getMemberById(id));
     }
 
     @GetMapping("/search")

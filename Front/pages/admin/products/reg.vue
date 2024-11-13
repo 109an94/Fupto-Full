@@ -314,7 +314,7 @@ onMounted(async () => {
                 <div class="form-row">
                   <label>소비자가 :</label>
                   <input
-                    type="number"
+                    type="text"
                     :value="formatNumber(product.retailPrice)"
                     @input="(e) => (product.retailPrice = unformatNumber(e.target.value))"
                     required
@@ -323,7 +323,7 @@ onMounted(async () => {
                 <div class="form-row">
                   <label>할인가 :</label>
                   <input
-                    type="number"
+                    type="text"
                     :value="formatNumber(product.salePrice)"
                     @input="(e) => (product.salePrice = unformatNumber(e.target.value))"
                     required

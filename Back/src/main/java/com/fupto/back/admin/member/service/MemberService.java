@@ -1,5 +1,6 @@
 package com.fupto.back.admin.member.service;
 
+import com.fupto.back.admin.member.dto.MemberDetailDto;
 import com.fupto.back.admin.member.dto.MemberListDto;
 import com.fupto.back.admin.member.dto.MemberResponseDto;
 import com.fupto.back.admin.member.dto.MemberSearchDto;
@@ -21,6 +22,7 @@ public interface MemberService {
                                     String startDate,
                                     String endDate);
     MemberResponseDto getMemberList(MemberSearchDto memberSearchDto);
-    MemberListDto getMemberById(Long id);
+//    MemberListDto getMemberById(Long id);
     List<MemberListDto> getMemberWithDetails();
+    MemberDetailDto getMemberById (Long id);
 }

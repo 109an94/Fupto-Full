@@ -407,7 +407,7 @@ onMounted(() => {
                 <td>{{ b.id }}</td>
                 <td class="brand-cell">
                   <div class="d-flex align-items-center">
-                    <img src="https://via.placeholder.com/70" alt="lemaire" class="brand-img" />
+                    <img :src="'http://localhost:8080' + b.img || 'https://via.placeholder.com/70'" class="brand-img" />
                   </div>
                 </td>
                 <td class="text-md">{{ b.korName }}</td>

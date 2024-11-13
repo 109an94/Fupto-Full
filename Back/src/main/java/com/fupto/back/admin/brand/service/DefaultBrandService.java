@@ -134,32 +134,48 @@ public class DefaultBrandService implements BrandService {
 
     @Override
     public BrandListDto createBrand(BrandCreateDto brandCreateDto, MultipartFile file) throws IOException {
+        // 브랜드 정보 매핑
         Brand brand = modelMapper.map(brandCreateDto, Brand.class);
 
-        if (file != null && !file.isEmpty()) {
-            String fileName = saveFile(file);
-            brand.setImg(fileName);
-        }
-
+        // 브랜드 기본 상태 설정
         brand.setState(true);
         brand.setCreateDate(Instant.now());
         brand.setUpdateDate(Instant.now());
+        brand.setImg("-");
 
+        // 먼저 브랜드를 저장하여 ID를 생성
         Brand savedBrand = brandRepository.save(brand);
+        Long brandId = savedBrand.getId();
+
+        // 파일이 비어있지 않다면 저장
+        if (file != null && !file.isEmpty()) {
+            String fileName = saveFile(file, brandId); // brandId를 넘겨 경로에 포함시킴
+            savedBrand.setImg(fileName); // 파일명 설정
+        }
+
+        // 변경사항 저장
+        savedBrand = brandRepository.save(savedBrand);
+
+        // DTO로 변환하여 반환
         return convertToBrandListDto(savedBrand);
     }
 
-    private String saveFile(MultipartFile file) throws IOException {
+    private String saveFile(MultipartFile file, Long brandId) throws IOException {
+        // 파일 이름에 UUID 추가
         String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-        Path uploadDir = Paths.get(uploadPath);
 
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
+        // 브랜드 ID를 포함한 디렉토리 생성
+        Path brandUploadDir = Paths.get(uploadPath, "brands", brandId.toString());
+        if (!Files.exists(brandUploadDir)) {
+            Files.createDirectories(brandUploadDir);
         }
 
-        Path filePath = uploadDir.resolve(fileName);
+        // 최종 파일 경로 설정
+        Path filePath = brandUploadDir.resolve(fileName);
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        return fileName;
+
+        // 경로가 포함된 파일명을 반환 (백슬래시를 포워드 슬래시로 변경)
+        return filePath.toString().replace("\\", "/");
     }
 
     // ModelMapper를 사용하여 Brand 객체를 BrandListDto로 변환
