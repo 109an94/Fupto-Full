@@ -202,23 +202,15 @@ members.value.forEach(members => {
           <table class="report f-list">
             <tbody>
               <tr>
-<!--                <th><input type="checkbox"></th>-->
-<!--                <th>이름</th>-->
-<!--                <th>아이디</th>-->
-<!--                <th>이메일</th>-->
-<!--                <th>가입일</th>-->
-<!--                <th>나이</th>-->
-<!--                <th>성별</th>-->
-<!--                <th>회원 유형</th>-->
-                <th><input type="checkbox" v-model="selectAll" @change="toggleAll"></th>
-                <th @click="sort('nickname')">이름 <span v-if="sortColumn === 'nickname'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span></th>
-                <th @click="sort('userId')">아이디 <span v-if="sortColumn === 'userId'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span></th>
-                <th @click="sort('email')">이메일 <span v-if="sortColumn === 'email'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span></th>
-                <th @click="sort('createDate')">가입일 <span v-if="sortColumn === 'createDate'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span></th>
-                <th @click="sort('age')">나이 <span v-if="sortColumn === 'age'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span></th>
-                <th @click="sort('gender')">성별 <span v-if="sortColumn === 'gender'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span></th>
-                <th @click="sort('memberType')">회원 유형 <span v-if="sortColumn === 'memberType'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span></th>
-              </tr>
+                <th><input type="checkbox"></th>
+                <th>이름</th>
+                <th>아이디</th>
+                <th>이메일</th>
+                <th>가입일</th>
+                <th>나이</th>
+                <th>성별</th>
+                <th>회원 유형</th>
+                 </tr>
                 <tr v-for="m in members" :key="m.id" @click="urlHandler(m.id)">
                   <td><input type="checkbox" v-model="m.selected"></td>
                   <td>{{ m.nickname }}</td>
