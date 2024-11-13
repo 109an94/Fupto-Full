@@ -3,10 +3,7 @@ package com.fupto.back.entity;
 <<<<<<< HEAD
 import com.fupto.back.admin.board.dto.BoardRequestsDto;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
