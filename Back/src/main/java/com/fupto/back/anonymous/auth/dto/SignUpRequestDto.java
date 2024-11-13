@@ -24,4 +24,13 @@ public class SignUpRequestDto {
     private Instant updateDate;
     private Instant loginDate;
     private String role;
+
+    public SignUpRequestDto(String userId, String nickname, String password) {
+        this.userId = userId;
+        this.nickname = nickname;
+        this.password = password;
+
+        this.createDate = Instant.now();
+        this.updateDate = Instant.now();
+    }
 }
