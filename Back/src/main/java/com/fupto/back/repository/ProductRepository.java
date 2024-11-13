@@ -54,4 +54,91 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             Instant endDate,
             Pageable pageable
     );
+
+    @Query("""
+    SELECT DISTINCT p FROM Product p
+    LEFT JOIN FETCH p.brand b
+    LEFT JOIN FETCH p.category c
+    WHERE (:gender IS NULL OR c.parent.parent.id = :gender)
+    AND (:cat IS NULL OR c.id IN :cat)
+    AND (:brand IS NULL OR b.id IN :brand)
+    AND (:min IS NULL OR EXISTS (
+        SELECT 1 FROM PriceHistory ph 
+        WHERE ph.product.mappingId = p.mappingId
+        AND ph.createDate = (
+            SELECT MAX(ph2.createDate)
+            FROM PriceHistory ph2
+            WHERE ph2.product.mappingId = p.mappingId
+        )
+        AND ph.salePrice >= :min
+    ))
+    AND (:max IS NULL OR EXISTS (
+        SELECT 1 FROM PriceHistory ph
+        WHERE ph.product.mappingId = p.mappingId
+        AND ph.createDate = (
+            SELECT MAX(ph2.createDate)
+            FROM PriceHistory ph2
+            WHERE ph2.product.mappingId = p.mappingId
+        )
+        AND ph.salePrice <= :max
+    ))
+    AND p.active = true
+    AND p.presentId = true
+    AND (:cursor IS NULL OR p.id < :cursor)
+    ORDER BY
+    CASE :sort
+        WHEN 'recent' THEN p.createDate
+        WHEN 'priceAsc' THEN (
+            SELECT MIN(ph.salePrice)
+            FROM PriceHistory ph
+            WHERE ph.product.mappingId = p.mappingId
+            AND ph.createDate = (
+                SELECT MAX(ph2.createDate)
+                FROM PriceHistory ph2
+                WHERE ph2.product.mappingId = p.mappingId
+            )
+        )
+        WHEN 'priceDesc' THEN (
+            SELECT MIN(ph.salePrice)
+            FROM PriceHistory ph
+            WHERE ph.product.mappingId = p.mappingId
+            AND ph.createDate = (
+                SELECT MAX(ph2.createDate)
+                FROM PriceHistory ph2
+                WHERE ph2.product.mappingId = p.mappingId
+            )
+        )
+        ELSE COALESCE(p.viewCount, 0)
+    END DESC,
+    CASE WHEN :sort = 'priceAsc' THEN 1 ELSE 0 END ASC,
+    p.id DESC
+    """)
+    List<Product> searchProducts(
+            @Param("gender") Long gender,
+            @Param("cat") List<Long> cat,
+            @Param("brand") List<Long> brand,
+            @Param("min") Integer min,
+            @Param("max") Integer max,
+            @Param("cursor") Long cursor,
+            @Param("sort") String sort,
+            Pageable pageable
+    );
+
+    @Query("SELECT COUNT(DISTINCT p) FROM Product p " +
+            "LEFT JOIN p.category c " +
+            "LEFT JOIN p.brand b " +
+            "WHERE (:gender IS NULL OR c.parent.parent.id = :gender) " +
+            "AND (:cat IS NULL OR c.id IN :cat) " +
+            "AND (:brand IS NULL OR b.id IN :brand) " +
+            "AND (:min IS NULL OR EXISTS (SELECT 1 FROM PriceHistory ph WHERE ph.product.mappingId = p.mappingId AND ph.salePrice >= :min)) " +
+            "AND (:max IS NULL OR EXISTS (SELECT 1 FROM PriceHistory ph WHERE ph.product.mappingId = p.mappingId AND ph.salePrice <= :max)) " +
+            "AND p.active = true " +
+            "AND p.presentId = true")
+    Long countSearchResults(
+            @Param("gender") Long gender,
+            @Param("cat") List<Long> cat,
+            @Param("brand") List<Long> brand,
+            @Param("min") Integer min,
+            @Param("max") Integer max
+    );
 }

@@ -44,10 +44,7 @@ const previewImage = (event) => {
 const handleSubmit = async () => {
     try {
         // 데이터 유효성 검사
-        if (!brand.value.korName || !brand.value.engName || !brand.value.url || !brand.value.description) {
-            alert('모든 필드를 채워주세요!');
-            return;
-        }
+        
 
         const formData = new FormData();
 
@@ -59,6 +56,12 @@ const handleSubmit = async () => {
             active: brand.value.active,
             description: brand.value.description
         }));
+
+        // formData.append("korName", brand.value.korName);
+        // formData.append("engName", brand.value.engName);
+        // formData.append("active", brand.value.active);
+        // formData.append("url", brand.value.url);
+        // formData.append("description", brand.value.description);
 
         // 파일이 있는 경우 FormData에 추가
         if (brand.value.fileUpload) {
@@ -156,7 +159,7 @@ const handleCancel = resetForm;
                             </div>
                             <div class="file-upload">
                                 <label for="fileUpload">이미지 추가</label>
-                                <input type="file" id="fileUpload" @change="previewImage" accept="image/*">
+                                <input type="file" id="fileUpload" @change="previewImage" accept="image/*" required>
                             </div>
                             <div class="image-preview" id="imagePreview">
                                 <img v-if="imageUrl" :src="imageUrl" alt="미리보기 이미지">

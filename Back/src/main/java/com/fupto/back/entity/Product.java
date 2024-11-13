@@ -2,6 +2,7 @@ package com.fupto.back.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fupto.back.entity.Favorite;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -48,6 +49,10 @@ public class Product {
     @Column(name = "state")
     private Boolean state;
 
+    @Column(name = "view_count")
+    @Builder.Default
+    private Long viewCount = 0L;
+
     @ColumnDefault("current_timestamp()")
     @Column(name = "create_date", insertable = false, updatable = false)
     private Instant createDate;
@@ -78,4 +83,13 @@ public class Product {
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<ProductImage> productImages;
+
+    public void increaseViewCount() {
+        this.viewCount += 1;
+    }
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Favorite> favorites;
+
 }

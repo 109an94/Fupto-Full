@@ -1,21 +1,32 @@
 package com.fupto.back.admin.board.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fupto.back.entity.Board;
+import lombok.*;
 
-import java.util.List;
+import java.time.Instant;
 
+@Getter
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class BoardResponseDto {
-    private long totalCount;
-    private long totalPages;
-    private boolean nextPage;
-    private boolean prevPage;
-    private List<Long> pages;
-    private List<BoardListDto> boards;
+    private Long id;
+    private String title;
+    private String contents;
+    private Boolean active;
+    private Instant createdAt;
+    private Instant modifiedAt;
+    private Long boardCategoryId;
+
+    public BoardResponseDto(Board board) {
+        this.id = board.getId();
+        this.title = board.getTitle();
+        this.contents = board.getContents();
+        this.active = board.getActive();
+        this.createdAt = board.getCreatedAt();
+        this.modifiedAt = board.getModifiedAt();
+        this.boardCategoryId= board.getBoardCategory().getId();
+    }
+
 }

@@ -1,54 +1,60 @@
 package com.fupto.back.admin.board.controller;
 
-import com.fupto.back.admin.board.dto.BoardResponseDto;
-import com.fupto.back.admin.board.dto.BoardSearchDto;
+import com.fupto.back.admin.board.dto.*;
 import com.fupto.back.admin.board.service.BoardService;
-import com.fupto.back.repository.BoardRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
 @RestController
+//@RequiredArgsConstructor
 @RequestMapping("admin/boards")
 public class BoardController {
 
-    private final BoardRepository boardRepository;
-    private BoardService boardService;
+    private final BoardService boardService;
 
-    public BoardController(BoardService boardService, BoardRepository boardRepository) {
+    public BoardController(BoardService boardService) {
         this.boardService = boardService;
-        this.boardRepository = boardRepository;
     }
 
-//     등록
-//    @PostMapping("/reg")
-//    public ResponseEntity<BoardListDto> create(
-//            @RequestBody BoardListDto boardListDto) {
-//        System.out.println(boardListDto);
-//        return ResponseEntity.ok(boardService.create(boardListDto));
-//    }
-
-    // 목록 - 페이징
-
+    // 게시물 조회
     @GetMapping("/list")
-    public ResponseEntity<BoardResponseDto> getList(
-            @ModelAttribute BoardSearchDto searchDto
-            ) {
-        if(searchDto.getPage() == null || searchDto.getPage() < 1) {
-            searchDto.setPage(1);
-        }
-        return ResponseEntity.ok(boardService.getList(searchDto));
+    public List<BoardListDto> getList() {
+        return boardService.getList();
     }
-}
 
-    //삭제
-//    @DeleteMapping
-//    public void deleteById(Long id) {
-//        boardService.delete(id);
-//    }
+
+    // 게시글 등록
+    @PostMapping("/post")
+    public ResponseEntity<BoardListDto> createPost( @RequestBody BoardListDto boardListDto){
+
+        BoardListDto createBoard = boardService.createPost(boardListDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(createBoard);
+    }
+
+
+    // 선택한 게시글 조회
+    @GetMapping("{id}")
+    public ResponseEntity<BoardDetailDto> getBoardById(@PathVariable Long id) {
+        return ResponseEntity.ok(boardService.getBoardById(id));
+    }
+
+    // 선택한 게시글 수정
+    @PutMapping("/{id}")
+    public BoardResponseDto updatePost(@PathVariable Long id, @RequestBody BoardRequestsDto requestsDto) throws Exception {
+        return boardService.updatePost(id, requestsDto);
+    }
+
+    // 선택한 게시글 삭제
+    @DeleteMapping("{id}")
+    public SuccessResponseDto deletePost(@PathVariable Long id, @RequestBody BoardRequestsDto requestsDto) throws Exception {
+        return boardService.deletePost(id,requestsDto);
+    }
+
+}
 
 
 

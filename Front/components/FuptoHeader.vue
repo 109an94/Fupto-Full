@@ -4,8 +4,8 @@
       <h1 class="main-nav_title"><NuxtLink to="/">FUPTO</NuxtLink></h1>
       <ul class="main-nav-list">
         <li class="main-nav_link">
-          <a href="#">여성</a>
-          <NuxtLink to="/products/list">남성</NuxtLink>
+          <NuxtLink to="/products?gender=2">여성</NuxtLink>
+          <NuxtLink to="/products?gender=1">남성</NuxtLink>
         </li>
         <li class="main-nav_link">
           <a href="#">브랜드</a>

@@ -38,6 +38,7 @@ public class BrandController {
             System.out.println(file.getOriginalFilename());
             ObjectMapper objectMapper = new ObjectMapper();
             BrandCreateDto brandCreateDto = objectMapper.readValue(brandDataJson, BrandCreateDto.class);
+            System.out.println(brandCreateDto.toString());
             BrandListDto createdBrand = brandService.createBrand(brandCreateDto, file);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdBrand);
         } catch (Exception e) {

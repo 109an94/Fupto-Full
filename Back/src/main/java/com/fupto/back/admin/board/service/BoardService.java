@@ -1,23 +1,30 @@
 package com.fupto.back.admin.board.service;
 
-import com.fupto.back.admin.board.dto.BoardResponseDto;
-import com.fupto.back.admin.board.dto.BoardSearchDto;
+import com.fupto.back.admin.board.dto.*;
 
 import java.util.List;
 
 
 public interface BoardService {
 
-//    BoardListDto create(BoardListDto boardListDto);
 
-//    void delete(Long id);
+    // 전체 조회
+    List<BoardListDto> getList();
+//    List<BoardResponseDto> getList();
 
-//    BoardResponseDto getList(int page);
+    // id 조회
+    BoardDetailDto getBoardById(Long id);
+//    BoardResponseDto getPost(Long id);
 
-//    List<Board> getList();
-//    List<BoardListDto> findAllBoards();
+    // 등록
+    BoardListDto createPost(BoardListDto boardListDto);
+//    BoardResponseDto createPost(BoardRequestsDto requestsDto);
 
-    BoardResponseDto getList(BoardSearchDto searchDto);
+    // 수정
+    BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception;
 
-    BoardResponseDto getList(Integer page, String korName, List<Long> categoryIds);
+    // 삭제
+    SuccessResponseDto deletePost(Long id, BoardRequestsDto requestsDto) throws Exception;
+
+
 }
