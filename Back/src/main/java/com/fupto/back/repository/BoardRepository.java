@@ -15,6 +15,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     @Query("select b from Board b where b.regMember.id = :id")
     List<Board> findByRegMemberId(Long id);
 
+
     List<Board> findAllByOrderByModifiedAtDesc();
 
     void deleteById(Long id);

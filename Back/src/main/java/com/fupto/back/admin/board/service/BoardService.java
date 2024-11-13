@@ -1,21 +1,29 @@
 package com.fupto.back.admin.board.service;
 
-import com.fupto.back.admin.board.dto.BoardRequestsDto;
-import com.fupto.back.admin.board.dto.BoardResponseDto;
-import com.fupto.back.admin.board.dto.SuccessResponseDto;
+import com.fupto.back.admin.board.dto.*;
 
 import java.util.List;
 
 
 public interface BoardService {
 
-    List<BoardResponseDto> getList();
 
+    // 전체 조회
+    List<BoardListDto> getList();
+//    List<BoardResponseDto> getList();
+
+    // id 조회
+    BoardDetailDto getBoardById(Long id);
+//    BoardResponseDto getPost(Long id);
+
+    // 등록
     BoardResponseDto createPost(BoardRequestsDto requestsDto);
 
-    BoardResponseDto getPost(Long id);
+    // 수정
+//    BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception;
 
-    BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception;
-
+    // 삭제
     SuccessResponseDto deletePost(Long id, BoardRequestsDto requestsDto) throws Exception;
+
+
 }
