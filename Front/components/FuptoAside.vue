@@ -5,7 +5,9 @@ useHead({
   link: [{ rel: "stylesheet", href: "/css/aside.css" }],
 });
 
-// props로 초기 성별 받기
+const route = useRoute();
+const emit = defineEmits(["filter-change", "search"]);
+
 const props = defineProps({
   initialGender: {
     type: String,
@@ -19,9 +21,11 @@ const selectedGender = ref(props.initialGender);
 const toggleGender = async (gender) => {
   selectedGender.value = gender;
   const genderId = gender === "male" ? "1" : "2";
+  emit("filter-change", { gender: genderId });
   await loadSecondCategories(genderId);
   await loadBrands();
 };
+
 /*카테고리 관련*/
 const categories = ref([]);
 
@@ -43,10 +47,15 @@ const loadSecondCategories = async (genderId) => {
       isExpanded: false,
       subCategories: [{ id: `${category.id}-all`, name: "All", checked: true }],
     }));
+
+    // URL에서 선택된 카테고리 복원
+    if (route.query.cat) {
+      const selectedCatIds = route.query.cat.split(",");
+      await restoreSelectedCategories(selectedCatIds);
+    }
   }
 };
 
-// 3차 카테고리 로드 (2차 카테고리 클릭시)
 const loadThirdCategories = async (category) => {
   const config = useRuntimeConfig();
   const { data } = await useFetch("/products/categories", {
@@ -66,17 +75,17 @@ const loadThirdCategories = async (category) => {
   }
 };
 
-// 기존 toggleCategory 함수 수정
 const toggleCategory = async (category) => {
   category.isExpanded = category.checked;
   if (category.checked && category.subCategories.length === 1) {
     await loadThirdCategories(category);
   }
+  emitFilterChange();
 };
 
-// handleSubCategoryChange는 기존 그대로 유지
 const handleSubCategoryChange = (category, subCategory) => {
   if (subCategory.id.endsWith("-all")) {
+    // All 선택 시
     if (subCategory.checked) {
       category.subCategories.forEach((sub) => {
         if (sub.id !== subCategory.id) {
@@ -85,14 +94,32 @@ const handleSubCategoryChange = (category, subCategory) => {
       });
     }
   } else {
+    // 일반 항목 선택 시 All 버튼 무조건 해제
     const allButton = category.subCategories.find((sub) => sub.id.endsWith("-all"));
-    if (allButton) {
+    if (allButton && allButton.checked) {
       allButton.checked = false;
     }
   }
+  emitFilterChange();
 };
 
-// clearAll도 기존 그대로 유지
+const getSelectedCategories = () => {
+  const selectedCats = [];
+  categories.value.forEach((category) => {
+    if (category.subCategories) {
+      category.subCategories.forEach((subCat) => {
+        if (subCat.checked && !subCat.id.endsWith("-all")) {
+          selectedCats.push({
+            id: subCat.id,
+            name: subCat.name,
+          });
+        }
+      });
+    }
+  });
+  return selectedCats;
+};
+
 const clearAll = () => {
   categories.value.forEach((category) => {
     category.checked = false;
@@ -101,13 +128,13 @@ const clearAll = () => {
       sub.checked = index === 0;
     });
   });
+  emitFilterChange();
 };
 
 /*브랜드 관련*/
 const searchQuery = ref("");
 const brands = ref([]);
 
-// 브랜드 로드
 const loadBrands = async () => {
   const config = useRuntimeConfig();
   const { data } = await useFetch("/products/brands", {
@@ -116,34 +143,122 @@ const loadBrands = async () => {
 
   if (data.value) {
     brands.value = data.value.map((brand) => ({
-      id: brand.id,
+      id: `brand-${brand.id}`, // 브랜드 ID에 접두사 추가
+      originalId: brand.id, // 원본 ID 저장
       name: `${brand.engName}(${brand.korName})`,
       checked: false,
     }));
+
+    // URL에서 선택된 브랜드 복원
+    if (route.query.brand) {
+      const selectedBrandIds = route.query.brand.split(",");
+      brands.value.forEach((brand) => {
+        brand.checked = selectedBrandIds.includes(brand.originalId.toString());
+      });
+    }
   }
 };
 
-// filteredBrands는 기존 그대로 유지
 const filteredBrands = computed(() => {
   return brands.value.filter((brand) => brand.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
 });
 
-// clearBrands도 기존 그대로 유지
+const getSelectedBrands = () => {
+  return brands.value
+    .filter((brand) => brand.checked)
+    .map((brand) => ({
+      id: brand.originalId,
+      name: brand.name,
+    }));
+};
+
 const clearBrands = () => {
   brands.value.forEach((brand) => (brand.checked = false));
   searchQuery.value = "";
+  emitFilterChange();
 };
 
-/*가격 관련 - 기존 그대로 유지*/
+/*가격 관련*/
 const minPrice = ref("");
 const maxPrice = ref("");
 
 const clearPriceRange = () => {
   minPrice.value = "";
   maxPrice.value = "";
+  emitFilterChange();
 };
 
-// URL의 gender 파라미터 감지하여 성별 설정
+// 필터 변경 이벤트 발생
+const emitFilterChange = () => {
+  const filterData = {
+    cat: getSelectedCategories(),
+    brand: getSelectedBrands(),
+    min: minPrice.value || undefined,
+    max: maxPrice.value || undefined,
+  };
+  emit("filter-change", filterData);
+};
+
+// 검색 버튼 클릭
+const handleSearch = () => {
+  emit("search", {
+    cat: getSelectedCategories(),
+    brand: getSelectedBrands(),
+    min: minPrice.value || null,
+    max: maxPrice.value || null,
+  });
+};
+
+// List 컴포넌트로부터의 필터 상태 업데이트 메서드
+defineExpose({
+  updateFilterState(data) {
+    if (data.type === "brand") {
+      const brand = brands.value.find((b) => b.originalId === data.id);
+      if (brand) {
+        brand.checked = data.checked;
+        emitFilterChange();
+      }
+    } else if (data.type === "cat") {
+      categories.value.forEach((category) => {
+        category.subCategories.forEach((subCat) => {
+          if (subCat.id === data.id) {
+            subCat.checked = data.checked;
+            // All 버튼 상태 체크
+            const hasCheckedItems = category.subCategories.some((sub) => !sub.id.endsWith("-all") && sub.checked);
+            const allButton = category.subCategories.find((sub) => sub.id.endsWith("-all"));
+            if (allButton) {
+              allButton.checked = !hasCheckedItems;
+            }
+            emitFilterChange();
+          }
+        });
+      });
+    }
+  },
+});
+
+// 선택된 카테고리 상태 복원
+const restoreSelectedCategories = async (selectedCatIds) => {
+  for (const category of categories.value) {
+    const hasSelectedSubCategory = category.subCategories.some((sub) => selectedCatIds.includes(sub.id.toString()));
+    if (hasSelectedSubCategory) {
+      category.checked = true;
+      category.isExpanded = true;
+      await loadThirdCategories(category);
+    }
+  }
+};
+
+// URL query 변경 감지
+watch(
+  () => route.query,
+  () => {
+    emitFilterChange();
+  },
+  { deep: true }
+);
+
+// 초기 로드
 watch(
   () => props.initialGender,
   (newGender) => {
@@ -155,14 +270,6 @@ watch(
   },
   { immediate: true }
 );
-
-// 초기 데이터 로드
-onMounted(async () => {
-  if (props.initialGender) {
-    await loadSecondCategories(props.initialGender);
-    await loadBrands();
-  }
-});
 </script>
 
 <template>
@@ -268,7 +375,7 @@ onMounted(async () => {
         </div>
       </section>
 
-      <button class="search-button">검 색</button>
+      <button class="search-button" @click="handleSearch">검 색</button>
     </div>
   </aside>
 </template>
