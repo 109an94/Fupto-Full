@@ -2,8 +2,10 @@ package com.fupto.back.admin.member.service;
 
 import com.fupto.back.admin.member.dto.*;
 import com.fupto.back.entity.Board;
+import com.fupto.back.entity.Favorite;
 import com.fupto.back.entity.Member;
 import com.fupto.back.repository.BoardRepository;
+import com.fupto.back.repository.FavoriteRepository;
 import com.fupto.back.repository.MemberRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -28,11 +30,13 @@ public class DefaultMemberService implements MemberService{
     private final MemberRepository memberRepository;
     private final ModelMapper modelMapper;
     private final BoardRepository boardRepository;
+    private final FavoriteRepository favoriteRepository;
 
-    public DefaultMemberService(MemberRepository memberRepository, ModelMapper modelMapper, BoardRepository boardRepository) {
+    public DefaultMemberService(MemberRepository memberRepository, ModelMapper modelMapper, BoardRepository boardRepository, FavoriteRepository favoriteRepository) {
         this.memberRepository = memberRepository;
         this.modelMapper = modelMapper;
         this.boardRepository = boardRepository;
+        this.favoriteRepository = favoriteRepository;
     }
 
     @Override
@@ -81,12 +85,12 @@ public class DefaultMemberService implements MemberService{
         String dateTypef = (dateType != null && !dateType.isEmpty()) ? dateType :"regDate";
         Instant startDateI = (startDate == null)?null
                 :LocalDate.parse(startDate)
-                .atStartOfDay(ZoneId.of("UTC"))
+                .atStartOfDay(ZoneId.of("Asia/Seoul"))
                 .toInstant();
         Instant endDateI = (endDate == null)?null
                 :LocalDate.parse(endDate)
                 .atTime(LocalTime.MAX)
-                .atZone(ZoneId.of("UTC"))
+                .atZone(ZoneId.of("Asia/Seoul"))
                 .toInstant();
         Page<Member> memberPage = memberRepository.searchMember(memberTypef, genderf, userId, nickname, email, dateTypef,startDateI,endDateI ,pageable);
 
@@ -144,7 +148,9 @@ public class DefaultMemberService implements MemberService{
 
         MemberDetailDto memberDetail = modelMapper.map(member, MemberDetailDto.class);
         List<Board> boards = boardRepository.findByRegMemberId(id);
+        List<Favorite> favorites = favoriteRepository.findAllByMemberId(id);
         System.out.println(boards);
+        System.out.println(favorites);
 
         List<BoardListDto> boardListDtos = boards.stream()
                 .map(this::getBoard)
@@ -153,6 +159,13 @@ public class DefaultMemberService implements MemberService{
         memberDetail.setBoardCount(boardListDtos.size());
         memberDetail.setBoardList(boardListDtos);
         System.out.println(boardListDtos.size());
+
+        List<FavoriteListDto> favoriteListDtos = favorites.stream()
+                .map(this::getFavorite)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        memberDetail.setFavoriteCount(favoriteListDtos.size());
+        memberDetail.setFavoriteList(favoriteListDtos);
 
         return memberDetail;
     }
@@ -165,6 +178,22 @@ public class DefaultMemberService implements MemberService{
         dto.setId(board.getId());
         dto.setTitle(board.getTitle());
 //        dto.setDate(board.getDate());
+
+        return dto;
+    }
+
+    private FavoriteListDto getFavorite (Favorite favorite){
+        if (favorite == null){
+            return null;
+        }
+
+        FavoriteListDto dto = new FavoriteListDto();
+        dto.setId(favorite.getId());
+        dto.setProductId(favorite.getProduct().getId());
+        dto.setProductName(favorite.getProduct().getProductName());
+        dto.setMemberId(favorite.getMember().getId());
+        dto.setMemberName(favorite.getMember().getNickname());
+        dto.setCreateDate(favorite.getCreateDate());
 
         return dto;
     }
