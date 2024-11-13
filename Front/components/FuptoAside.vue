@@ -273,109 +273,115 @@ watch(
 </script>
 
 <template>
-  <aside class="filter-sidebar">
-    <h1 style="display: none">사이드바</h1>
-    <div>
-      <section>
-        <h1 class="filter-list h1-style">성별</h1>
-        <div class="gender-buttons">
-          <button
-            class="gender-button"
-            :class="{ 'gender-button-active': selectedGender === 'female' }"
-            @click="toggleGender('female')"
-          >
-            여성
-          </button>
-          <button
-            class="gender-button"
-            :class="{ 'gender-button-active': selectedGender === 'male' }"
-            @click="toggleGender('male')"
-          >
-            남성
-          </button>
-        </div>
-      </section>
+  <client-only>
+    <aside class="filter-sidebar">
+      <h1 style="display: none">사이드바</h1>
+      <div>
+        <section>
+          <h1 class="filter-list h1-style">성별</h1>
+          <div class="gender-buttons">
+            <button
+              class="gender-button"
+              :class="{ 'gender-button-active': selectedGender === 'female' }"
+              @click="toggleGender('female')"
+            >
+              여성
+            </button>
+            <button
+              class="gender-button"
+              :class="{ 'gender-button-active': selectedGender === 'male' }"
+              @click="toggleGender('male')"
+            >
+              남성
+            </button>
+          </div>
+        </section>
 
-      <section>
-        <header class="filter-list">
-          <h1 class="h1-style">카테고리</h1>
-          <span class="clear-button" @click="clearAll">Clear</span>
-        </header>
-        <ul class="category-list">
-          <li v-for="category in categories" :key="category.id" class="category-item">
-            <div class="category-item-content">
-              <input type="checkbox" :id="category.id" v-model="category.checked" @change="toggleCategory(category)" />
-              <label :for="category.id">{{ category.name }}</label>
-              <img class="icon-down" :src="category.isExpanded ? '/imgs/icon/up.svg' : '/imgs/icon/down.svg'" alt="direc-icon" />
-            </div>
-            <div v-if="category.isExpanded" class="category-items">
-              <div class="aside-category-list">
-                <template v-for="subCategory in category.subCategories" :key="subCategory.id">
-                  <input
-                    type="checkbox"
-                    name="category"
-                    :id="subCategory.id"
-                    class="aside-category-input"
-                    v-model="subCategory.checked"
-                    @change="handleSubCategoryChange(category, subCategory)"
-                  />
-                  <label :for="subCategory.id" class="aside-category-label">
-                    {{ subCategory.name }}
-                  </label>
-                </template>
+        <section>
+          <header class="filter-list">
+            <h1 class="h1-style">카테고리</h1>
+            <span class="clear-button" @click="clearAll">Clear</span>
+          </header>
+          <ul class="category-list">
+            <li v-for="category in categories" :key="category.id" class="category-item">
+              <div class="category-item-content">
+                <input type="checkbox" :id="category.id" v-model="category.checked" @change="toggleCategory(category)" />
+                <label :for="category.id">{{ category.name }}</label>
+                <img
+                  class="icon-down"
+                  :src="category.isExpanded ? '/imgs/icon/up.svg' : '/imgs/icon/down.svg'"
+                  alt="direc-icon"
+                />
               </div>
+              <div v-if="category.isExpanded" class="category-items">
+                <div class="aside-category-list">
+                  <template v-for="subCategory in category.subCategories" :key="subCategory.id">
+                    <input
+                      type="checkbox"
+                      name="category"
+                      :id="subCategory.id"
+                      class="aside-category-input"
+                      v-model="subCategory.checked"
+                      @change="handleSubCategoryChange(category, subCategory)"
+                    />
+                    <label :for="subCategory.id" class="aside-category-label">
+                      {{ subCategory.name }}
+                    </label>
+                  </template>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <header class="filter-list">
+            <h1 class="h1-style">브랜드</h1>
+            <span class="clear-button" @click="clearBrands">Clear</span>
+          </header>
+          <div>
+            <input type="text" v-model="searchQuery" placeholder="브랜드 검색" class="aside-brand-search-input" />
+          </div>
+          <div class="aside-brand-list">
+            <div v-for="brand in filteredBrands" :key="brand.id" class="aside-brand-item">
+              <input type="checkbox" :id="brand.id" v-model="brand.checked" />
+              <label :for="brand.id">{{ brand.name }}</label>
             </div>
-          </li>
-        </ul>
-      </section>
-
-      <section>
-        <header class="filter-list">
-          <h1 class="h1-style">브랜드</h1>
-          <span class="clear-button" @click="clearBrands">Clear</span>
-        </header>
-        <div>
-          <input type="text" v-model="searchQuery" placeholder="브랜드 검색" class="aside-brand-search-input" />
-        </div>
-        <div class="aside-brand-list">
-          <div v-for="brand in filteredBrands" :key="brand.id" class="aside-brand-item">
-            <input type="checkbox" :id="brand.id" v-model="brand.checked" />
-            <label :for="brand.id">{{ brand.name }}</label>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section>
-        <header class="filter-list">
-          <h1 class="h1-style">가격</h1>
-          <span class="clear-button" @click="clearPriceRange">Clear</span>
-        </header>
-        <div class="price-range">
-          <div class="price-input">
-            <span class="currency">₩</span>
-            <input
-              type="number"
-              v-model="minPrice"
-              placeholder="최소"
-              max="99999999"
-              oninput="javascript: if (this.value.length > 8) this.value = this.value.slice(0, 8);"
-            />
+        <section>
+          <header class="filter-list">
+            <h1 class="h1-style">가격</h1>
+            <span class="clear-button" @click="clearPriceRange">Clear</span>
+          </header>
+          <div class="price-range">
+            <div class="price-input">
+              <span class="currency">₩</span>
+              <input
+                type="number"
+                v-model="minPrice"
+                placeholder="최소"
+                max="99999999"
+                oninput="javascript: if (this.value.length > 8) this.value = this.value.slice(0, 8);"
+              />
+            </div>
+            <span class="price-separator">-</span>
+            <div class="price-input">
+              <span class="currency">₩</span>
+              <input
+                type="number"
+                v-model="maxPrice"
+                placeholder="최대"
+                max="99999999"
+                oninput="javascript: if (this.value.length > 8) this.value = this.value.slice(0, 8);"
+              />
+            </div>
           </div>
-          <span class="price-separator">-</span>
-          <div class="price-input">
-            <span class="currency">₩</span>
-            <input
-              type="number"
-              v-model="maxPrice"
-              placeholder="최대"
-              max="99999999"
-              oninput="javascript: if (this.value.length > 8) this.value = this.value.slice(0, 8);"
-            />
-          </div>
-        </div>
-      </section>
+        </section>
 
-      <button class="search-button" @click="handleSearch">검 색</button>
-    </div>
-  </aside>
+        <button class="search-button" @click="handleSearch">검 색</button>
+      </div>
+    </aside>
+  </client-only>
 </template>

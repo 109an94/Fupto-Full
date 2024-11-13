@@ -225,38 +225,47 @@ onUnmounted(() => {
         <section class="product-p-frame">
           <div class="user-product-list">
             <ul class="product-grid">
-              <li
-                v-for="(product, index) in products"
-                :key="product.id"
-                class="product-c-frame"
-                :ref="
-                  index === products.length - 1
-                    ? (el) => {
-                        lastProductRef = el;
-                      }
-                    : undefined
-                "
-              >
-                <a href="#">
-                  <div class="product-img-frame">
-                    <div class="product-img-container">
-                      <img class="product-images primary-img" :src="product.mainImageUrl" alt="product-img" />
-                      <img class="product-images secondary-img" :src="product.hoverImageUrl" alt="product-img-hover" />
+              <template v-if="products.length > 0">
+                <li
+                  v-for="(product, index) in products"
+                  :key="product.id"
+                  class="product-c-frame"
+                  :ref="
+                    index === products.length - 1
+                      ? (el) => {
+                          lastProductRef = el;
+                        }
+                      : undefined
+                  "
+                >
+                  <a href="#">
+                    <div class="product-img-frame">
+                      <div class="product-img-container">
+                        <img class="product-images primary-img" :src="product.mainImageUrl" alt="product-img" />
+                        <img class="product-images secondary-img" :src="product.hoverImageUrl" alt="product-img-hover" />
+                      </div>
                     </div>
-                  </div>
-                  <div class="product-info">
-                    <span class="product-brand">{{ product.brandEngName }}</span>
-                    <span class="product-name">{{ product.productName }}</span>
-                    <div class="price-info">
-                      <span class="product-price">{{ product.salePrice.toLocaleString() }}</span>
-                      <span class="price-unit">원</span>
+                    <div class="product-info">
+                      <span class="product-brand">{{ product.brandEngName }}</span>
+                      <span class="product-name">{{ product.productName }}</span>
+                      <div class="price-info">
+                        <span class="product-price">{{ product.salePrice.toLocaleString() }}</span>
+                        <span class="price-unit">원</span>
+                      </div>
                     </div>
-                  </div>
-                </a>
-              </li>
+                  </a>
+                </li>
+              </template>
+              <template v-else>
+                <li class="empty-list">
+                  <template v-if="loading">
+                    <div class="loading">Loading...</div>
+                  </template>
+                  <template v-else> 상품이 없습니다. </template>
+                </li>
+              </template>
             </ul>
           </div>
-          <div v-if="loading" class="loading">Loading...</div>
         </section>
       </div>
     </div>
@@ -301,7 +310,6 @@ onUnmounted(() => {
   color: #000;
 }
 
-/* 로딩 인디케이터 */
 .loading {
   display: flex;
   justify-content: center;
@@ -311,7 +319,6 @@ onUnmounted(() => {
   color: #666;
 }
 
-/* 애니메이션이 있는 로딩 인디케이터를 원하시면 이렇게도 가능합니다 */
 .loading::after {
   content: "";
   width: 24px;
@@ -327,5 +334,17 @@ onUnmounted(() => {
   to {
     transform: rotate(360deg);
   }
+}
+
+.empty-list {
+  grid-column: 1 / -1;
+  min-height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #666;
 }
 </style>
