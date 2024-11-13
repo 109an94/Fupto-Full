@@ -15,17 +15,19 @@ public class BoardResponseDto {
     private Long id;
     private String title;
     private String contents;
-    private String author;
+    private Boolean active;
     private Instant createdAt;
     private Instant modifiedAt;
+//    private String boardCategoryName;
 
-    public BoardResponseDto(Board entity) {
-        this.id = entity.getId();
-        this.title = entity.getTitle();
-        this.contents = entity.getContents();
-        this.author = entity.getAuthor();
-        this.createdAt = entity.getCreatedAt();
-        this.modifiedAt = entity.getModifiedAt();
+    public BoardResponseDto(Board board) {
+        this.id = board.getId();
+        this.title = board.getTitle();
+        this.contents = board.getContents();
+        this.active = board.getActive();
+        this.createdAt = board.getCreatedAt();
+        this.modifiedAt = board.getModifiedAt();
+//        this.boardCategoryName= board.getBoardCategory().getName();
     }
 
 }
