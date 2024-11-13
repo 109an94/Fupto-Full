@@ -15,5 +15,5 @@ public class BoardRequestsDto {
    private String contents;
    private Boolean active;
    private String password;
-   private Long boardCategory;
+   private Long boardCategoryId;
 }

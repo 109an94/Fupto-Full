@@ -1,14 +1,16 @@
 package com.fupto.back.admin.board.service;
 
 import com.fupto.back.admin.board.dto.*;
-import com.fupto.back.admin.board.service.BoardService;
 import com.fupto.back.entity.Board;
+import com.fupto.back.entity.BoardCategory;
+import com.fupto.back.entity.Member;
+import com.fupto.back.repository.BoardCategoryRepository;
 import com.fupto.back.repository.BoardRepository;
-import lombok.RequiredArgsConstructor;
+import com.fupto.back.repository.MemberRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -16,11 +18,19 @@ import java.util.List;
 public class DefaultBoardService implements BoardService {
 
     private final BoardRepository boardRepository;
+    private final BoardCategoryRepository boardCategoryRepository;
     private final ModelMapper modelMapper;
+    private final MemberRepository memberRepository;
 
-    public DefaultBoardService(BoardRepository boardRepository, ModelMapper modelMapper) {
+    public DefaultBoardService(BoardRepository boardRepository,
+                               BoardCategoryRepository boardCategoryRepository,
+                               ModelMapper modelMapper,
+                               MemberRepository memberRepository) {
+
         this.boardRepository = boardRepository;
         this.modelMapper = modelMapper;
+        this.boardCategoryRepository = boardCategoryRepository;
+        this.memberRepository = memberRepository;
     }
 
 //    public DefaultBoardService(BoardRepository boardRepository, ModelMapper modelMapper) {
@@ -38,33 +48,38 @@ public class DefaultBoardService implements BoardService {
                 .toList();
         return boardListDtos;
     }
-//    @Override
-//    public List<BoardResponseDto> getList() {
-//        return boardRepository.findAllByOrderByModifiedAtDesc().stream().map(BoardResponseDto::new).toList();
-//    }
-
-
-
 
 // ========== 등록 =========================================================================
     @Override
-    public BoardResponseDto createPost(BoardRequestsDto requestsDto) {
-        return null;
+    public BoardListDto createPost(BoardListDto boardListDto) {
+        // BoardListDto -> Board Entity 변환
+        Board newBoard = modelMapper.map(boardListDto, Board.class);
+
+        // 카테고리
+        Long boardCategoryId = boardListDto.getBoardCategoryId();  // BoardListDto에서 category ID를 가져옴
+        BoardCategory boardCategory = boardCategoryRepository.findById(boardCategoryId)
+                .orElseThrow(() -> new RuntimeException("BoardCategory not found"));
+
+        newBoard.setBoardCategory(boardCategory);
+
+        // 멤버
+
+        Long regMemberId = boardListDto.getRegMemberId();
+        Member member = memberRepository.findById(regMemberId).orElseThrow(() -> new RuntimeException("RegMember not found"));
+
+        newBoard.setRegMember(member);
+
+        // createdAt, updatedAt 값을 설정
+         newBoard.setCreatedAt(Instant.now());
+        // newBoard.setCreatedAt(Instant.now());
+
+        // DB에 게시글 저장
+        Board savedBoard = boardRepository.save(newBoard);
+
+        // 저장된 게시글을 BoardListDto로 변환하여 반환
+        return modelMapper.map(savedBoard, BoardListDto.class);
     }
 
-
-
-
-//    @Override
-//    public BoardResponseDto createPost(BoardRequestsDto requestsDto) {
-//        Board board = new Board();
-//        board.setTitle(requestsDto.getTitle());
-//        board.setContents(requestsDto.getContents());
-//        board.setActive(requestsDto.getActive());  // author 필드에 값 설정
-//        board.setPassword(requestsDto.getPassword());
-//        boardRepository.save(board);
-//        return new BoardResponseDto(board);
-//    }
 
 // ========== id 조회 =========================================================================
     @Override
@@ -78,27 +93,21 @@ public class DefaultBoardService implements BoardService {
         return boardDetailDto;
     }
 
-
-//    @Override
-//    public BoardResponseDto getPost(Long id) {
-//        return boardRepository.findById(id).map(BoardResponseDto::new)
-//                .orElseThrow(() -> new IllegalArgumentException("아이디가 존재하지 않습니다."));
-//    }
-
 // ========== 수정 =========================================================================
-//    @Override
-//    public BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception {
-//        Board board = boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("아이디가 존재하지 않습니다."));
-//        if (!requestsDto.getPassword().equals(board.getPassword()))
-//            throw new Exception("비밀번호가 일치하지 않습니다.");
-//
-//        board.update(requestsDto);
-//        boardRepository.save(board);
-//
-//        return new BoardResponseDto(board);
-//    }
+    @Override
+    public BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception {
+        Board board = boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("아이디가 존재하지 않습니다."));
+        if (!requestsDto.getPassword().equals(board.getPassword()))
+            throw new Exception("비밀번호가 일치하지 않습니다.");
 
-    // 게시글 삭제
+        board.update(requestsDto);
+        boardRepository.save(board);
+
+        return new BoardResponseDto(board);
+    }
+
+
+// ========== 삭제 =========================================================================
     @Override
     public SuccessResponseDto deletePost(Long id, BoardRequestsDto requestsDto) throws Exception {
         Board board = boardRepository.findById(id).orElseThrow(

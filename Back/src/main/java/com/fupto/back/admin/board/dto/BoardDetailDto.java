@@ -17,7 +17,7 @@ public class BoardDetailDto {
 
     private String title;
     private String contents;
-    private String regMemberName;
+    private String regMemberNickName;
     private Instant createdAt;
     private Instant updatedAt;
     private String boardCategoryName;

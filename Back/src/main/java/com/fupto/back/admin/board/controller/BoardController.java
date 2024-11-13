@@ -2,8 +2,7 @@ package com.fupto.back.admin.board.controller;
 
 import com.fupto.back.admin.board.dto.*;
 import com.fupto.back.admin.board.service.BoardService;
-import com.fupto.back.entity.Board;
-import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,22 +26,14 @@ public class BoardController {
     }
 
 
-
     // 게시글 등록
     @PostMapping("/post")
-    public BoardResponseDto createPost(
-            @RequestBody BoardRequestsDto requestsDto
-    ){
+    public ResponseEntity<BoardListDto> createPost( @RequestBody BoardListDto boardListDto){
 
-        return boardService.createPost(requestsDto);
+        BoardListDto createBoard = boardService.createPost(boardListDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(createBoard);
     }
-//    public BoardResponseDto createPost(
-//            @RequestBody BoardRequestsDto requestsDto
-//    ){
-//
-//        return boardService.createPost(requestsDto);
-//    }
-
 
 
     // 선택한 게시글 조회
@@ -51,12 +42,11 @@ public class BoardController {
         return ResponseEntity.ok(boardService.getBoardById(id));
     }
 
-
     // 선택한 게시글 수정
-//    @PutMapping("/{id}")
-//    public BoardResponseDto updatePost(@PathVariable Long id, @RequestBody BoardRequestsDto requestsDto) throws Exception {
-//        return boardService.updatePost(id, requestsDto);
-//    }
+    @PutMapping("/{id}")
+    public BoardResponseDto updatePost(@PathVariable Long id, @RequestBody BoardRequestsDto requestsDto) throws Exception {
+        return boardService.updatePost(id, requestsDto);
+    }
 
     // 선택한 게시글 삭제
     @DeleteMapping("{id}")

@@ -4,7 +4,6 @@ import com.fupto.back.entity.Board;
 import lombok.*;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Getter
 @Data
@@ -18,7 +17,7 @@ public class BoardResponseDto {
     private Boolean active;
     private Instant createdAt;
     private Instant modifiedAt;
-//    private String boardCategoryName;
+    private Long boardCategoryId;
 
     public BoardResponseDto(Board board) {
         this.id = board.getId();
@@ -27,7 +26,7 @@ public class BoardResponseDto {
         this.active = board.getActive();
         this.createdAt = board.getCreatedAt();
         this.modifiedAt = board.getModifiedAt();
-//        this.boardCategoryName= board.getBoardCategory().getName();
+        this.boardCategoryId= board.getBoardCategory().getId();
     }
 
 }

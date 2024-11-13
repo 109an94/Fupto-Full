@@ -16,10 +16,10 @@ public class BoardListDto {
     private String title;
     private String contents;
     private String password;
-    private String regMemberName;
+    private Long regMemberId;
     private Instant createdAt;
     private Instant updatedAt;
-    private String boardCategoryName;
+    private Long boardCategoryId;
     private Boolean active;
 
 }

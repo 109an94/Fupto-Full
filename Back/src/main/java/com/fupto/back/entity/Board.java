@@ -1,11 +1,14 @@
 package com.fupto.back.entity;
 
+import com.fupto.back.admin.board.dto.BoardRequestsDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -26,8 +29,8 @@ public class Board {
     @Column(name = "password", nullable = false, length = 200)
     private String password;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reg_member_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "reg_member_id", nullable = false)
     private Member regMember;
 
     @ColumnDefault("current_timestamp()")
@@ -45,4 +48,21 @@ public class Board {
     @Column(name = "active", nullable = false)
     private Boolean active = false;
 
+    @PrePersist
+    public void onPrePersist() {
+        ZonedDateTime nowInKST = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+//        this.createdAt = nowInKST.toInstant();
+        this.modifiedAt = nowInKST.toInstant();
+    }
+
+
+    public void update(BoardRequestsDto requestsDto) {
+
+        this.title = requestsDto.getTitle();
+        this.contents = requestsDto.getContents();
+        this.password = requestsDto.getPassword();
+        this.modifiedAt = Instant.now();
+
+    }
 }
+
