@@ -42,11 +42,11 @@ public class Member {
     private String email;
 
     @ColumnDefault("current_timestamp()")
-    @Column(name = "create_date", nullable = false)
+    @Column(name = "create_date", insertable = false, updatable = false)
     private Instant createDate;
 
     @ColumnDefault("current_timestamp()")
-    @Column(name = "update_date", nullable = false)
+    @Column(name = "update_date", insertable = false)
     private Instant updateDate;
 
     @Column(name = "user_id", nullable = false, length = 50)
