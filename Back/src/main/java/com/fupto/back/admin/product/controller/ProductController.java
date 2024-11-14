@@ -112,17 +112,17 @@ public class ProductController {
         return ResponseEntity.ok("성공적으로 처리되었습니다.");
     }
 
-    @PatchMapping("{id}/promote")
-    public ResponseEntity<String> promoteAndDelete(@PathVariable("id") Long id) {
-        productService.promoteAndDelete(id);
-        return ResponseEntity.ok("성공적으로 처리되었습니다.");
-    }
-
     @PatchMapping("{id}/active")
     public ResponseEntity<ProductListDto> updateActive(
             @PathVariable("id") Long id,
             @RequestParam Boolean active) {
         return ResponseEntity.ok(productService.updateActive(id, active));
+    }
+
+    @PatchMapping("{id}/promote")
+    public ResponseEntity<String> promoteAndDelete(@PathVariable("id") Long id) {
+        productService.promoteAndDelete(id);
+        return ResponseEntity.ok("성공적으로 처리되었습니다.");
     }
 
     @DeleteMapping("{id}")
