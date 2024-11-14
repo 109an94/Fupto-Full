@@ -1,6 +1,11 @@
 package com.fupto.back.anonymous.product.service;
 
 import com.fupto.back.anonymous.product.dto.*;
+import com.fupto.back.entity.ProductImage;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
 import com.fupto.back.entity.Product;
 import com.fupto.back.repository.*;
@@ -9,6 +14,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -17,6 +26,10 @@ import java.util.Set;
 @Service
 @Transactional(readOnly = true)
 public class DefaultProductService implements ProductService {
+
+    @Value("${file.upload.path}")
+    private String uploadPath;
+
     private ProductRepository productRepository;
     private ProductImageRepository productImageRepository;
     private PriceHistoryRepository priceHistoryRepository;
@@ -150,6 +163,21 @@ public class DefaultProductService implements ProductService {
                         .korName(brand.getKorName())
                         .build())
                 .toList();
+    }
+
+    @Override
+    public Resource getProductImages(Long productId, Integer displayOrder) throws IOException {
+        ProductImage productImage = productImageRepository.findByProductIdAndDisplayOrder(productId, displayOrder)
+                .orElseThrow(() -> new EntityNotFoundException("이미지를 찾을 수 없습니다."));
+
+        Path imagePath = Paths.get(uploadPath, productImage.getFilePath());
+        Resource resource = new FileSystemResource(imagePath.toFile());
+
+        if (!resource.exists()) {
+            throw new FileNotFoundException("이미지 파일을 찾을 수 없습니다.");
+        }
+
+        return resource;
     }
 
     private void validateSort(String sort) {
