@@ -72,6 +72,7 @@
   border-color: var(--color-text-unselected);
 }
 
+/* 카테고리 관련 */
 .category-list {
   list-style-type: none;
   padding: 0;
@@ -81,10 +82,11 @@
 .category-item input[type="checkbox"] {
   margin-right: 20px;
   appearance: none;
-  width: 10px;
-  height: 10px;
+  width: 13px;
+  height: 13px;
   border: 1px solid var(--color-ui-backgroundb);
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .category-item.active input[type="checkbox"] {
@@ -173,15 +175,17 @@
   display: flex;
   align-items: center;
   padding: 7px 0;
+  width: 100%;
 }
 
 .aside-brand-item input[type="checkbox"] {
   margin-right: 20px;
   appearance: none;
-  width: 10px;
-  height: 10px;
+  width: 13px;
+  height: 13px;
   border: 1px solid var(--color-ui-backgroundb);
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .aside-brand-item input[type="checkbox"]:checked {
@@ -192,9 +196,17 @@
   font-size: 14px;
   color: var(--color-text-unselected);
   cursor: pointer;
+  word-break: break-all;
+  flex: 1;
 }
 
 /*가격 관련*/
+.price-error {
+  color: red;
+  font-size: 0.9em;
+  margin-top: 0.5rem;
+}
+
 .price-range {
   display: flex;
   align-items: center;
