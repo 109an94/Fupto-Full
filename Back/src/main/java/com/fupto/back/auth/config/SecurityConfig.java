@@ -70,7 +70,7 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         UserDetails user1 = User.builder()
                 .username("newlec")
-                .password("{noop}111")
+                .password(passwordEncoder().encode("111"))
                 .roles("MEMBER", "ADMIN")
                 .build();
 

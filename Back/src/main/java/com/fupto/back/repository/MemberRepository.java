@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
     List<Member> findAll();
-
+    Member findByUserId(String userId);
 
     @Query("select m from Member m " +
             "where" +
