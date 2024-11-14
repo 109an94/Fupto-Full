@@ -38,26 +38,37 @@ const selectedFilters = ref({
 });
 
 // URL 쿼리 파라미터 업데이트
-const updateQueryParams = (newParams) => {
-  const updatedQuery = {};
+const updateQueryParams = async (newParams) => {
+  // async 추가
+  const updatedQuery = { ...route.query };
 
-  // gender 파라미터 처리 추가
   if (newParams.gender) {
     updatedQuery.gender = newParams.gender;
-  } else {
-    updatedQuery.gender = route.query.gender; // 기존 gender 유지
   }
 
+  // 카테고리 처리
   if (newParams.cat?.length) {
     updatedQuery.cat = newParams.cat.map((c) => c.id).join(",");
+  } else {
+    delete updatedQuery.cat;
   }
+
+  // 브랜드 처리
   if (newParams.brand?.length) {
     updatedQuery.brand = newParams.brand.map((b) => b.id).join(",");
+  } else {
+    delete updatedQuery.brand;
   }
-  if (newParams.min) updatedQuery.min = newParams.min;
-  if (newParams.max) updatedQuery.max = newParams.max;
 
-  router.replace({
+  // 가격 범위 처리
+  if (newParams.min) updatedQuery.min = newParams.min;
+  else delete updatedQuery.min;
+
+  if (newParams.max) updatedQuery.max = newParams.max;
+  else delete updatedQuery.max;
+
+  await router.replace({
+    // await 추가
     path: route.path,
     query: updatedQuery,
   });
@@ -68,12 +79,45 @@ const handleFilterChange = (filterData) => {
   updateQueryParams(filterData);
 };
 
-// 필터 태그 제거
 const removeFilter = async (type, id) => {
   selectedFilters.value[type] = selectedFilters.value[type].filter((item) => item.id !== id);
-  // Aside 컴포넌트의 상태도 업데이트
+
+  // aside 컴포넌트 상태 업데이트
   await asideRef.value?.updateFilterState({ type, id, checked: false });
-  // 자동으로 검색 실행
+
+  // 현재 남아있는 필터 상태로 검색 실행
+  const filterData = {
+    gender: route.query.gender, // gender 유지
+    cat: selectedFilters.value.cat, // 현재 선택된 카테고리
+    brand: selectedFilters.value.brand, // 현재 선택된 브랜드
+    min: route.query.min, // 가격 범위 유지
+    max: route.query.max,
+  };
+
+  // 쿼리 파라미터 직접 업데이트
+  const updatedQuery = { ...route.query }; // 현재 쿼리 복사
+
+  // 카테고리 처리
+  if (filterData.cat?.length) {
+    updatedQuery.cat = filterData.cat.map((c) => c.id).join(",");
+  } else {
+    delete updatedQuery.cat;
+  }
+
+  // 브랜드 처리
+  if (filterData.brand?.length) {
+    updatedQuery.brand = filterData.brand.map((b) => b.id).join(",");
+  } else {
+    delete updatedQuery.brand;
+  }
+
+  // 라우터 업데이트
+  await router.replace({
+    path: route.path,
+    query: updatedQuery,
+  });
+
+  // 상품 검색 실행
   loadProducts(true);
 };
 
@@ -122,13 +166,32 @@ const loadProducts = async (reset = false) => {
 };
 
 // 검색 버튼 클릭 처리
-const handleSearch = (searchParams) => {
+const handleSearch = async (searchParams) => {
+  // async 추가
+  // 선택된 필터 상태 업데이트
   selectedFilters.value = {
     cat: searchParams.cat || [],
     brand: searchParams.brand || [],
   };
-  updateQueryParams(searchParams);
-  loadProducts(true);
+
+  // 가격도 selectedFilters에 포함
+  if (searchParams.min || searchParams.max) {
+    selectedFilters.value.min = searchParams.min;
+    selectedFilters.value.max = searchParams.max;
+  }
+
+  // 쿼리 파라미터 업데이트 및 상품 검색 - 한번에 처리
+  const queryParams = {
+    ...searchParams,
+    cat: selectedFilters.value.cat,
+    brand: selectedFilters.value.brand,
+    min: searchParams.min || undefined,
+    max: searchParams.max || undefined,
+  };
+
+  // 쿼리 파라미터 업데이트를 기다린 후 상품 검색 실행
+  await updateQueryParams(queryParams);
+  await loadProducts(true);
 };
 
 // 무한 스크롤
@@ -158,23 +221,24 @@ watch(() => products.value.length, updateObserver);
 
 // URL 파라미터 변경 감지
 watch(
-  () => route.query.gender,
+  () => route.query.gender, // route.query 전체가 아닌 gender만 감시
   (newGender) => {
-    gender.value = newGender;
     if (newGender) {
+      gender.value = newGender;
       loadProducts(true);
     }
   },
-  { immediate: true }
+  { immediate: true } // deep: true는 필요 없음
 );
 
-// 외부 클릭 시 드롭다운 닫기
+// 외부 클릭 이벤트 핸들러 유지
 const handleClickOutside = (e) => {
   if (!e.target.closest(".filter-select")) {
     isActive.value = false;
   }
 };
 
+// mounted, unmounted 이벤트 핸들러 유지
 onMounted(() => {
   setupIntersectionObserver();
   document.addEventListener("click", handleClickOutside);
@@ -225,38 +289,47 @@ onUnmounted(() => {
         <section class="product-p-frame">
           <div class="user-product-list">
             <ul class="product-grid">
-              <li
-                v-for="(product, index) in products"
-                :key="product.id"
-                class="product-c-frame"
-                :ref="
-                  index === products.length - 1
-                    ? (el) => {
-                        lastProductRef = el;
-                      }
-                    : undefined
-                "
-              >
-                <a href="#">
-                  <div class="product-img-frame">
-                    <div class="product-img-container">
-                      <img class="product-images primary-img" :src="product.mainImageUrl" alt="product-img" />
-                      <img class="product-images secondary-img" :src="product.hoverImageUrl" alt="product-img-hover" />
+              <template v-if="products.length > 0">
+                <li
+                  v-for="(product, index) in products"
+                  :key="product.id"
+                  class="product-c-frame"
+                  :ref="
+                    index === products.length - 1
+                      ? (el) => {
+                          lastProductRef = el;
+                        }
+                      : undefined
+                  "
+                >
+                  <a href="#">
+                    <div class="product-img-frame">
+                      <div class="product-img-container">
+                        <img class="product-images primary-img" :src="product.mainImageUrl" alt="product-img" />
+                        <img class="product-images secondary-img" :src="product.hoverImageUrl" alt="product-img-hover" />
+                      </div>
                     </div>
-                  </div>
-                  <div class="product-info">
-                    <span class="product-brand">{{ product.brandEngName }}</span>
-                    <span class="product-name">{{ product.productName }}</span>
-                    <div class="price-info">
-                      <span class="product-price">{{ product.salePrice.toLocaleString() }}</span>
-                      <span class="price-unit">원</span>
+                    <div class="product-info">
+                      <span class="product-brand">{{ product.brandEngName }}</span>
+                      <span class="product-name">{{ product.productName }}</span>
+                      <div class="price-info">
+                        <span class="product-price">{{ product.salePrice.toLocaleString() }}</span>
+                        <span class="price-unit">원</span>
+                      </div>
                     </div>
-                  </div>
-                </a>
-              </li>
+                  </a>
+                </li>
+              </template>
+              <template v-else>
+                <li class="empty-list">
+                  <template v-if="loading">
+                    <div class="loading">Loading...</div>
+                  </template>
+                  <template v-else> 상품이 없습니다. </template>
+                </li>
+              </template>
             </ul>
           </div>
-          <div v-if="loading" class="loading">Loading...</div>
         </section>
       </div>
     </div>
@@ -270,6 +343,7 @@ onUnmounted(() => {
   gap: 8px;
   padding: 16px 0;
   margin-bottom: 16px;
+  width: 100%;
 }
 
 .filter-tag {
@@ -301,7 +375,6 @@ onUnmounted(() => {
   color: #000;
 }
 
-/* 로딩 인디케이터 */
 .loading {
   display: flex;
   justify-content: center;
@@ -311,7 +384,6 @@ onUnmounted(() => {
   color: #666;
 }
 
-/* 애니메이션이 있는 로딩 인디케이터를 원하시면 이렇게도 가능합니다 */
 .loading::after {
   content: "";
   width: 24px;
@@ -326,6 +398,60 @@ onUnmounted(() => {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+.empty-list {
+  grid-column: 1 / -1;
+  min-height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #666;
+}
+
+@media (min-width: 769px) {
+  .filter-tags {
+    max-width: calc((130px + (100vw - 769px) * 0.14) * 3 + 20px);
+  }
+}
+
+@media (min-width: 1440px) {
+  .filter-tags {
+    max-width: calc(224px * 4 + 30px);
+  }
+}
+
+@media (max-width: 768px) {
+  .filter-tags {
+    max-width: calc(130px * 5 + 40px);
+  }
+}
+
+@media (max-width: 650px) {
+  .filter-tags {
+    max-width: calc(130px * 4 + 30px);
+  }
+}
+
+@media (max-width: 600px) {
+  .filter-tags {
+    max-width: calc(130px * 3 + 20px);
+  }
+}
+
+@media (max-width: 430px) {
+  .filter-tags {
+    max-width: calc(130px * 2 + 10px);
+  }
+}
+
+@media (max-width: 280px) {
+  .filter-tags {
+    max-width: 130px;
   }
 }
 </style>

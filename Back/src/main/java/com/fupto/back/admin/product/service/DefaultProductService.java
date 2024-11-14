@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -392,7 +392,7 @@ public class DefaultProductService implements ProductService {
                 .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다."));
 
         product.setActive(active);
-        product.setUpdateDate(Instant.now());
+        product.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
         product = productRepository.save(product);
 
         return convertToProductListDto(product);

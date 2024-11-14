@@ -16,3 +16,7 @@ server:
 file:
   upload:
     path: uploads
+
+fupto:
+  jwt:
+    secret: "H4piIdHTINbvBLfkVXT5gi/AqvrCB+n6j7+vmo6Uy3TiAOG62F7GVyW5as7Q+r26ryiddgT7xxeDET+O+uT1hQ=="

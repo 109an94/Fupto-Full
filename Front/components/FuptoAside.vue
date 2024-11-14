@@ -15,7 +15,7 @@ const props = defineProps({
   },
 });
 
-/*성별 관련*/
+//성별 관련
 const selectedGender = ref(props.initialGender);
 
 const toggleGender = async (gender) => {
@@ -26,10 +26,10 @@ const toggleGender = async (gender) => {
   await loadBrands();
 };
 
-/*카테고리 관련*/
+//카테고리 관련
 const categories = ref([]);
 
-// 2차 카테고리 로드
+//2차 카테고리 로드
 const loadSecondCategories = async (genderId) => {
   if (!genderId) return;
 
@@ -45,7 +45,7 @@ const loadSecondCategories = async (genderId) => {
       name: category.name,
       checked: false,
       isExpanded: false,
-      subCategories: [{ id: `${category.id}-all`, name: "All", checked: true }],
+      subCategories: [{ id: `all-${category.id}`, name: "All", checked: true }],
     }));
 
     // URL에서 선택된 카테고리 복원
@@ -65,9 +65,9 @@ const loadThirdCategories = async (category) => {
 
   if (data.value) {
     category.subCategories = [
-      { id: `${category.id}-all`, name: "All", checked: true },
+      { id: `all-${category.id}`, name: "All", checked: true },
       ...data.value.map((subCat) => ({
-        id: subCat.id,
+        id: subCat.id.toString(),
         name: subCat.name,
         checked: false,
       })),
@@ -84,8 +84,10 @@ const toggleCategory = async (category) => {
 };
 
 const handleSubCategoryChange = (category, subCategory) => {
-  if (subCategory.id.endsWith("-all")) {
-    // All 선택 시
+  const isAll = subCategory.id.startsWith("all-");
+
+  if (isAll) {
+    // All 버튼이 체크되면 다른 모든 항목 해제
     if (subCategory.checked) {
       category.subCategories.forEach((sub) => {
         if (sub.id !== subCategory.id) {
@@ -94,12 +96,19 @@ const handleSubCategoryChange = (category, subCategory) => {
       });
     }
   } else {
-    // 일반 항목 선택 시 All 버튼 무조건 해제
-    const allButton = category.subCategories.find((sub) => sub.id.endsWith("-all"));
-    if (allButton && allButton.checked) {
+    // 일반 항목이 체크되면 All 버튼 해제
+    const allButton = category.subCategories.find((sub) => sub.id.startsWith("all-"));
+    if (allButton) {
       allButton.checked = false;
     }
+
+    // 모든 일반 항목이 해제되면 All 버튼 체크
+    const hasCheckedItems = category.subCategories.some((sub) => !sub.id.startsWith("all-") && sub.checked);
+    if (!hasCheckedItems) {
+      allButton.checked = true;
+    }
   }
+
   emitFilterChange();
 };
 
@@ -108,7 +117,7 @@ const getSelectedCategories = () => {
   categories.value.forEach((category) => {
     if (category.subCategories) {
       category.subCategories.forEach((subCat) => {
-        if (subCat.checked && !subCat.id.endsWith("-all")) {
+        if (subCat.checked && !subCat.id.startsWith("all-")) {
           selectedCats.push({
             id: subCat.id,
             name: subCat.name,
@@ -131,8 +140,9 @@ const clearAll = () => {
   emitFilterChange();
 };
 
-/*브랜드 관련*/
+//브랜드 관련
 const searchQuery = ref("");
+const isComposing = ref(false);
 const brands = ref([]);
 
 const loadBrands = async () => {
@@ -143,8 +153,8 @@ const loadBrands = async () => {
 
   if (data.value) {
     brands.value = data.value.map((brand) => ({
-      id: `brand-${brand.id}`, // 브랜드 ID에 접두사 추가
-      originalId: brand.id, // 원본 ID 저장
+      id: `brand-${brand.id}`,
+      originalId: brand.id,
       name: `${brand.engName}(${brand.korName})`,
       checked: false,
     }));
@@ -160,7 +170,16 @@ const loadBrands = async () => {
 };
 
 const filteredBrands = computed(() => {
-  return brands.value.filter((brand) => brand.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
+  if (!searchQuery.value) return brands.value;
+
+  const searchValue = searchQuery.value;
+  return brands.value.filter((brand) => {
+    const name = brand.name;
+    if (/[a-zA-Z]/.test(searchValue)) {
+      return name.toLowerCase().includes(searchValue.toLowerCase());
+    }
+    return name.includes(searchValue);
+  });
 });
 
 const getSelectedBrands = () => {
@@ -178,45 +197,46 @@ const clearBrands = () => {
   emitFilterChange();
 };
 
-/*가격 관련*/
+//가격 관련
 const minPrice = ref("");
 const maxPrice = ref("");
 
 const clearPriceRange = () => {
   minPrice.value = "";
   maxPrice.value = "";
-  emitFilterChange();
 };
 
 // 필터 변경 이벤트 발생
 const emitFilterChange = () => {
+  const selectedCats = getSelectedCategories();
+  const selectedBrands = getSelectedBrands();
+
   const filterData = {
-    cat: getSelectedCategories(),
-    brand: getSelectedBrands(),
-    min: minPrice.value || undefined,
-    max: maxPrice.value || undefined,
+    cat: selectedCats,
+    brand: selectedBrands,
   };
+
   emit("filter-change", filterData);
 };
 
 // 검색 버튼 클릭
 const handleSearch = () => {
-  emit("search", {
+  const filterData = {
     cat: getSelectedCategories(),
     brand: getSelectedBrands(),
-    min: minPrice.value || null,
-    max: maxPrice.value || null,
-  });
+    min: minPrice.value ? parseInt(minPrice.value) : null,
+    max: maxPrice.value ? parseInt(maxPrice.value) : null,
+  };
+
+  emit("search", filterData);
 };
 
-// List 컴포넌트로부터의 필터 상태 업데이트 메서드
 defineExpose({
   updateFilterState(data) {
     if (data.type === "brand") {
       const brand = brands.value.find((b) => b.originalId === data.id);
       if (brand) {
         brand.checked = data.checked;
-        emitFilterChange();
       }
     } else if (data.type === "cat") {
       categories.value.forEach((category) => {
@@ -229,7 +249,6 @@ defineExpose({
             if (allButton) {
               allButton.checked = !hasCheckedItems;
             }
-            emitFilterChange();
           }
         });
       });
@@ -249,15 +268,6 @@ const restoreSelectedCategories = async (selectedCatIds) => {
   }
 };
 
-// URL query 변경 감지
-watch(
-  () => route.query,
-  () => {
-    emitFilterChange();
-  },
-  { deep: true }
-);
-
 // 초기 로드
 watch(
   () => props.initialGender,
@@ -273,109 +283,121 @@ watch(
 </script>
 
 <template>
-  <aside class="filter-sidebar">
-    <h1 style="display: none">사이드바</h1>
-    <div>
-      <section>
-        <h1 class="filter-list h1-style">성별</h1>
-        <div class="gender-buttons">
-          <button
-            class="gender-button"
-            :class="{ 'gender-button-active': selectedGender === 'female' }"
-            @click="toggleGender('female')"
-          >
-            여성
-          </button>
-          <button
-            class="gender-button"
-            :class="{ 'gender-button-active': selectedGender === 'male' }"
-            @click="toggleGender('male')"
-          >
-            남성
-          </button>
-        </div>
-      </section>
+  <client-only>
+    <aside class="filter-sidebar">
+      <h1 style="display: none">사이드바</h1>
+      <div>
+        <section>
+          <h1 class="filter-list h1-style">성별</h1>
+          <div class="gender-buttons">
+            <button
+              class="gender-button"
+              :class="{ 'gender-button-active': selectedGender === 'female' }"
+              @click="toggleGender('female')"
+            >
+              여성
+            </button>
+            <button
+              class="gender-button"
+              :class="{ 'gender-button-active': selectedGender === 'male' }"
+              @click="toggleGender('male')"
+            >
+              남성
+            </button>
+          </div>
+        </section>
 
-      <section>
-        <header class="filter-list">
-          <h1 class="h1-style">카테고리</h1>
-          <span class="clear-button" @click="clearAll">Clear</span>
-        </header>
-        <ul class="category-list">
-          <li v-for="category in categories" :key="category.id" class="category-item">
-            <div class="category-item-content">
-              <input type="checkbox" :id="category.id" v-model="category.checked" @change="toggleCategory(category)" />
-              <label :for="category.id">{{ category.name }}</label>
-              <img class="icon-down" :src="category.isExpanded ? '/imgs/icon/up.svg' : '/imgs/icon/down.svg'" alt="direc-icon" />
-            </div>
-            <div v-if="category.isExpanded" class="category-items">
-              <div class="aside-category-list">
-                <template v-for="subCategory in category.subCategories" :key="subCategory.id">
-                  <input
-                    type="checkbox"
-                    name="category"
-                    :id="subCategory.id"
-                    class="aside-category-input"
-                    v-model="subCategory.checked"
-                    @change="handleSubCategoryChange(category, subCategory)"
-                  />
-                  <label :for="subCategory.id" class="aside-category-label">
-                    {{ subCategory.name }}
-                  </label>
-                </template>
+        <section>
+          <header class="filter-list">
+            <h1 class="h1-style">카테고리</h1>
+            <span class="clear-button" @click="clearAll">Clear</span>
+          </header>
+          <ul class="category-list">
+            <li v-for="category in categories" :key="category.id" class="category-item">
+              <div class="category-item-content">
+                <input type="checkbox" :id="category.id" v-model="category.checked" @change="toggleCategory(category)" />
+                <label :for="category.id">{{ category.name }}</label>
+                <img
+                  class="icon-down"
+                  :src="category.isExpanded ? '/imgs/icon/up.svg' : '/imgs/icon/down.svg'"
+                  alt="direc-icon"
+                />
               </div>
+              <div v-if="category.isExpanded" class="category-items">
+                <div class="aside-category-list">
+                  <template v-for="subCategory in category.subCategories" :key="subCategory.id">
+                    <input
+                      type="checkbox"
+                      name="category"
+                      :id="subCategory.id"
+                      class="aside-category-input"
+                      v-model="subCategory.checked"
+                      @change="handleSubCategoryChange(category, subCategory)"
+                    />
+                    <label :for="subCategory.id" class="aside-category-label">
+                      {{ subCategory.name }}
+                    </label>
+                  </template>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <header class="filter-list">
+            <h1 class="h1-style">브랜드</h1>
+            <span class="clear-button" @click="clearBrands">Clear</span>
+          </header>
+          <div>
+            <input
+              type="text"
+              :value="searchQuery"
+              @input="(e) => (searchQuery = e.target.value)"
+              placeholder="브랜드 검색"
+              class="aside-brand-search-input"
+            />
+          </div>
+          <div class="aside-brand-list">
+            <div v-for="brand in filteredBrands" :key="brand.id" class="aside-brand-item">
+              <input type="checkbox" :id="brand.id" v-model="brand.checked" @change="emitFilterChange" />
+              <label :for="brand.id">{{ brand.name }}</label>
             </div>
-          </li>
-        </ul>
-      </section>
-
-      <section>
-        <header class="filter-list">
-          <h1 class="h1-style">브랜드</h1>
-          <span class="clear-button" @click="clearBrands">Clear</span>
-        </header>
-        <div>
-          <input type="text" v-model="searchQuery" placeholder="브랜드 검색" class="aside-brand-search-input" />
-        </div>
-        <div class="aside-brand-list">
-          <div v-for="brand in filteredBrands" :key="brand.id" class="aside-brand-item">
-            <input type="checkbox" :id="brand.id" v-model="brand.checked" />
-            <label :for="brand.id">{{ brand.name }}</label>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section>
-        <header class="filter-list">
-          <h1 class="h1-style">가격</h1>
-          <span class="clear-button" @click="clearPriceRange">Clear</span>
-        </header>
-        <div class="price-range">
-          <div class="price-input">
-            <span class="currency">₩</span>
-            <input
-              type="number"
-              v-model="minPrice"
-              placeholder="최소"
-              max="99999999"
-              oninput="javascript: if (this.value.length > 8) this.value = this.value.slice(0, 8);"
-            />
+        <section>
+          <header class="filter-list">
+            <h1 class="h1-style">가격</h1>
+            <span class="clear-button" @click="clearPriceRange">Clear</span>
+          </header>
+          <div class="price-range">
+            <div class="price-input">
+              <span class="currency">₩</span>
+              <input
+                type="number"
+                v-model="minPrice"
+                placeholder="최소"
+                max="99999999"
+                oninput="javascript: if (this.value.length > 8) this.value = this.value.slice(0, 8);"
+              />
+            </div>
+            <span class="price-separator">-</span>
+            <div class="price-input">
+              <span class="currency">₩</span>
+              <input
+                type="number"
+                v-model="maxPrice"
+                placeholder="최대"
+                max="99999999"
+                oninput="javascript: if (this.value.length > 8) this.value = this.value.slice(0, 8);"
+              />
+            </div>
           </div>
-          <span class="price-separator">-</span>
-          <div class="price-input">
-            <span class="currency">₩</span>
-            <input
-              type="number"
-              v-model="maxPrice"
-              placeholder="최대"
-              max="99999999"
-              oninput="javascript: if (this.value.length > 8) this.value = this.value.slice(0, 8);"
-            />
-          </div>
-        </div>
-      </section>
+        </section>
 
-      <button class="search-button" @click="handleSearch">검 색</button>
-    </div>
-  </aside>
+        <button class="search-button" @click="handleSearch">검 색</button>
+      </div>
+    </aside>
+  </client-only>
 </template>
