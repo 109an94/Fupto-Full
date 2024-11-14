@@ -25,10 +25,41 @@ const toggleDropdown = () => {
   isActive.value = !isActive.value;
 };
 
-const selectOption = (option) => {
+const selectOption = async (option) => {
   selectedSort.value = option.value;
   isActive.value = false;
-  loadProducts(true);
+  const config = useRuntimeConfig();
+
+  try {
+    const response = await $fetch(`${config.public.apiBase}/products`, {
+      params: {
+        gender: route.query.gender,
+        cat: route.query.cat ? route.query.cat.split(",") : undefined,
+        brand: route.query.brand ? route.query.brand.split(",") : undefined,
+        min: route.query.min || undefined,
+        max: route.query.max || undefined,
+        sort: option.value,
+        cursor: null,
+        limit: 20,
+      },
+    });
+
+    if (response) {
+      products.value = response.products;
+      cursor.value = response.nextCursor;
+      hasMore.value = response.hasMore;
+    }
+
+    // URL 업데이트
+    await router.replace({
+      query: {
+        ...route.query,
+        sort: option.value,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to sort products:", error);
+  }
 };
 
 // 필터 태그 관련
@@ -221,14 +252,11 @@ watch(() => products.value.length, updateObserver);
 
 // URL 파라미터 변경 감지
 watch(
-  () => route.query.gender, // route.query 전체가 아닌 gender만 감시
-  (newGender) => {
-    if (newGender) {
-      gender.value = newGender;
-      loadProducts(true);
-    }
-  },
-  { immediate: true } // deep: true는 필요 없음
+  () => route.path + route.query.gender, // 페이지 경로와 gender 쿼리 모두 감시
+  () => {
+    selectedSort.value = "popular"; // 새 페이지에서는 항상 인기순으로 초기화
+    loadProducts(true);
+  }
 );
 
 // 외부 클릭 이벤트 핸들러 유지

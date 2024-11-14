@@ -87,7 +87,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     AND (:cursor IS NULL OR p.id < :cursor)
     ORDER BY
     CASE :sort
-        WHEN 'recent' THEN p.createDate
+        WHEN 'recent' THEN p.createDate END DESC,
+    CASE :sort
         WHEN 'priceAsc' THEN (
             SELECT MIN(ph.salePrice)
             FROM PriceHistory ph
@@ -97,7 +98,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                 FROM PriceHistory ph2
                 WHERE ph2.product.mappingId = p.mappingId
             )
-        )
+        ) END ASC,
+    CASE :sort
         WHEN 'priceDesc' THEN (
             SELECT MIN(ph.salePrice)
             FROM PriceHistory ph
@@ -107,10 +109,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                 FROM PriceHistory ph2
                 WHERE ph2.product.mappingId = p.mappingId
             )
-        )
-        ELSE COALESCE(p.viewCount, 0)
-    END DESC,
-    CASE WHEN :sort = 'priceAsc' THEN 1 ELSE 0 END ASC,
+        ) END DESC,
+    CASE WHEN :sort = 'popular' THEN COALESCE(p.viewCount, 0) END DESC,
     p.id DESC
     """)
     List<Product> searchProducts(

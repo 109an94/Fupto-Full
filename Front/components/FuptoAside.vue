@@ -142,7 +142,6 @@ const clearAll = () => {
 
 //브랜드 관련
 const searchQuery = ref("");
-const isComposing = ref(false);
 const brands = ref([]);
 
 const loadBrands = async () => {
