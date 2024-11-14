@@ -5,9 +5,14 @@ import com.fupto.back.anonymous.product.dto.CategoryDto;
 import com.fupto.back.anonymous.product.dto.ProductResponseDto;
 import com.fupto.back.anonymous.product.dto.ProductSearchDto;
 import com.fupto.back.anonymous.product.service.ProductService;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -34,5 +39,22 @@ public class ProductController {
     @GetMapping("/brands")
     public ResponseEntity<List<BrandDto>> getBrands() {
         return ResponseEntity.ok(productService.getBrands());
+    }
+
+    @GetMapping("/{id}/image/{displayOrder}")
+    public ResponseEntity<Resource> getProductImage(
+            @PathVariable Long id, @PathVariable Integer displayOrder) throws IOException {
+        Resource imageResource = productService.getProductImages(id, displayOrder);
+        String contentType = Files.probeContentType(
+                Paths.get(imageResource.getURI())
+        );
+
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(imageResource);
     }
 }
