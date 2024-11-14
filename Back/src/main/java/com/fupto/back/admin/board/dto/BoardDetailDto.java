@@ -19,7 +19,7 @@ public class BoardDetailDto {
     private String contents;
     private String regMemberNickName;
     private Instant createdAt;
-    private Instant updatedAt;
+    private Instant modifiedAt;
     private String boardCategoryName;
     private Boolean active;
 }

@@ -11,6 +11,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -68,10 +70,8 @@ public class DefaultBoardService implements BoardService {
         Member member = memberRepository.findById(regMemberId).orElseThrow(() -> new RuntimeException("RegMember not found"));
 
         newBoard.setRegMember(member);
+        newBoard.setCreatedAt(Instant.now());
 
-        // createdAt, updatedAt 값을 설정
-         newBoard.setCreatedAt(Instant.now());
-        // newBoard.setCreatedAt(Instant.now());
 
         // DB에 게시글 저장
         Board savedBoard = boardRepository.save(newBoard);

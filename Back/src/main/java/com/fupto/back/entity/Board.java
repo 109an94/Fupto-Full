@@ -2,8 +2,7 @@ package com.fupto.back.entity;
 
 import com.fupto.back.admin.board.dto.BoardRequestsDto;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
@@ -13,6 +12,10 @@ import java.time.ZonedDateTime;
 @Getter
 @Setter
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 @Table(name = "board")
 public class Board {
     @Id
@@ -34,11 +37,15 @@ public class Board {
     private Member regMember;
 
     @ColumnDefault("current_timestamp()")
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", insertable = false, updatable = false)
+//    @ColumnDefault("current_timestamp()")
+//    @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
     @ColumnDefault("current_timestamp()")
-    @Column(name = "modified_at", nullable = false)
+    @Column(name = "modified_at", insertable = false)
+//    @ColumnDefault("current_timestamp()")
+//    @Column(name = "modified_at", nullable = false)
     private Instant modifiedAt;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -51,7 +58,6 @@ public class Board {
     @PrePersist
     public void onPrePersist() {
         ZonedDateTime nowInKST = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
-//        this.createdAt = nowInKST.toInstant();
         this.modifiedAt = nowInKST.toInstant();
     }
 
@@ -61,7 +67,7 @@ public class Board {
         this.title = requestsDto.getTitle();
         this.contents = requestsDto.getContents();
         this.password = requestsDto.getPassword();
-        this.modifiedAt = Instant.now();
+        this.modifiedAt = Instant.now().plusSeconds(9 * 3600);
 
     }
 }
