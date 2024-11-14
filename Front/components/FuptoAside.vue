@@ -142,6 +142,7 @@ const clearAll = () => {
 
 //브랜드 관련
 const searchQuery = ref("");
+const isComposing = ref(false);
 const brands = ref([]);
 
 const loadBrands = async () => {
@@ -169,7 +170,16 @@ const loadBrands = async () => {
 };
 
 const filteredBrands = computed(() => {
-  return brands.value.filter((brand) => brand.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
+  if (!searchQuery.value) return brands.value;
+
+  const searchValue = searchQuery.value;
+  return brands.value.filter((brand) => {
+    const name = brand.name;
+    if (/[a-zA-Z]/.test(searchValue)) {
+      return name.toLowerCase().includes(searchValue.toLowerCase());
+    }
+    return name.includes(searchValue);
+  });
 });
 
 const getSelectedBrands = () => {
@@ -340,7 +350,13 @@ watch(
             <span class="clear-button" @click="clearBrands">Clear</span>
           </header>
           <div>
-            <input type="text" v-model="searchQuery" placeholder="브랜드 검색" class="aside-brand-search-input" />
+            <input
+              type="text"
+              :value="searchQuery"
+              @input="(e) => (searchQuery = e.target.value)"
+              placeholder="브랜드 검색"
+              class="aside-brand-search-input"
+            />
           </div>
           <div class="aside-brand-list">
             <div v-for="brand in filteredBrands" :key="brand.id" class="aside-brand-item">
