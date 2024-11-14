@@ -343,6 +343,7 @@ onUnmounted(() => {
   gap: 8px;
   padding: 16px 0;
   margin-bottom: 16px;
+  width: 100%;
 }
 
 .filter-tag {
@@ -410,5 +411,47 @@ onUnmounted(() => {
   border-radius: 8px;
   font-size: 16px;
   color: #666;
+}
+
+@media (min-width: 769px) {
+  .filter-tags {
+    max-width: calc((130px + (100vw - 769px) * 0.14) * 3 + 20px);
+  }
+}
+
+@media (min-width: 1440px) {
+  .filter-tags {
+    max-width: calc(224px * 4 + 30px);
+  }
+}
+
+@media (max-width: 768px) {
+  .filter-tags {
+    max-width: calc(130px * 5 + 40px);
+  }
+}
+
+@media (max-width: 650px) {
+  .filter-tags {
+    max-width: calc(130px * 4 + 30px);
+  }
+}
+
+@media (max-width: 600px) {
+  .filter-tags {
+    max-width: calc(130px * 3 + 20px);
+  }
+}
+
+@media (max-width: 430px) {
+  .filter-tags {
+    max-width: calc(130px * 2 + 10px);
+  }
+}
+
+@media (max-width: 280px) {
+  .filter-tags {
+    max-width: 130px;
+  }
 }
 </style>
