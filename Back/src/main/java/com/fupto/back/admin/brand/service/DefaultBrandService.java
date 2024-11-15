@@ -123,7 +123,7 @@ public class DefaultBrandService implements BrandService {
 
         // 활성 상태 업데이트
         brand.setActive(active);
-        brand.setUpdateDate(Instant.now());  // 갱신 날짜 설정
+        brand.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));  // 갱신 날짜 설정
 
         // 변경된 브랜드 저장
         Brand updatedBrand = brandRepository.save(brand);
@@ -139,8 +139,8 @@ public class DefaultBrandService implements BrandService {
 
         // 브랜드 기본 상태 설정
         brand.setState(true);
-        brand.setCreateDate(Instant.now());
-        brand.setUpdateDate(Instant.now());
+//        brand.setCreateDate(Instant.now());
+//        brand.setUpdateDate(Instant.now());
         brand.setImg("-");
 
         // 먼저 브랜드를 저장하여 ID를 생성
@@ -158,6 +158,26 @@ public class DefaultBrandService implements BrandService {
 
         // DTO로 변환하여 반환
         return convertToBrandListDto(savedBrand);
+    }
+
+    public BrandListDto updateState(Long id, boolean state) {
+        Brand brand = brandRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Brand not found with id: " + id));
+
+        brand.setActive(state);
+        brand.setState(state);
+        Brand updatedBrand = brandRepository.save(brand);
+
+        return convertToBrandListDto(updatedBrand);
+    }
+
+    public void bulkUpdateState(List<Long> brandIds, boolean state) {
+        List<Brand> brandsToUpdate = brandRepository.findAllById(brandIds);
+        for (Brand brand : brandsToUpdate) {
+            brand.setActive(state);
+            brand.setState(state);
+        }
+        brandRepository.saveAll(brandsToUpdate);
     }
 
     private String saveFile(MultipartFile file, Long brandId) throws IOException {

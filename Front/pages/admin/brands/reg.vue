@@ -9,15 +9,59 @@ const brand = ref({
     korName: '',
     engName: '',
     url: '',
-    active: '',
+    active: true,
     description: '',
     fileUpload: null,
 });
 
 const imageUrl = ref('');
+const errors = ref({});
+
+const validateKorName = () => {
+    if (!brand.value.korName) {
+        errors.value.korName = '한글명을 입력하세요.';
+    } else {
+        delete errors.value.korName;
+    }
+};
+
+const validateEngName = () => {
+    if (!brand.value.engName) {
+        errors.value.engName = '영문명을 입력하세요.';
+    } else {
+        delete errors.value.engName;
+    }
+};
+
+const validateUrl = () => {
+    const urlPattern = /^https?:\/\/.+$/;
+    if (!brand.value.url || !urlPattern.test(brand.value.url)) {
+        errors.value.url = '유효한 URL을 입력하세요.';
+    } else {
+        delete errors.value.url;
+    }
+};
+
+const validateFileUpload = () => {
+    if (!brand.value.fileUpload) {
+        errors.value.fileUpload = '이미지를 선택하세요.';
+    } else {
+        delete errors.value.fileUpload;
+    }
+};
+
+const validateForm = () => {
+    validateKorName();
+    validateEngName();
+    validateUrl();
+    validateFileUpload();
+
+    return Object.keys(errors.value).length === 0;
+};
 
 const previewImage = (event) => {
     const file = event.target.files[0];
+    errors.value.fileUpload = ''; 
     if (file) {
         if (file.size > 5 * 1024 * 1024) { // 5MB 제한
             alert('파일 크기는 5MB를 초과할 수 없습니다.');
@@ -42,9 +86,12 @@ const previewImage = (event) => {
 };
 
 const handleSubmit = async () => {
+    if (!validateForm()) {
+        alert('필수항목을 입력하세요.');
+        return;
+    }
+
     try {
-        // 데이터 유효성 검사
-        
 
         const formData = new FormData();
 
@@ -80,6 +127,9 @@ const handleSubmit = async () => {
             console.log('브랜드 등록 성공:', result);
             alert('브랜드가 성공적으로 등록되었습니다!');
             resetForm(); // 폼 초기화
+
+            // 등록 후 리다이렉트
+            window.location.href = 'http://localhost:3000/admin/brands/list';
         } else {
             const errorData = await response.json();
             console.error('브랜드 등록 실패:', errorData);
@@ -92,7 +142,6 @@ const handleSubmit = async () => {
     }
 };
 
-
 const resetForm = () => {
     brand.value = {
         korName: '',
@@ -103,9 +152,14 @@ const resetForm = () => {
         fileUpload: null,
     };
     imageUrl.value = '';
+    errors.value = {};
 };
 
-const handleCancel = resetForm;
+const handleCancel = () => {
+    resetForm();
+    // 취소 버튼을 클릭했을 때 리다이렉트
+    window.location.href = 'http://localhost:3000/admin/brands/list';
+};
 </script>
 
 <template>
@@ -125,28 +179,30 @@ const handleCancel = resetForm;
                     <form @submit.prevent="handleSubmit" enctype="multipart/form-data">
                             <div>
                                 <label for="korName">
-                                    <span>한글명</span>
-                                    <input type="text" id="korName" v-model="brand.korName" placeholder="한글명 입력" required>
+                                    <span>*한글명</span>
+                                    <input type="text" id="korName" v-model="brand.korName" @blur="validateKorName" placeholder="한글명 입력">
+                                    <span v-if="errors.korName" class="error">{{ errors.korName }}</span>
                                 </label>
                             </div>
                             <div>
                                 <label for="engName">
-                                    <span>영문명</span>
-                                    <input type="text" id="engName" v-model="brand.engName" placeholder="영문명 입력" required>
+                                    <span>*영문명</span>
+                                    <input type="text" id="engName" v-model="brand.engName" @blur="validateEngName" placeholder="영문명 입력">
+                                    <span v-if="errors.engName" class="error">{{ errors.engName }}</span>
                                 </label>
                             </div>
                             <div>
                                 <label for="url">
-                                    <span>URL</span>
-                                    <input type="url" id="url" v-model="brand.url" placeholder="url 입력" required>
+                                    <span>*URL</span>
+                                    <input type="url" id="url" v-model="brand.url" @blur="validateUrl" placeholder="url 입력">
+                                    <span v-if="errors.url" class="error">{{ errors.url }}</span>
                                 </label>
                             </div>
                             <div>
                                 <label for="active">
                                     <span>사용여부</span>
-                                    <select id="active" v-model="brand.active" required>
-                                        <option value="" disabled selected>선택하세요</option>
-                                        <option :value="true">노출함</option>
+                                    <select id="active" v-model="brand.active">
+                                        <option :value="true" selected>노출함</option>
                                         <option :value="false">노출안함</option>
                                     </select>
                                 </label>
@@ -154,12 +210,13 @@ const handleCancel = resetForm;
                             <div>
                                 <label for="description">
                                     <span>설명</span>
-                                    <textarea id="description" v-model="brand.description" placeholder="설명 입력" required></textarea>
+                                    <textarea rows="5" id="description" v-model="brand.description" placeholder="설명 입력"></textarea>
                                 </label>
                             </div>
                             <div class="file-upload">
-                                <label for="fileUpload">이미지 추가</label>
-                                <input type="file" id="fileUpload" @change="previewImage" accept="image/*" required>
+                                <label for="fileUpload">*이미지 추가</label>
+                                <input type="file" id="fileUpload" @change="previewImage" @blur="validateFileUpload" accept="image/*">
+                                <span v-if="errors.fileUpload" class="error">{{ errors.fileUpload }}</span>
                             </div>
                             <div class="image-preview" id="imagePreview">
                                 <img v-if="imageUrl" :src="imageUrl" alt="미리보기 이미지">

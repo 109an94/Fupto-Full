@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController("adminBrandController")
 @RequestMapping("admin/brands")
 public class BrandController {
@@ -51,5 +53,25 @@ public class BrandController {
             @PathVariable("id") Long id,
             @RequestParam Boolean active) {
         return ResponseEntity.ok(brandService.updateActive(id, active));
+    }
+
+    @PatchMapping("{id}")
+    public ResponseEntity<BrandListDto> updateBrandState(@PathVariable("id") Long id) {
+        try {
+            BrandListDto updatedBrand = brandService.updateState(id, false);
+            return ResponseEntity.ok(updatedBrand);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @PatchMapping("/bulk-update-state")
+    public ResponseEntity<Void> bulkUpdateBrandState(@RequestBody List<Long> brandIds) {
+        try {
+            brandService.bulkUpdateState(brandIds, false);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

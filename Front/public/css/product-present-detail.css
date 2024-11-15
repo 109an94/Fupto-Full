@@ -61,11 +61,11 @@
 }
 
 .icon\:favorite::before{
-    mask-image: url("@/assets/imgs/icon/favorite.svg");
+    mask-image: url("/imgs/icon/favorite.svg");
 }
 
 .icon\:more::before{
-    mask-image: url("@/assets/imgs/icon/arrow-forward.svg"); 
+    mask-image: url("/imgs/icon/arrow-forward.svg"); 
     transform: rotate(90deg);
 }
 
@@ -225,219 +225,57 @@
     margin-right: 10px;
 }
 
-@media (min-width: 769px) {
-    /* ----- 상품 상세 페이지 전체 레이아웃 ----- */
-    .product-detail-container {
-        display: flex;
-        justify-content: space-between; /* Space between the left and right sections */
-        gap: 40px; /* Gap between image and product details */
-        padding: 30px;
-    }
 
-    /* ----- 이미지 섹션 ----- */
-    .imgs-align {
-        flex: 1; /* Allow the image section to take up space */
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        max-width: 400px; /* Set a max width for the image section */
-    }
 
-    .imgs-container {
-        width: 100%; /* Full width inside the container */
-        max-width: 300px; /* Limit image size for better layout */
-        height: auto;
-        background-color: gray;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        scroll-behavior: smooth;
-    }
+/* 로고 스타일 */
+.logo-container {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;  /* 원형 테두리 */
+    overflow: hidden;
+}
 
-    .imgs-wrap {
-        display: flex;
-    }
+.logo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
-    .imgs-wrap>img {
-        width: 100%;
-        height: auto;
-        scroll-snap-align: center;
-        margin-bottom: 10px;
-    }
+/* 쇼핑몰 이름 링크 */
+.shop-name a {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}
 
-    /* ----- 상품 정보 및 가격 섹션 ----- */
-    .product-info-container {
-        flex: 2; /* Allow the info section to take up more space */
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-    }
+/* 아이템 세부 사항 */
+.item-details {
+    margin-bottom: 15px;
+}
 
-    /* ----- 상품정보 ----- */
-    .name-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-bottom: 20px;
-        border-bottom: 1px solid #ddd;
-        margin-bottom: 20px;
-    }
+.brand-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
 
-    .brand-name>a {
-        font-size: var(--font-large-h1);
-        font-weight: bold;
-    }
+.item-price {
+    font-size: 14px;
+    color: #777;
+}
 
-    .product-name {
-        font-size: var(--font-large-h2);
-        font-weight: bold;
-    }
+/* 링크 버튼 */
+.link-button {
+    display: inline-block;
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 14px;
+}
 
-    .icon\:favorite,
-    .icon\:more {
-        --icon-width: 32px;
-        --icon-height: 32px;
-    }
-
-    /* ----- 가격 정보 섹션 ----- */
-    .price-container {
-        display: flex;
-        justify-content: flex-end;
-        padding: 20px 0;
-    }
-
-    .price-wrap {
-        gap: 15px;
-        font-size: var(--font-large-h2);
-        align-items: flex-end;
-        text-align: right;
-    }
-
-    .price-retail>del {
-        font-size: var(--font-large-h3);
-    }
-
-    .price-per {
-        font-size: var(--font-large-h2);
-    }
-
-    .price-sale {
-        font-size: var(--font-large-h1);
-    }
-
-    /* ----- 상품 설명 ----- */
-    .card-container {
-        padding: 30px 0;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .card-header {
-        font-size: var(--font-large-h3);
-        font-weight: bold;
-        padding-bottom: 15px;
-    }
-
-    .dcp-wrap {
-        font-size: var(--font-medium-caption);
-        padding: 20px 0;
-        color: var(--color-text-unselected);
-    }
-
-    /* ----- 관련 상품 ----- */
-    .related-product {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 30px;
-    }
-
-    .related-item {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        border: 1px solid #ddd;
-        padding: 10px;
-        border-radius: 5px;
-        background-color: #f9f9f9;
-    }
-
-    .related-item img {
-        width: 80px;
-        height: 80px;
-        border-radius: 5px;
-    }
-
-    /* ----- 상점 버튼 ----- */
-    .shop-button {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 20px;
-    }
-
-    .shop-button button {
-        background-color: black;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    /* ----- 자랑하기 (리뷰) ----- */
-    .review-container {
-        display: flex;
-        justify-content: space-between;
-        margin: 20px 0;
-    }
-
-    .review-img {
-        width: 120px;
-        height: 140px;
-        background-color: #D9D9D9;
-        color: var(--color-button-default);
-        font-size: var(--font-medium-h3);
-        font-weight: var(--font-medium);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border-radius: 20px;
-    }
-
-    .review-wrap {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        margin-left: 20px;
-        color: var(--color-text-default);
-        font-size: var(--font-body);
-    }
-
-    .review-seller {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 10px;
-    }
-
-    .review-brand {
-        color: var(--color-text-title);
-        font-size: var(--font-medium-body);
-        font-weight: var(--font-medium);
-    }
-
-    .review-name {
-        color: var(--color-text-default);
-        font-size: var(--font-regular-caption);
-        font-weight: var(--font-regular);
-    }
-
-    .review-sub {
-        display: flex;
-        gap: 10px;
-    }
-
-    .review-id {
-        color: var(--color-text-caption);
-        font-size: var(--font-regular-notion);
-        font-weight: var(--font-regular);
-    }
+.link-button:hover {
+    background-color: #0056b3;
 }
