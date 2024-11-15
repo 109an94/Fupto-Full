@@ -86,13 +86,13 @@ public class DefaultProductService implements ProductService {
         }
 
         // 전체 결과 수 조회
-        Long totalCount = productRepository.countSearchResults(
-                searchDto.getGender(),
-                searchDto.getCat(),
-                searchDto.getBrand(),
-                searchDto.getMin(),
-                searchDto.getMax()
-        );
+//        Long totalCount = productRepository.countSearchResults(
+//                searchDto.getGender(),
+//                searchDto.getCat(),
+//                searchDto.getBrand(),
+//                searchDto.getMin(),
+//                searchDto.getMax()
+//        );
 
         // 다음 페이지 존재 여부 확인
         boolean hasMore = products.size() > searchDto.getLimit();
@@ -112,7 +112,7 @@ public class DefaultProductService implements ProductService {
                 .products(productDtos)
                 .nextCursor(nextCursor)
                 .hasMore(hasMore)
-                .totalCount(totalCount)
+//                .totalCount(totalCount)
                 .build();
     }
 

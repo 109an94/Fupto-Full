@@ -9,6 +9,10 @@ const route = useRoute();
 const router = useRouter();
 const gender = ref(route.query.gender);
 const asideRef = ref(null);
+const selectedFilters = ref({
+  cat: [],
+  brand: [],
+});
 
 // 정렬 관련
 const isActive = ref(false);
@@ -61,12 +65,6 @@ const selectOption = async (option) => {
   }
 };
 
-// 필터 태그 관련
-const selectedFilters = ref({
-  cat: [],
-  brand: [],
-});
-
 // URL 쿼리 파라미터 업데이트
 const updateQueryParams = async (newParams) => {
   const updatedQuery = { ...route.query };
@@ -112,15 +110,14 @@ const handleFilterChange = (filterData) => {
 const removeFilter = async (type, id) => {
   selectedFilters.value[type] = selectedFilters.value[type].filter((item) => item.id !== id);
 
-  // aside 컴포넌트 상태 업데이트
   await asideRef.value?.updateFilterState({ type, id, checked: false });
 
   // 현재 남아있는 필터 상태로 검색 실행
   const filterData = {
-    gender: route.query.gender, // gender 유지
-    cat: selectedFilters.value.cat, // 현재 선택된 카테고리
-    brand: selectedFilters.value.brand, // 현재 선택된 브랜드
-    min: route.query.min, // 가격 범위 유지
+    gender: route.query.gender,
+    cat: selectedFilters.value.cat,
+    brand: selectedFilters.value.brand,
+    min: route.query.min,
     max: route.query.max,
   };
 
@@ -157,58 +154,35 @@ const loading = ref(false);
 const hasMore = ref(true);
 const cursor = ref(null);
 
-// 상품 로드
-// 상품 로드
 const loadProducts = async (reset = false) => {
   if (loading.value || (!hasMore.value && !reset)) return;
   loading.value = true;
 
   try {
     const config = useRuntimeConfig();
-    let response;
-
-    // 초기 로드는 useFetch 사용 (SSR)
-    if (process.server) {
-      const { data } = await useFetch("/products", {
-        baseURL: config.public.apiBase,
-        params: {
-          gender: route.query.gender,
-          cat: route.query.cat ? route.query.cat.split(",") : undefined,
-          brand: route.query.brand ? route.query.brand.split(",") : undefined,
-          min: route.query.min || undefined,
-          max: route.query.max || undefined,
-          sort: selectedSort.value,
-          cursor: reset ? null : cursor.value,
-          limit: 20,
-        },
-      });
-      response = data.value;
-    } else {
-      // 클라이언트 사이드에서는 $fetch 사용
-      response = await $fetch("/products", {
-        baseURL: config.public.apiBase,
-        params: {
-          gender: route.query.gender,
-          cat: route.query.cat ? route.query.cat.split(",") : undefined,
-          brand: route.query.brand ? route.query.brand.split(",") : undefined,
-          min: route.query.min || undefined,
-          max: route.query.max || undefined,
-          sort: selectedSort.value,
-          cursor: reset ? null : cursor.value,
-          limit: 20,
-        },
-      });
-    }
+    const data = await $fetch("/products", {
+      baseURL: config.public.apiBase,
+      params: {
+        gender: route.query.gender,
+        cat: route.query.cat ? route.query.cat.split(",") : undefined,
+        brand: route.query.brand ? route.query.brand.split(",") : undefined,
+        min: route.query.min || undefined,
+        max: route.query.max || undefined,
+        sort: selectedSort.value,
+        cursor: reset ? null : cursor.value,
+        limit: 20,
+      },
+    });
 
     if (reset) {
       products.value = [];
       cursor.value = null;
     }
 
-    if (response) {
-      products.value.push(...response.products);
-      cursor.value = response.nextCursor;
-      hasMore.value = response.hasMore;
+    if (data) {
+      products.value.push(...data.products);
+      cursor.value = data.nextCursor;
+      hasMore.value = data.hasMore;
     }
   } catch (error) {
     console.error("Failed to load products:", error);
@@ -219,20 +193,16 @@ const loadProducts = async (reset = false) => {
 
 // 검색 버튼 클릭 처리
 const handleSearch = async (searchParams) => {
-  // async 추가
-  // 선택된 필터 상태 업데이트
   selectedFilters.value = {
     cat: searchParams.cat || [],
     brand: searchParams.brand || [],
   };
 
-  // 가격도 selectedFilters에 포함
   if (searchParams.min || searchParams.max) {
     selectedFilters.value.min = searchParams.min;
     selectedFilters.value.max = searchParams.max;
   }
 
-  // 쿼리 파라미터 업데이트 및 상품 검색 - 한번에 처리
   const queryParams = {
     ...searchParams,
     cat: selectedFilters.value.cat,
@@ -241,7 +211,6 @@ const handleSearch = async (searchParams) => {
     max: searchParams.max || undefined,
   };
 
-  // 쿼리 파라미터 업데이트를 기다린 후 상품 검색 실행
   await updateQueryParams(queryParams);
   await loadProducts(true);
 };
@@ -355,7 +324,7 @@ onUnmounted(() => {
                       : undefined
                   "
                 >
-                  <a href="#">
+                  <nuxt-link :to="`/products/${product.id}/detail`">
                     <div class="product-img-frame">
                       <div class="product-img-container">
                         <img class="product-images primary-img" :src="product.mainImageUrl" alt="product-img" />
@@ -370,7 +339,7 @@ onUnmounted(() => {
                         <span class="price-unit">원</span>
                       </div>
                     </div>
-                  </a>
+                  </nuxt-link>
                 </li>
               </template>
               <template v-else>

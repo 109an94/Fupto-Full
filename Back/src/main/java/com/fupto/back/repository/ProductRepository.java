@@ -124,21 +124,21 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             Pageable pageable
     );
 
-    @Query("SELECT COUNT(DISTINCT p) FROM Product p " +
-            "LEFT JOIN p.category c " +
-            "LEFT JOIN p.brand b " +
-            "WHERE (:gender IS NULL OR c.parent.parent.id = :gender) " +
-            "AND (:cat IS NULL OR c.id IN :cat) " +
-            "AND (:brand IS NULL OR b.id IN :brand) " +
-            "AND (:min IS NULL OR EXISTS (SELECT 1 FROM PriceHistory ph WHERE ph.product.mappingId = p.mappingId AND ph.salePrice >= :min)) " +
-            "AND (:max IS NULL OR EXISTS (SELECT 1 FROM PriceHistory ph WHERE ph.product.mappingId = p.mappingId AND ph.salePrice <= :max)) " +
-            "AND p.active = true " +
-            "AND p.presentId = true")
-    Long countSearchResults(
-            @Param("gender") Long gender,
-            @Param("cat") List<Long> cat,
-            @Param("brand") List<Long> brand,
-            @Param("min") Integer min,
-            @Param("max") Integer max
-    );
+//    @Query("SELECT COUNT(DISTINCT p) FROM Product p " +
+//            "LEFT JOIN p.category c " +
+//            "LEFT JOIN p.brand b " +
+//            "WHERE (:gender IS NULL OR c.parent.parent.id = :gender) " +
+//            "AND (:cat IS NULL OR c.id IN :cat) " +
+//            "AND (:brand IS NULL OR b.id IN :brand) " +
+//            "AND (:min IS NULL OR EXISTS (SELECT 1 FROM PriceHistory ph WHERE ph.product.mappingId = p.mappingId AND ph.salePrice >= :min)) " +
+//            "AND (:max IS NULL OR EXISTS (SELECT 1 FROM PriceHistory ph WHERE ph.product.mappingId = p.mappingId AND ph.salePrice <= :max)) " +
+//            "AND p.active = true " +
+//            "AND p.presentId = true")
+//    Long countSearchResults(
+//            @Param("gender") Long gender,
+//            @Param("cat") List<Long> cat,
+//            @Param("brand") List<Long> brand,
+//            @Param("min") Integer min,
+//            @Param("max") Integer max
+//    );
 }
