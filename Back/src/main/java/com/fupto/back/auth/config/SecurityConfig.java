@@ -51,10 +51,10 @@ public class SecurityConfig {
         http.cors(cors-> cors.configurationSource(corsConfSource))
                 .csrf(csrf->csrf.disable())
                 .authorizeHttpRequests(authorize-> authorize
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().permitAll())
-                .formLogin(Customizer.withDefaults());
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+//                .formLogin(Customizer.withDefaults());
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }
