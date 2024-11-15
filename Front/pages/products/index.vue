@@ -50,7 +50,6 @@ const selectOption = async (option) => {
       hasMore.value = response.hasMore;
     }
 
-    // URL 업데이트
     await router.replace({
       query: {
         ...route.query,
@@ -70,11 +69,12 @@ const selectedFilters = ref({
 
 // URL 쿼리 파라미터 업데이트
 const updateQueryParams = async (newParams) => {
-  // async 추가
   const updatedQuery = { ...route.query };
 
   if (newParams.gender) {
     updatedQuery.gender = newParams.gender;
+    // 성별 변경시 정렬 쿼리 제거
+    delete updatedQuery.sort;
   }
 
   // 카테고리 처리
@@ -99,7 +99,6 @@ const updateQueryParams = async (newParams) => {
   else delete updatedQuery.max;
 
   await router.replace({
-    // await 추가
     path: route.path,
     query: updatedQuery,
   });
@@ -159,35 +158,57 @@ const hasMore = ref(true);
 const cursor = ref(null);
 
 // 상품 로드
+// 상품 로드
 const loadProducts = async (reset = false) => {
   if (loading.value || (!hasMore.value && !reset)) return;
   loading.value = true;
 
   try {
     const config = useRuntimeConfig();
-    const { data } = await useFetch("/products", {
-      baseURL: config.public.apiBase,
-      params: {
-        gender: route.query.gender,
-        cat: route.query.cat ? route.query.cat.split(",") : undefined,
-        brand: route.query.brand ? route.query.brand.split(",") : undefined,
-        min: route.query.min || undefined,
-        max: route.query.max || undefined,
-        sort: selectedSort.value,
-        cursor: reset ? null : cursor.value,
-        limit: 20,
-      },
-    });
+    let response;
+
+    // 초기 로드는 useFetch 사용 (SSR)
+    if (process.server) {
+      const { data } = await useFetch("/products", {
+        baseURL: config.public.apiBase,
+        params: {
+          gender: route.query.gender,
+          cat: route.query.cat ? route.query.cat.split(",") : undefined,
+          brand: route.query.brand ? route.query.brand.split(",") : undefined,
+          min: route.query.min || undefined,
+          max: route.query.max || undefined,
+          sort: selectedSort.value,
+          cursor: reset ? null : cursor.value,
+          limit: 20,
+        },
+      });
+      response = data.value;
+    } else {
+      // 클라이언트 사이드에서는 $fetch 사용
+      response = await $fetch("/products", {
+        baseURL: config.public.apiBase,
+        params: {
+          gender: route.query.gender,
+          cat: route.query.cat ? route.query.cat.split(",") : undefined,
+          brand: route.query.brand ? route.query.brand.split(",") : undefined,
+          min: route.query.min || undefined,
+          max: route.query.max || undefined,
+          sort: selectedSort.value,
+          cursor: reset ? null : cursor.value,
+          limit: 20,
+        },
+      });
+    }
 
     if (reset) {
       products.value = [];
       cursor.value = null;
     }
 
-    if (data.value) {
-      products.value.push(...data.value.products);
-      cursor.value = data.value.nextCursor;
-      hasMore.value = data.value.hasMore;
+    if (response) {
+      products.value.push(...response.products);
+      cursor.value = response.nextCursor;
+      hasMore.value = response.hasMore;
     }
   } catch (error) {
     console.error("Failed to load products:", error);
@@ -252,11 +273,15 @@ watch(() => products.value.length, updateObserver);
 
 // URL 파라미터 변경 감지
 watch(
-  () => route.path + route.query.gender, // 페이지 경로와 gender 쿼리 모두 감시
-  () => {
-    selectedSort.value = "popular"; // 새 페이지에서는 항상 인기순으로 초기화
-    loadProducts(true);
-  }
+  () => route.query.gender,
+  (newGender) => {
+    if (newGender) {
+      gender.value = newGender;
+      selectedSort.value = "popular";
+      loadProducts(true);
+    }
+  },
+  { immediate: true }
 );
 
 // 외부 클릭 이벤트 핸들러 유지

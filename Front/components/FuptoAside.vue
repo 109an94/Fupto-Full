@@ -21,6 +21,7 @@ const selectedGender = ref(props.initialGender);
 const toggleGender = async (gender) => {
   selectedGender.value = gender;
   const genderId = gender === "male" ? "1" : "2";
+  clearPriceRange();
   emit("filter-change", { gender: genderId });
   await loadSecondCategories(genderId);
   await loadBrands();
@@ -34,13 +35,13 @@ const loadSecondCategories = async (genderId) => {
   if (!genderId) return;
 
   const config = useRuntimeConfig();
-  const { data } = await useFetch("/products/categories", {
+  const data = await $fetch("/products/categories", {
     baseURL: config.public.apiBase,
     params: { parentId: genderId },
   });
 
-  if (data.value) {
-    categories.value = data.value.map((category) => ({
+  if (data) {
+    categories.value = data.map((category) => ({
       id: category.id,
       name: category.name,
       checked: false,
@@ -48,7 +49,6 @@ const loadSecondCategories = async (genderId) => {
       subCategories: [{ id: `all-${category.id}`, name: "All", checked: true }],
     }));
 
-    // URL에서 선택된 카테고리 복원
     if (route.query.cat) {
       const selectedCatIds = route.query.cat.split(",");
       await restoreSelectedCategories(selectedCatIds);
@@ -58,15 +58,15 @@ const loadSecondCategories = async (genderId) => {
 
 const loadThirdCategories = async (category) => {
   const config = useRuntimeConfig();
-  const { data } = await useFetch("/products/categories", {
+  const data = await $fetch("/products/categories", {
     baseURL: config.public.apiBase,
     params: { parentId: category.id },
   });
 
-  if (data.value) {
+  if (data) {
     category.subCategories = [
       { id: `all-${category.id}`, name: "All", checked: true },
-      ...data.value.map((subCat) => ({
+      ...data.map((subCat) => ({
         id: subCat.id.toString(),
         name: subCat.name,
         checked: false,
@@ -146,19 +146,18 @@ const brands = ref([]);
 
 const loadBrands = async () => {
   const config = useRuntimeConfig();
-  const { data } = await useFetch("/products/brands", {
+  const data = await $fetch("/products/brands", {
     baseURL: config.public.apiBase,
   });
 
-  if (data.value) {
-    brands.value = data.value.map((brand) => ({
+  if (data) {
+    brands.value = data.map((brand) => ({
       id: `brand-${brand.id}`,
       originalId: brand.id,
       name: `${brand.engName}(${brand.korName})`,
       checked: false,
     }));
 
-    // URL에서 선택된 브랜드 복원
     if (route.query.brand) {
       const selectedBrandIds = route.query.brand.split(",");
       brands.value.forEach((brand) => {
@@ -300,11 +299,13 @@ const restoreSelectedCategories = async (selectedCatIds) => {
 
 // 초기 로드
 watch(
-  () => props.initialGender,
-  (newGender) => {
-    if (newGender) {
-      selectedGender.value = newGender === "1" ? "male" : "female";
-      loadSecondCategories(newGender);
+  [() => route.query.gender, () => props.initialGender],
+  ([queryGender, propGender]) => {
+    const genderValue = queryGender || propGender;
+    if (genderValue) {
+      selectedGender.value = genderValue === "1" ? "male" : "female";
+      clearPriceRange();
+      loadSecondCategories(genderValue);
       loadBrands();
     }
   },
