@@ -1,15 +1,18 @@
 package com.fupto.back.entity;
 
+import com.fupto.back.admin.board.dto.BoardRequestsDto;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
-@ToString
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Table(name = "board")
 public class Board {
     @Id
@@ -23,9 +26,6 @@ public class Board {
     @Column(name = "contents", nullable = false, length = 1000)
     private String contents;
 
-    @Column(name = "author", nullable = false, length = 200)
-    private String author;
-
     @Column(name = "password", nullable = false, length = 200)
     private String password;
 
@@ -33,4 +33,36 @@ public class Board {
     @JoinColumn(name = "reg_member_id", nullable = false)
     private Member regMember;
 
+    @ColumnDefault("current_timestamp()")
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
+
+    @ColumnDefault("current_timestamp()")
+    @Column(name = "modified_at", nullable = false)
+    private Instant modifiedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "board_category_id", nullable = false)
+    private BoardCategory boardCategory;
+
+    @Column(name = "active", nullable = false)
+    private Boolean active = false;
+
+    @PrePersist
+    public void onPrePersist() {
+        ZonedDateTime nowInKST = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+//        this.createdAt = nowInKST.toInstant();
+        this.modifiedAt = nowInKST.toInstant();
+    }
+
+
+    public void update(BoardRequestsDto requestsDto) {
+
+        this.title = requestsDto.getTitle();
+        this.contents = requestsDto.getContents();
+        this.password = requestsDto.getPassword();
+        this.modifiedAt = Instant.now();
+
+    }
 }
+

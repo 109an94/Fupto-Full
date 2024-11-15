@@ -5,32 +5,69 @@ useHead({
 });
 
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 
-// 게시판 목록 상태
+// 상태관리
 const boards = ref([]);
-const isLoading = ref(true);
+const boardCategoryName = ([])
+const totalElements = ref(0);
+const totalPages = ref(0);
+const currentPage = ref(1);
+const pageSize = ref(0);
+const sortField = ref("id");
 
-// 페이지 이동을 위한 라우터
-const router = useRouter();
+const startDatePicker = ref(null);
+const endDatePicker = ref(null);
+const startDateInput = ref(null);
+const endDateInput = ref(null);
+const searchForm = ref(null);
+
+const noDataMessage = ref('');
+
+// 폼 데이터
+const formaData = ref({
+  boardCategory: "",
+  searchType: "board_name",
+  searchKeyword: "",
+  active: "",
+  dateType: "create_date",
+  startDate: "",
+  endDate: "",
+})
+
+// 체크박스 상태
+const selectAll = ref(false);
+const selectedItems = ref(new Set());
 
 // 게시판 데이터 가져오기
 const fetchBoards = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/v1/admin/boards/list`);
+    const params = new URLSearchParams({
+      page: currentPage.value.toString(),
+      size: pageSize.value.toString(),
+      sort: sortField.value,
+      presentId: "1"
+    });
+
+    const response = await fetch(`http://localhost:8080/api/v1/admin/boards/list?${params.toString()}`);
     const data = await response.json();
-    boards.value = data;
+    boards.value = data.boards;
+    totalElements.value = data.totalElements;
+    totalPages.value = data.totalPages;
+    if (boards.value.length === 0) {
+      noDataMessage.value = '게시글이 없습니다.';
+    } else {
+      noDataMessage.value = '';
+    }
   } catch (error) {
     console.error('게시판 데이터를 가져오는 중 오류 발생:', error);
-  } finally {
-    isLoading.value = false;
-  }
+  } 
 };
 
 // 컴포넌트 마운트 시 데이터 가져오기
 onMounted(() => {
   fetchBoards();
 });
+
 
 // 글쓰기 페이지로 이동
 const navigateToCreate = () => {
@@ -79,6 +116,16 @@ const navigateToCreate = () => {
                     <option value="notice_info">공지사항</option>
                     <option value="notice_faq">FAQ</option>
                     <option value="notice_cen">고객센터</option>
+                  </select>
+                </td>
+              </tr>
+
+              <tr>
+                <th>공개</th>
+                <td>
+                  <select name="st" class="select">
+                    <option value="notice_all">공개</option>
+                    <option value="notice_comm">비공개</option>
                   </select>
                 </td>
               </tr>

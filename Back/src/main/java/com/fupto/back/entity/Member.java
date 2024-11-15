@@ -1,11 +1,16 @@
 package com.fupto.back.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fupto.back.entity.Favorite;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -37,11 +42,11 @@ public class Member {
     private String email;
 
     @ColumnDefault("current_timestamp()")
-    @Column(name = "create_date", nullable = false)
+    @Column(name = "create_date", insertable = false, updatable = false)
     private Instant createDate;
 
     @ColumnDefault("current_timestamp()")
-    @Column(name = "update_date", nullable = false)
+    @Column(name = "update_date", insertable = false)
     private Instant updateDate;
 
     @Column(name = "user_id", nullable = false, length = 50)
@@ -55,5 +60,13 @@ public class Member {
 
     @Column(name = "birth_date")
     private Instant birthDate;
+
+    @OneToMany(mappedBy = "regMember", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Board> boards;
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Favorite> favorites;
 
 }

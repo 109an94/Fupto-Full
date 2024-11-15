@@ -1,116 +1,125 @@
 package com.fupto.back.admin.board.service;
 
-import com.fupto.back.admin.board.dto.BoardListDto;
-import com.fupto.back.admin.board.dto.BoardResponseDto;
-import com.fupto.back.admin.board.dto.BoardSearchDto;
+import com.fupto.back.admin.board.dto.*;
 import com.fupto.back.entity.Board;
+import com.fupto.back.entity.BoardCategory;
+import com.fupto.back.entity.Member;
+import com.fupto.back.repository.BoardCategoryRepository;
 import com.fupto.back.repository.BoardRepository;
+import com.fupto.back.repository.MemberRepository;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
-import java.util.stream.LongStream;
 
-@Service("adminBoardService")
+@Service
+//@RequiredArgsConstructor
 public class DefaultBoardService implements BoardService {
 
-    private BoardRepository boardRepository;
-    private ModelMapper modelMapper;
+    private final BoardRepository boardRepository;
+    private final BoardCategoryRepository boardCategoryRepository;
+    private final ModelMapper modelMapper;
+    private final MemberRepository memberRepository;
 
-    public DefaultBoardService(BoardRepository boardRepository, ModelMapper modelMapper) {
+    public DefaultBoardService(BoardRepository boardRepository,
+                               BoardCategoryRepository boardCategoryRepository,
+                               ModelMapper modelMapper,
+                               MemberRepository memberRepository) {
+
         this.boardRepository = boardRepository;
         this.modelMapper = modelMapper;
+        this.boardCategoryRepository = boardCategoryRepository;
+        this.memberRepository = memberRepository;
     }
 
+//    public DefaultBoardService(BoardRepository boardRepository, ModelMapper modelMapper) {
+//        this.boardRepository = boardRepository;
+//        this.modelMapper = modelMapper;
+//    }
+
+// ========== 전체 조회 =========================================================================
     @Override
-    public BoardResponseDto getList(BoardSearchDto searchDto) {
-        return getList(searchDto.getPage(), searchDto.getKeyword(), searchDto.getCategoryIds());
-    }
-
-    @Override
-    public BoardResponseDto getList(Integer page, String korName, List<Long> categoryIds) {
-        Sort sort = Sort.by("createDate").descending();
-        Pageable pageable = PageRequest.of(page-1,6,sort);
-        Page<Board> boardPage = (Page<Board>) boardRepository.findAll(pageable);
-
-        List<BoardListDto> boardListDtos = boardPage
-                .getContent()
-                .stream()
-                .map(board -> {
-                    BoardListDto boardListDto = modelMapper.map(board, BoardListDto.class);
-
-                    return boardListDto;
-                })
+    public List<BoardListDto> getList() {
+        List<Board> boards = boardRepository.findAll();
+        List<BoardListDto> boardListDtos = boards.stream()
+                .map(board -> {BoardListDto boardListDto = modelMapper.map(board, BoardListDto.class);
+                    return boardListDto;})
                 .toList();
+        return boardListDtos;
+    }
 
-        long totalCount = boardPage.getTotalElements();
-        long totalPages = boardPage.getTotalPages();
-        boolean nextPage = boardPage.hasNext();
-        boolean prevPage = boardPage.hasPrevious();
+// ========== 등록 =========================================================================
+    @Override
+    public BoardListDto createPost(BoardListDto boardListDto) {
+        // BoardListDto -> Board Entity 변환
+        Board newBoard = modelMapper.map(boardListDto, Board.class);
 
-        page = (page == null) ? 1 : page;
-        int offset = (page - 1) % 5;
-        int startNum = page - offset;
-        List<Long> pages= LongStream
-                .range(startNum, startNum + 5)
-                .boxed().toList();
+        // 카테고리
+        Long boardCategoryId = boardListDto.getBoardCategoryId();  // BoardListDto에서 category ID를 가져옴
+        BoardCategory boardCategory = boardCategoryRepository.findById(boardCategoryId)
+                .orElseThrow(() -> new RuntimeException("BoardCategory not found"));
 
-        return BoardResponseDto.builder()
-                .boards(boardListDtos)
-                .totalCount(totalCount)
-                .totalPages(totalPages)
-                .nextPage(nextPage)
-                .prevPage(prevPage)
-                .pages(pages)
-                .build();
+        newBoard.setBoardCategory(boardCategory);
+
+        // 멤버
+
+        Long regMemberId = boardListDto.getRegMemberId();
+        Member member = memberRepository.findById(regMemberId).orElseThrow(() -> new RuntimeException("RegMember not found"));
+
+        newBoard.setRegMember(member);
+
+        // createdAt, updatedAt 값을 설정
+         newBoard.setCreatedAt(Instant.now());
+        // newBoard.setCreatedAt(Instant.now());
+
+        // DB에 게시글 저장
+        Board savedBoard = boardRepository.save(newBoard);
+
+        // 저장된 게시글을 BoardListDto로 변환하여 반환
+        return modelMapper.map(savedBoard, BoardListDto.class);
     }
 
 
-    // 등록
-//    @Override
-//    public BoardListDto create(BoardListDto boardListDto) {
-//        Board board = boardRepository.save(BoardMapper.mapToEntity(boardListDto));
-//
-//        BoardListDto boardone = BoardMapper.mapToDto(boardRepository.findById(board.getId()).get());
-//        return BoardMapper.mapToDto(board);
-//    }
+// ========== id 조회 =========================================================================
+    @Override
+    public BoardDetailDto getBoardById(Long id) {
+        Board board = boardRepository.findById(id).orElse(null);
+        if (board == null) {
+            return null;
+        }
+        BoardDetailDto boardDetailDto = modelMapper.map(board, BoardDetailDto.class);
 
-    // 삭제
-//    @Override
-//    public void delete(Long id) {
-//        boardRepository.deleteById(id);
-//    }
+        return boardDetailDto;
+    }
+
+// ========== 수정 =========================================================================
+    @Override
+    public BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception {
+        Board board = boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("아이디가 존재하지 않습니다."));
+        if (!requestsDto.getPassword().equals(board.getPassword()))
+            throw new Exception("비밀번호가 일치하지 않습니다.");
+
+        board.update(requestsDto);
+        boardRepository.save(board);
+
+        return new BoardResponseDto(board);
+    }
 
 
-    // 목록
+// ========== 삭제 =========================================================================
+    @Override
+    public SuccessResponseDto deletePost(Long id, BoardRequestsDto requestsDto) throws Exception {
+        Board board = boardRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
+        );
+        if (!requestsDto.getPassword().equals(board.getPassword()))
+            throw new Exception("비밀번호가 일치하지 않습니다.");
 
-
-//    @Override
-//    public List<Board> getList() {return boardRepository.findAll();}
-//
-//    @Override
-//    public List<BoardListDto> findAllBoards() {
-//        List<Board> boards = boardRepository.findAll();
-//        List<BoardListDto> boardListDtos = boards.stream()
-//                .map(board -> modelMapper.map(board, BoardListDto.class))
-//                .toList();
-//        return boardListDtos;
-//    }
-//    @Override
-//    public BoardResponseDto getList(int page) {
-//        Sort sort = Sort.by("createDate").descending();
-//        Pageable pageable = PageRequest.of(page-1, 10, sort);
-//
-//        Long totalCount = boardRepository.count();
-//
-//        Page<Board> boards = boardRepository.findAll(pageable);
-//
-//        List<BoardListDto> boardListDtos = board
-//        return null;
-//    }
+        boardRepository.deleteById(id);
+        return new SuccessResponseDto(true);
+    }
 
 }
+
+

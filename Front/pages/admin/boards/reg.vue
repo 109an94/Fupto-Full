@@ -3,6 +3,7 @@ useHead({
   link: [{ rel: "stylesheet", href: "/css/admin/board-reg.css" }],
 });
 
+
 // 게시판 데이터와 이미지 URL 상태 정의
 const board = ref({
   title: '',
@@ -31,19 +32,45 @@ const previewImage = (event) => {
 
 // 제출 처리
 const handleSubmit = () => {
-  // 데이터를 서버로 전송할 수 있음 (예: fetch API 또는 axios 사용)
-  alert('등록되었습니다');
-  
-  // 폼 초기화
-  board.value = {
-    title: '',
-    boardCategory: '',
-    important: false,
-    visible: false,
-    content: '',
-    fileUpload: null,
-  };
-  imageUrl.value = '';
+  const formData = new FormData();
+
+  formData.append('title', board.value.title);
+  formData.append('boardCategory', board.boardCategory);
+  formData.append('important', board.value.important);
+  formData.append('visible', board.value.visible);
+  formData.append('content', board.value.content);
+  // 이미지 파일도 추가 (파일이 있으면)
+  if (board.value.fileUpload) {
+    formData.append('fileUpload', board.value.fileUpload);
+  }
+
+  try {
+    // 서버에 POST 요청 보내기
+    const response = fetch('http://localhost:8080/api/v1/admin/boards/reg', {
+      method: 'POST',
+      body: formData,
+    });
+
+    // 요청 결과 처리
+    if (response.ok) {
+      alert('등록되었습니다');
+      // 폼 초기화
+      board.value = {
+        title: '',
+        boardCategory: '',
+        important: false,
+        visible: false,
+        content: '',
+        fileUpload: null,
+      };
+      imageUrl.value = '';  // 이미지 미리보기 초기화
+    } else {
+      alert('등록에 실패했습니다');
+    }
+  } catch (error) {
+    console.error('등록 중 오류 발생:', error);
+    alert('서버와의 통신 중 오류가 발생했습니다.');
+  }
 };
 </script>
 
@@ -66,7 +93,6 @@ const handleSubmit = () => {
         <form @submit.prevent="handleSubmit">
           <table class="table">
             <tbody>
-
               <tr>
                 <th>제목</th>
                 <td>
@@ -125,9 +151,4 @@ const handleSubmit = () => {
     </div>
   </main>
 </template>
-
-<!-- <style scoped>
-@import '@/public/css/admin/board-reg.css';
-
-</style> -->
 

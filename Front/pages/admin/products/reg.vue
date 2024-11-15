@@ -380,7 +380,7 @@ onMounted(async () => {
             <div class="form-actions">
               <button type="button" @click="addProductForm" class="n-btn n-btn-color:main">+ 상품 추가</button>
               <button type="submit" class="n-btn n-btn-color:main">등 록</button>
-              <a href="#" class="n-btn n-btn-color:danger">취 소</a>
+              <nuxt-link to="list" class="n-btn n-btn-color:danger">취 소</nuxt-link>
             </div>
           </form>
         </section>

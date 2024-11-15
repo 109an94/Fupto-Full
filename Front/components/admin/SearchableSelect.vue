@@ -38,10 +38,8 @@ const filteredOptions = computed(() => {
   return props.options.filter((option) => {
     const name = option.name;
     if (/[a-zA-Z]/.test(searchValue)) {
-      // 영문인 경우 대소문자 구분 없이
       return name.toLowerCase().includes(searchValue.toLowerCase());
     }
-    // 한글 등 기타 문자는 그대로 비교
     return name.includes(searchValue);
   });
 });

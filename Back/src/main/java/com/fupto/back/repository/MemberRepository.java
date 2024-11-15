@@ -1,6 +1,8 @@
 package com.fupto.back.repository;
 
+import com.fupto.back.entity.BoardCategory;
 import com.fupto.back.entity.Member;
+import jakarta.persistence.Id;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,9 +11,11 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
     List<Member> findAll();
+    Member findByUserId(String userId);
 
     @Query("select m from Member m " +
             "where" +
