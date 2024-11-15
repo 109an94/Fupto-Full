@@ -14,7 +14,6 @@ import java.time.Instant;
 public class BoardDetailDto {
 
     private Long id;
-
     private String title;
     private String contents;
     private String regMemberNickName;

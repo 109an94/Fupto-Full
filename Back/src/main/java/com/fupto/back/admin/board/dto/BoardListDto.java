@@ -17,9 +17,11 @@ public class BoardListDto {
     private String contents;
     private String password;
     private Long regMemberId;
+    private String regMemberNickName;
     private Instant createdAt;
     private Instant modifiedAt;
     private Long boardCategoryId;
+    private String boardCategoryName;
     private Boolean active;
 
 }

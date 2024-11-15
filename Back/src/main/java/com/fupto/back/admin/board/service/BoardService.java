@@ -1,6 +1,7 @@
 package com.fupto.back.admin.board.service;
 
 import com.fupto.back.admin.board.dto.*;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -25,6 +26,8 @@ public interface BoardService {
 
     // 삭제
     SuccessResponseDto deletePost(Long id, BoardRequestsDto requestsDto) throws Exception;
+
+    BoardDefaultDto getSearch(BoardSearchDto boardSearchDto);
 
 
 }

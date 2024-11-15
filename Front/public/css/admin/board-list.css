@@ -92,6 +92,15 @@
   color: #fff;
   background-color: #6c757d;
 }
+.btn-outline-primary {
+  color: var(--blue);
+  border: 1px solid var(--blue);
+  background-color: transparent;
+}
+.btn-outline-primary:hover {
+  color: #fff;
+  background-color: var(--blue);
+}
 .btn-outline-danger {
   color: #dc3545;
   border: 1px solid #dc3545;

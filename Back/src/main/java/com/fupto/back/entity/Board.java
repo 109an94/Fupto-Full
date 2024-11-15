@@ -4,6 +4,7 @@ import com.fupto.back.admin.board.dto.BoardRequestsDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.modelmapper.ModelMapper;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -70,5 +71,6 @@ public class Board {
         this.modifiedAt = Instant.now().plusSeconds(9 * 3600);
 
     }
+
 }
 

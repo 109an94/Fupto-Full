@@ -1,6 +1,7 @@
 package com.fupto.back.admin.board.service;
 
 import com.fupto.back.admin.board.dto.*;
+import com.fupto.back.admin.brand.dto.BrandResponseDto;
 import com.fupto.back.entity.Board;
 import com.fupto.back.entity.BoardCategory;
 import com.fupto.back.entity.Member;
@@ -8,11 +9,17 @@ import com.fupto.back.repository.BoardCategoryRepository;
 import com.fupto.back.repository.BoardRepository;
 import com.fupto.back.repository.MemberRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -35,11 +42,6 @@ public class DefaultBoardService implements BoardService {
         this.memberRepository = memberRepository;
     }
 
-//    public DefaultBoardService(BoardRepository boardRepository, ModelMapper modelMapper) {
-//        this.boardRepository = boardRepository;
-//        this.modelMapper = modelMapper;
-//    }
-
 // ========== 전체 조회 =========================================================================
     @Override
     public List<BoardListDto> getList() {
@@ -49,6 +51,86 @@ public class DefaultBoardService implements BoardService {
                     return boardListDto;})
                 .toList();
         return boardListDtos;
+    }
+
+// ========== 검색 조회 =========================================================================
+    @Override
+    public BoardDefaultDto getSearch(BoardSearchDto boardSearchDto) {
+        Sort sort = Sort.by(
+                boardSearchDto.getSortOrder().equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
+                boardSearchDto.getSortBy() != null ? boardSearchDto.getSortBy() : "createDate"
+        );
+        Pageable pageable = PageRequest.of(boardSearchDto.getPage() -1, boardSearchDto.getSize(), sort);
+
+        Instant startDate = null;
+        Instant endDate = null;
+
+        try {
+            ZoneId zoneId = ZoneId.of("Asia/Seoul");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.UTC);
+
+            if(boardSearchDto.getStartDate() != null && !boardSearchDto.getStartDate().isEmpty()) {
+                LocalDate localStratDate = LocalDate.parse(boardSearchDto.getStartDate(), DateTimeFormatter.ISO_DATE);
+                startDate = localStratDate.atStartOfDay(zoneId).plusHours(9).toInstant();
+            }
+            if (boardSearchDto.getEndDate() != null && !boardSearchDto.getEndDate().isEmpty()) {
+                LocalDate localEndDate = LocalDate.parse(boardSearchDto.getEndDate(), DateTimeFormatter.ISO_DATE);
+                // 종료일의 23:59:59를 한국 표준시로 설정 후 9시간 추가
+                endDate = localEndDate.atTime(LocalTime.of(23, 59, 59)).atZone(zoneId).plusHours(9).toInstant();
+                System.out.println(formatter.format(endDate));
+            }
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Invalid date format. Please use yyyy-MM-dd format.", e);
+        }
+
+        Page<Board> boardPage = boardRepository.searchBoards(
+                boardSearchDto.getSearchKeyWord(),
+                boardSearchDto.getSearchType(),
+                boardSearchDto.getActive(),
+                boardSearchDto.getBoardCategory(),
+                startDate,
+                endDate,
+                boardSearchDto.getDateType(),
+                pageable
+        );
+
+        List<BoardListDto> boardListDtos = boardPage
+                .getContent()
+                .stream()
+                .map(board -> {BoardListDto boardListDto = modelMapper.map(board, BoardListDto.class);
+                return boardListDto;})
+                .toList();
+
+        long totalElements = boardPage.getTotalElements();
+        long totalPages = boardPage.getTotalPages();
+
+        List<Long> pages = new ArrayList<>();
+        for (long i = 1; i <= totalPages; i++) {
+            pages.add(i);
+        }
+
+        return BoardDefaultDto
+                .builder()
+                .totalElements(totalElements)
+                .totalPages(totalPages)
+                .hasNextPage(boardPage.hasNext())
+                .hasPreviousPage(boardPage.hasPrevious())
+                .pages(pages)
+                .boards(boardListDtos)
+                .build();
+    }
+
+
+// ========== id 조회 =========================================================================
+    @Override
+    public BoardDetailDto getBoardById(Long id) {
+        Board board = boardRepository.findById(id).orElse(null);
+        if (board == null) {
+            return null;
+        }
+        BoardDetailDto boardDetailDto = modelMapper.map(board, BoardDetailDto.class);
+
+        return boardDetailDto;
     }
 
 // ========== 등록 =========================================================================
@@ -78,19 +160,6 @@ public class DefaultBoardService implements BoardService {
 
         // 저장된 게시글을 BoardListDto로 변환하여 반환
         return modelMapper.map(savedBoard, BoardListDto.class);
-    }
-
-
-// ========== id 조회 =========================================================================
-    @Override
-    public BoardDetailDto getBoardById(Long id) {
-        Board board = boardRepository.findById(id).orElse(null);
-        if (board == null) {
-            return null;
-        }
-        BoardDetailDto boardDetailDto = modelMapper.map(board, BoardDetailDto.class);
-
-        return boardDetailDto;
     }
 
 // ========== 수정 =========================================================================

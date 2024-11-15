@@ -19,12 +19,25 @@ public class BoardController {
         this.boardService = boardService;
     }
 
-    // 게시물 조회
+    // 전체 게시물 조회
     @GetMapping("/list")
     public List<BoardListDto> getList() {
         return boardService.getList();
     }
 
+    // 선택한 게시글 조회
+    @GetMapping("{id}")
+    public ResponseEntity<BoardDetailDto> getBoardById(@PathVariable Long id) {
+        return ResponseEntity.ok(boardService.getBoardById(id));
+    }
+
+    // 게시글 검색 조회
+    @GetMapping
+    public ResponseEntity<BoardDefaultDto> searchBoard(
+            @ModelAttribute BoardSearchDto boardSearchDto
+    ) {
+        return ResponseEntity.ok(boardService.getSearch(boardSearchDto));
+    }
 
     // 게시글 등록
     @PostMapping("/post")
@@ -33,13 +46,6 @@ public class BoardController {
         BoardListDto createBoard = boardService.createPost(boardListDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createBoard);
-    }
-
-
-    // 선택한 게시글 조회
-    @GetMapping("{id}")
-    public ResponseEntity<BoardDetailDto> getBoardById(@PathVariable Long id) {
-        return ResponseEntity.ok(boardService.getBoardById(id));
     }
 
     // 선택한 게시글 수정
