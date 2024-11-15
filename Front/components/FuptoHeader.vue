@@ -8,8 +8,8 @@
           <NuxtLink to="/products?gender=1">남성</NuxtLink>
         </li>
         <li class="main-nav_link">
-          <a href="#">브랜드</a>
-          <a href="#">쇼핑몰</a>
+          <NuxtLink to="/brands">브랜드</NuxtLink>
+          <NuxtLink to="/shoppingmalls">쇼핑몰</NuxtLink>
         </li>
         <li class="main-nav_link">
           <NuxtLink to="/board/notice">게시글</NuxtLink>
