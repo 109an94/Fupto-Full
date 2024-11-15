@@ -1,5 +1,7 @@
 package com.fupto.back.auth.config;
 
+import com.fupto.back.auth.entity.FuptoUserDetails;
+import com.fupto.back.auth.service.FuptoUserDetailService;
 import com.fupto.back.auth.util.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,10 +51,10 @@ public class SecurityConfig {
         http.cors(cors-> cors.configurationSource(corsConfSource))
                 .csrf(csrf->csrf.disable())
                 .authorizeHttpRequests(authorize-> authorize
-//                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().permitAll())
-//                .formLogin(Customizer.withDefaults());
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .formLogin(Customizer.withDefaults());
+//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }
@@ -66,7 +68,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**",config);
         return source;
     };
-    @Bean
+//    @Bean
     public UserDetailsService userDetailsService() {
         UserDetails user1 = User.builder()
                 .username("newlec")
@@ -82,4 +84,5 @@ public class SecurityConfig {
 
         return new InMemoryUserDetailsManager(user1, user2);
     }
+
 }

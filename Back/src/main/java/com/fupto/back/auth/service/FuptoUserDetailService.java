@@ -7,6 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,9 +16,12 @@ import java.util.List;
 @Service
 public class FuptoUserDetailService implements UserDetailsService {
 
-private MemberRepository memberRepository;
-public FuptoUserDetailService(MemberRepository memberRepository) {
+    private final PasswordEncoder passwordEncoder;
+    private MemberRepository memberRepository;
+
+public FuptoUserDetailService(MemberRepository memberRepository, PasswordEncoder passwordEncoder) {
     this.memberRepository = memberRepository;
+    this.passwordEncoder = passwordEncoder;
 }
 
     @Override
@@ -25,12 +29,15 @@ public FuptoUserDetailService(MemberRepository memberRepository) {
 //        if (username.equals("admin")){}
         Member member = memberRepository.findByUserId(userId);
         List<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+
+        String role = member.getRole();
+        authorities.add(new SimpleGrantedAuthority(role));
+
 
         return FuptoUserDetails.builder()
                 .id(member.getId())
                 .username(userId)
-                .password(member.getPassword())
+                .password(passwordEncoder.encode(member.getPassword()))
                 .email(member.getEmail())
                 .authorities(authorities)
                 .build();
