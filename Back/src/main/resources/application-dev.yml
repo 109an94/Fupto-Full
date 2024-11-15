@@ -1,4 +1,8 @@
 spring:
+  web:
+    resources:
+      static-locations: file:./uploads/
+
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     username: fupto

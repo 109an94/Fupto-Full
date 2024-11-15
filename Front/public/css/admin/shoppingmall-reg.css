@@ -1,4 +1,5 @@
 .card {
+    width: 50%;
     background-color: #fff;
     border: none;
     border-radius: 4px;
@@ -11,8 +12,16 @@
 
 /* 카드 레이블 */
 .card-body label {
-    display: block;
+    display: inline;
     margin-bottom: 20px;
+}
+
+.error {
+    color: red;
+    font-size: 0.875em;
+    margin-top: 4px;
+    font-weight: 600;
+    display: block;
 }
 
 /* 레이블 텍스트와 입력 필드 간격 조정 */
@@ -20,7 +29,6 @@
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: var(--dark-grey);
 }
 
 /* 입력 필드 스타일 */
@@ -133,6 +141,9 @@ textarea {
     .container {
         width: 90%;
         padding: 20px;
+    }
+    .card{
+        width: 100%;
     }
 
     .button-group {

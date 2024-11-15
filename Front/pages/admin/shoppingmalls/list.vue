@@ -2,10 +2,10 @@
 import { ref, onMounted} from "vue";
 
 useHead({
-    link: [{ rel: "stylesheet", href: "/css/admin/brand-list.css"}],
+    link: [{ rel: "stylesheet", href: "/css/admin/shoppingmall-list.css"}],
 });
 
-const brands = ref([]);
+const shoppingmalls = ref([]);
 const totalElements = ref(0);
 const totalPages = ref(0);
 const currentPage = ref(1);
@@ -21,28 +21,30 @@ const noDataMessage = ref('');
 
 // 폼 데이터
 const formData = ref({
-  nameType: 'default_name',  // 브랜드명 유형
-  name: '',                  // 브랜드명 입력
+  nameType: 'default_name',  // 쇼핑몰명 유형
+  name: '',                  // 쇼핑몰명 입력
   active: '',                // 사용여부
   dateType: 'reg',
   startDate: '',
   endDate: ''
 });
 
-// 모달 표시 여부와 선택된 브랜드 데이터
+// 모달 표시 여부와 선택된 쇼핑몰 데이터
 const showModal = ref(false);
-const selectedBrand = reactive({ 
+const selectedshoppingmall = reactive({ 
   id: '',
   korName: '',
   engName: '',
   description: '',
   img: '',
-  url: ''
+  url: '',
+  deliveryfee: '',
+  taxes: ''
 });
 
 // 모달 열기 함수
-const openModal = (brand) => {
-    Object.assign(selectedBrand, brand); // 선택된 브랜드 정보를 selectedBrand에 저장
+const openModal = (shoppingmall) => {
+    Object.assign(selectedshoppingmall, shoppingmall); // 선택된 쇼핑몰 정보를 selectedshoppingmall에 저장
     showModal.value = true; // 모달 표시
 };
 
@@ -56,7 +58,7 @@ const selectAll = ref(false);
 const selectedItems = ref(new Set());
 
 // API 호출
-const fetchBrands = async () => {
+const fetchshoppingmalls = async () => {
   try {
     const params = new URLSearchParams({
       page: currentPage.value.toString(),
@@ -70,27 +72,48 @@ const fetchBrands = async () => {
     if (formData.value.startDate) params.append("startDate", formData.value.startDate);
     if (formData.value.endDate) params.append("endDate", formData.value.endDate);
 
-    const response = await fetch(`http://localhost:8080/api/v1/admin/brands?${params.toString()}`);
+    const response = await fetch(`http://localhost:8080/api/v1/admin/shoppingmalls?${params.toString()}`);
     const data = await response.json();
     console.log(data);
-    brands.value = data.brands;
+    shoppingmalls.value = data.shoppingmalls;
     totalElements.value = data.totalElements;
     totalPages.value = data.totalPages;
-    if (brands.value.length === 0) {
+    if (shoppingmalls.value.length === 0) {
       noDataMessage.value = '데이터가 없습니다.';
     } else {
       noDataMessage.value = '';
     }
   } catch (error) {
-    console.error("Error fetching brands:", error);
+    console.error("Error fetching shoppingmalls:", error);
   }
 };
 
+// // API 호출
+// const fetchshoppingmalls = async () => {
+//   try {
+//     const response = await fetch(
+//       `http://localhost:8080/api/v1/admin/shoppingmalls?page=${currentPage.value}&size=${pageSize.value}&active=${formData.value.active}&nameType=${formData.value.nameType}&name=${formData.value.name}&dateType=${formData.value.dateType}&startDate=${formData.value.startDate}&endDate=${formData.value.endDate}`
+//     );
+//     const data = await response.json();
+//     console.log(data);
+//     shoppingmalls.value = data.shoppingmalls;
+//     totalElements.value = data.totalElements;
+//     totalPages.value = data.totalPages;
+//     if (shoppingmalls.value.length === 0) {
+//       noDataMessage.value = '데이터가 없습니다.';
+//     } else {
+//       noDataMessage.value = '';
+//     }
+//   } catch (error) {
+//     console.error("Error fetching shoppingmalls:", error);
+//   }
+// };
+
 // active 상태 변경
-const updateActive = async (brandId, active) => {
+const updateActive = async (shoppingmallId, active) => {
   try {
-    console.log(`Updating active status: brandId=${brandId}, active=${active}`);
-    const response = await fetch(`http://localhost:8080/api/v1/admin/brands/${brandId}/active?active=${active}`, {
+    console.log(`Updating active status: shoppingmallId=${shoppingmallId}, active=${active}`);
+    const response = await fetch(`http://localhost:8080/api/v1/admin/shoppingmalls/${shoppingmallId}/active?active=${active}`, {
       method: "PATCH",
     });
     if (!response.ok) {
@@ -101,41 +124,43 @@ const updateActive = async (brandId, active) => {
   }
 };
 
-const confirmDelete = (brandId) => {
+const confirmDelete = (shoppingmallId) => {
   if (confirm('정말 삭제하시겠습니까?')) {
-    handleDelete(brandId);
+    handleDelete(shoppingmallId);
   }
 };
 
-const handleDelete = async (brandId) => {
+const handleDelete = async (shoppingmallId) => {
   try {
-    const response = await fetch(`http://localhost:8080/api/v1/admin/brands/${brandId}`, {
+    const response = await fetch(`http://localhost:8080/api/v1/admin/shoppingmalls/${shoppingmallId}`, {
       method: "PATCH"
     });
 
     if (!response.ok) {
-      throw new Error("브랜드 삭제에 실패했습니다.");
+      throw new Error("쇼핑몰 삭제에 실패했습니다.");
     }
 
     // 삭제 성공
     alert('정상적으로 삭제되었습니다.');
-    fetchBrands();
+    selectedItems.value.clear();
+    selectAll.value = false;
+    fetchshoppingmalls();
 
   } catch (error) {
-    console.error("Error deleting brand:", error);
+    console.error("Error deleting shoppingmall:", error);
     alert(error.message);
   }
 };
 
 const handleBulkDelete = async () => {
   if (selectedItems.value.size === 0) {
-    alert('삭제할 브랜드를 선택해주세요.');
+    alert('삭제할 쇼핑몰을 선택해주세요.');
     return;
   }
 
-  if (confirm('선택한 브랜드를 모두 삭제하시겠습니까?')) {
+  if (confirm('선택한 쇼핑몰을 모두 삭제하시겠습니까?')) {
     try {
-      const response = await fetch('http://localhost:8080/api/v1/admin/brands/bulk-update-state', {
+      const response = await fetch('http://localhost:8080/api/v1/admin/shoppingmalls/bulk-update-state', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -144,36 +169,36 @@ const handleBulkDelete = async () => {
       });
 
       if (!response.ok) {
-        throw new Error('브랜드 일괄 삭제에 실패했습니다.');
+        throw new Error('쇼핑몰 일괄 삭제에 실패했습니다.');
       }
 
-      alert('선택한 브랜드가 성공적으로 삭제되었습니다.');
+      alert('선택한 쇼핑몰이 성공적으로 삭제되었습니다.');
       selectedItems.value.clear();
       selectAll.value = false;
-      fetchBrands();
+      fetchshoppingmalls();
     } catch (error) {
-      console.error('Error deleting brands:', error);
+      console.error('Error deleting shoppingmalls:', error);
       alert(error.message);
     }
   }
 };
 
 // active 토글 핸들러
-const handleActiveChange = async (brand) => {
-  await updateActive(brand.id, brand.active);
+const handleActiveChange = async (shoppingmall) => {
+  await updateActive(shoppingmall.id, shoppingmall.active);
 };
 
 // 페이지네이션 핸들러
 const pageChange = (newPage) => {
   if (newPage < 1 || newPage > totalPages.value) return;
   currentPage.value = newPage;
-  fetchBrands();
+  fetchshoppingmalls();
 };
 
 const pageSizeChange = (event) => {
   pageSize.value = parseInt(event.target.value);
   currentPage.value = 1;
-  fetchBrands();
+  fetchshoppingmalls();
 };
 
 // 현재 페이지에 따라 표시할 페이지 번호 범위를 동적으로 계산
@@ -281,28 +306,28 @@ const handleSelectAll = (event) => {
   event.preventDefault();
   const checked = event.target.checked;
   if (checked) {
-    selectedItems.value = new Set(brands.value.map((brand) => brand.id));
+    selectedItems.value = new Set(shoppingmalls.value.map((shoppingmall) => shoppingmall.id));
   } else {
     selectedItems.value.clear();
   }
   selectAll.value = checked;
 };
 
-const handleSelectItem = (event, brandId) => {
+const handleSelectItem = (event, shoppingmallId) => {
   event.stopPropagation();
   event.preventDefault();
-  if (selectedItems.value.has(brandId)) {
-    selectedItems.value.delete(brandId);
+  if (selectedItems.value.has(shoppingmallId)) {
+    selectedItems.value.delete(shoppingmallId);
   } else {
-    selectedItems.value.add(brandId);
+    selectedItems.value.add(shoppingmallId);
   }
-  selectAll.value = selectedItems.value.size === brands.value.length;
+  selectAll.value = selectedItems.value.size === shoppingmalls.value.length;
 };
 
 const handleSearch = (event) => {
   event.preventDefault();
   currentPage.value = 1; // 검색 시 첫 페이지로 리셋
-  fetchBrands();
+  fetchshoppingmalls();
 };
 
 // 날짜 포맷팅 함수
@@ -327,9 +352,14 @@ const formatDate = (dateString) => {
   return [ymd, time]; // 배열로 반환
 };
 
+// 숫자 포맷팅 함수
+const formatNumber = (number) => {
+  return number?.toLocaleString("ko-KR") || "0";
+};
+
 // 초기화
 onMounted(() => {
-  fetchBrands();
+  fetchshoppingmalls();
   waitForFlatpickr(() => {
     initializeFlatpickr();
   });
@@ -339,13 +369,13 @@ onMounted(() => {
 
 <template>
   <main>
-    <h1 class="title">브랜드 목록</h1>
+    <h1 class="title">쇼핑몰 목록</h1>
 		<ul class="breadcrumbs">
 			<li><a href="#">FUPTO</a></li>
 			<li class="divider">/</li>
-      <li><a href="#">브랜드</a></li>
+      <li><a href="#">쇼핑몰</a></li>
 			<li class="divider">/</li>
-			<li><a href="#" class="active">브랜드 목록</a></li>
+			<li><a href="#" class="active">쇼핑몰 목록</a></li>
 		</ul>
 
     <div class="card">
@@ -354,7 +384,7 @@ onMounted(() => {
           <table class="table">
             <tbody>
               <tr>
-                <th>브랜드명</th>
+                <th>쇼핑몰명</th>
                 <td>
                   <select v-model="formData.nameType" class="select">
                     <option value="default_name">전체</option>
@@ -416,21 +446,23 @@ onMounted(() => {
             </select>
           </div>
           <div>
-            <router-link to="/admin/brands/reg" class="btn btn-primary">+ Add Brand</router-link>
+            <router-link to="/admin/shoppingmalls/reg" class="btn btn-primary">+ Add shoppingmall</router-link>
           </div>
         </div>
         <div>
-          <table class="table brand-list-table">
+          <table class="table shoppingmall-list-table">
             <thead>
               <tr class="text-md">
                 <th>
                   <input type="checkbox" id="selectAll" :checked="selectAll" @change="handleSelectAll" class="pl-checkbox" />
                 </th>
                 <th>번호</th>
-                <th>브랜드이미지</th>
-                <th>브랜드한글명</th>
-                <th>브랜드영어명</th>
+                <th>쇼핑몰이미지</th>
+                <th>쇼핑몰한글명</th>
+                <th>쇼핑몰영어명</th>
                 <th>URL</th>
+                <th>배송비</th>
+                <th>관부가세</th>
                 <th>등록일</th>
                 <th>수정일</th>
                 <th>사용여부</th>
@@ -439,49 +471,51 @@ onMounted(() => {
             </thead>
             <tbody>
               <tr v-if="noDataMessage">
-                <td colspan="10" class="text-center py-4 text-gray-500">
+                <td colspan="12" class="text-center py-4 text-gray-500">
                   {{ noDataMessage }}
                 </td>
               </tr>
               <template v-else>
                 <!-- 첫 번째 대표 상품 -->
-                <tr v-for="b in brands" :key="b.id">
+                <tr v-for="sm in shoppingmalls" :key="sm.id">
                 <td>
                   <input
                     type="checkbox"
-                    :id="'brand' + b.id"
-                    :checked="selectedItems.has(b.id)"
-                    @change="(e) => handleSelectItem(e, b.id)"
+                    :id="'shoppingmall' + sm.id"
+                    :checked="selectedItems.has(sm.id)"
+                    @change="(e) => handleSelectItem(e, sm.id)"
                     class="pl-checkbox"
                   />
                 </td>
-                <td>{{ b.id }}</td>
-                <td class="brand-cell">
+                <td>{{ sm.id }}</td>
+                <td class="shoppingmall-cell">
                   <div class="d-flex align-items-center">
-                    <img :src="'http://localhost:8080/api/v1/' + b.img || 'https://via.placeholder.com/70'" :alt="b.korName" class="brand-img" />
+                    <img :src="'http://localhost:8080/api/v1/' + sm.img || 'https://via.placeholder.com/70'" :alt="sm.korName" class="shoppingmall-img" />
                   </div>
                 </td>
-                <td class="text-md">{{ b.korName }}</td>
-                <td class="text-md">{{ b.engName }}</td>
+                <td class="text-md">{{ sm.korName }}</td>
+                <td class="text-md">{{ sm.engName }}</td>
                 <td>
-                  <button class="btn btn-outline-primary btn-sm"><a :href="b.url" target="_blank">URL 이동</a></button>
+                  <button class="btn btn-outline-primary btn-sm"><a :href="sm.url" target="_blank">URL 이동</a></button>
                 </td>
-                <td class="text-md">{{ formatDate(b.createDate)[0] }}<br>{{ formatDate(b.createDate)[1] }}</td>
-                <td class="text-md">{{ formatDate(b.updateDate)[0] }}<br>{{ formatDate(b.updateDate)[1] }}</td>
+                <td class="text-md">￦{{ formatNumber(sm.deliveryfee) }}</td>
+                <td class="text-md">￦{{ formatNumber(sm.taxes) }}</td>
+                <td class="text-md">{{ formatDate(sm.createDate)[0] }}<br>{{ formatDate(sm.createDate)[1] }}</td>
+                <td class="text-md">{{ formatDate(sm.updateDate)[0] }}<br>{{ formatDate(sm.updateDate)[1] }}</td>
                 <td>
                   <label class="pl-switch">
-                    <input type="checkbox" :id="'active' + b.id" v-model="b.active" @change="() => handleActiveChange(b)"/>
+                    <input type="checkbox" :id="'active' + sm.id" v-model="sm.active" @change="() => handleActiveChange(sm)"/>
                     <span class="pl-slider round"></span>
                   </label>
                 </td>
                 <td>
-                  <button class="btn btn-outline-secondary btn-sm toggle-brands" @click="openModal(b)">
+                  <button class="btn btn-outline-secondary btn-sm toggle-shoppingmalls" @click="openModal(sm)">
                     <i class="mdi mdi-chevron-down"></i>
                   </button>
                   <button class="btn btn-outline-secondary btn-sm">
                     <i class="bx bxs-pencil"></i>
                   </button>
-                  <button class="btn btn-outline-danger btn-sm" @click="confirmDelete(b.id)">
+                  <button class="btn btn-outline-danger btn-sm" @click="confirmDelete(sm.id)">
                     <i class="bx bx-trash"></i>
                   </button>
                 </td>
@@ -512,19 +546,21 @@ onMounted(() => {
     <div v-if="showModal" class="modal-overlay" @click="closeModal">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h5 class="modal-title">브랜드 상세 정보</h5>
+          <h5 class="modal-title">쇼핑몰 상세 정보</h5>
           <button type="button" class="close" @click="closeModal">
             &times;
           </button>
         </div>
         
         <div class="modal-body">
-          <p><strong>번호:</strong> {{ selectedBrand.id }}번</p>
-          <p><strong>브랜드 이미지:</strong><br><img :src="'http://localhost:8080/api/v1/' + selectedBrand.img || 'https://via.placeholder.com/70'" :alt="selectedBrand.korName" /></p>
-          <p><strong>브랜드 한글명:</strong> {{ selectedBrand.korName }}</p>
-          <p><strong>브랜드 영어명:</strong> {{ selectedBrand.engName }}</p>
-          <p><strong>브랜드 URL:</strong><a :href="selectedBrand.url" target="_blank"> {{ selectedBrand.url }}</a></p>
-          <p><strong>상세설명:</strong><br>{{ selectedBrand.description }}</p>
+          <p><strong>번호:</strong> {{ selectedshoppingmall.id }}번</p>
+          <p><strong>쇼핑몰 이미지:</strong><br><img :src="'http://localhost:8080/api/v1/' + selectedshoppingmall.img || 'https://via.placeholder.com/70'" :alt="selectedshoppingmall.korName"></p>
+          <p><strong>쇼핑몰 한글명:</strong> {{ selectedshoppingmall.korName }}</p>
+          <p><strong>쇼핑몰 영어명:</strong> {{ selectedshoppingmall.engName }}</p>
+          <p><strong>쇼핑몰 URL:</strong><a :href="selectedshoppingmall.url" target="_blank"> {{ selectedshoppingmall.url }}</a></p>
+          <p><strong>배송비:</strong> ￦{{ formatNumber(selectedshoppingmall.deliveryfee) }}</p>
+          <p><strong>관부가세:</strong> ￦{{ formatNumber(selectedshoppingmall.taxes) }}</p>
+          <p><strong>상세설명:</strong><br>{{ selectedshoppingmall.description }}</p>
         </div>
         
         <div class="modal-footer">

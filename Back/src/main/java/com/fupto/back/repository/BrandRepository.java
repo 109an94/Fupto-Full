@@ -11,8 +11,8 @@ import java.time.Instant;
 import java.util.List;
 
 public interface BrandRepository extends JpaRepository<Brand, Long> {
-    @Query("SELECT b FROM Brand b WHERE " +
-            "(:nameType = 'default_name' OR " +
+    @Query("SELECT b FROM Brand b WHERE b.state = true AND " +
+            "(:nameType = 'default_name' AND (b.korName LIKE %:name% OR b.engName LIKE %:name%) OR " +
             "(:name IS NULL OR " +
             "(:nameType = 'korName' AND b.korName LIKE %:name%) OR " +
             "(:nameType = 'engName' AND b.engName LIKE %:name%))) " +
@@ -32,6 +32,7 @@ public interface BrandRepository extends JpaRepository<Brand, Long> {
             @Param("dateType") String dateType,
             Pageable pageable
     );
+
 
     List<Brand> findByActiveIsTrueOrderByEngNameAsc();
 }
