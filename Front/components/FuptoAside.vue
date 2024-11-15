@@ -21,6 +21,7 @@ const selectedGender = ref(props.initialGender);
 const toggleGender = async (gender) => {
   selectedGender.value = gender;
   const genderId = gender === "male" ? "1" : "2";
+  clearPriceRange();
   emit("filter-change", { gender: genderId });
   await loadSecondCategories(genderId);
   await loadBrands();
@@ -303,6 +304,7 @@ watch(
     const genderValue = queryGender || propGender;
     if (genderValue) {
       selectedGender.value = genderValue === "1" ? "male" : "female";
+      clearPriceRange();
       loadSecondCategories(genderValue);
       loadBrands();
     }
