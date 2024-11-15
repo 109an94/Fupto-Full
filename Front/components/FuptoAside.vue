@@ -169,7 +169,16 @@ const loadBrands = async () => {
 };
 
 const filteredBrands = computed(() => {
-  return brands.value.filter((brand) => brand.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
+  if (!searchQuery.value) return brands.value;
+
+  const searchValue = searchQuery.value;
+  return brands.value.filter((brand) => {
+    const name = brand.name;
+    if (/[a-zA-Z]/.test(searchValue)) {
+      return name.toLowerCase().includes(searchValue.toLowerCase());
+    }
+    return name.includes(searchValue);
+  });
 });
 
 const getSelectedBrands = () => {
@@ -190,10 +199,35 @@ const clearBrands = () => {
 //가격 관련
 const minPrice = ref("");
 const maxPrice = ref("");
+const priceError = ref("");
 
 const clearPriceRange = () => {
   minPrice.value = "";
   maxPrice.value = "";
+  priceError.value = "";
+};
+
+const formattedMinPrice = computed({
+  get: () => {
+    return minPrice.value ? Number(minPrice.value).toLocaleString() : "";
+  },
+  set: (value) => {
+    minPrice.value = value.replace(/,/g, "");
+  },
+});
+
+const formattedMaxPrice = computed({
+  get: () => {
+    return maxPrice.value ? Number(maxPrice.value).toLocaleString() : "";
+  },
+  set: (value) => {
+    maxPrice.value = value.replace(/,/g, "");
+  },
+});
+
+const validatePrices = () => {
+  priceError.value = "";
+  return true;
 };
 
 // 필터 변경 이벤트 발생
@@ -211,6 +245,13 @@ const emitFilterChange = () => {
 
 // 검색 버튼 클릭
 const handleSearch = () => {
+  if (minPrice.value && maxPrice.value) {
+    if (Number(minPrice.value) > Number(maxPrice.value)) {
+      priceError.value = "최소 금액이 최대 금액보다 큽니다.<br>다시 입력해 주세요.";
+      return;
+    }
+  }
+
   const filterData = {
     cat: getSelectedCategories(),
     brand: getSelectedBrands(),
@@ -233,7 +274,6 @@ defineExpose({
         category.subCategories.forEach((subCat) => {
           if (subCat.id === data.id) {
             subCat.checked = data.checked;
-            // All 버튼 상태 체크
             const hasCheckedItems = category.subCategories.some((sub) => !sub.id.endsWith("-all") && sub.checked);
             const allButton = category.subCategories.find((sub) => sub.id.endsWith("-all"));
             if (allButton) {
@@ -340,7 +380,13 @@ watch(
             <span class="clear-button" @click="clearBrands">Clear</span>
           </header>
           <div>
-            <input type="text" v-model="searchQuery" placeholder="브랜드 검색" class="aside-brand-search-input" />
+            <input
+              type="text"
+              :value="searchQuery"
+              @input="(e) => (searchQuery = e.target.value)"
+              placeholder="브랜드 검색"
+              class="aside-brand-search-input"
+            />
           </div>
           <div class="aside-brand-list">
             <div v-for="brand in filteredBrands" :key="brand.id" class="aside-brand-item">
@@ -358,26 +404,15 @@ watch(
           <div class="price-range">
             <div class="price-input">
               <span class="currency">₩</span>
-              <input
-                type="number"
-                v-model="minPrice"
-                placeholder="최소"
-                max="99999999"
-                oninput="javascript: if (this.value.length > 8) this.value = this.value.slice(0, 8);"
-              />
+              <input type="text" v-model="formattedMinPrice" placeholder="최소" @input="validatePrices" maxlength="12" />
             </div>
             <span class="price-separator">-</span>
             <div class="price-input">
               <span class="currency">₩</span>
-              <input
-                type="number"
-                v-model="maxPrice"
-                placeholder="최대"
-                max="99999999"
-                oninput="javascript: if (this.value.length > 8) this.value = this.value.slice(0, 8);"
-              />
+              <input type="text" v-model="formattedMaxPrice" placeholder="최대" @input="validatePrices" maxlength="12" />
             </div>
           </div>
+          <div v-if="priceError" class="price-error" v-html="priceError"></div>
         </section>
 
         <button class="search-button" @click="handleSearch">검 색</button>

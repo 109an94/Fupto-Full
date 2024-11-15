@@ -80,7 +80,8 @@ public class DefaultMemberService implements MemberService{
 
             //genderf 는 String 타입으로안해도 되는 데 가독성을 위해 f로 변환
         String genderf = (gender == null || gender.isEmpty()) ? null : gender;
-        String memberTypef = (memberType == null || memberType.isEmpty()) ? null : memberType;
+        String memberTypef =(memberType == null || memberType.isEmpty()) ? null : memberType;
+
         // 레포지토리 메소드 호출
         String dateTypef = (dateType != null && !dateType.isEmpty()) ? dateType :"regDate";
         Instant startDateI = (startDate == null)?null
