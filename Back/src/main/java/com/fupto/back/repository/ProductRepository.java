@@ -18,7 +18,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findAllByMappingIdAndStateTrue(@Param("mappingId") Long mappingId);
 
     @Query("""
-    SELECT p FROM Product p WHERE 
+
+            SELECT p FROM Product p WHERE 
         (:category1 IS NULL OR p.category.parent.parent.id = :category1)
         AND (:category2 IS NULL OR p.category.parent.id = :category2) 
         AND (:category3 IS NULL OR p.category.id = :category3)

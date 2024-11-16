@@ -1,6 +1,7 @@
 package com.fupto.back.anonymous.product.service;
 
 import com.fupto.back.anonymous.product.dto.*;
+import com.fupto.back.entity.Category;
 import com.fupto.back.entity.ProductImage;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +19,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -144,20 +146,20 @@ public class DefaultProductService implements ProductService {
         return String.format("http://localhost:8080/api/v1/products/%d/image/%d", productId, displayOrder);
     }
 
-    public List<CategoryDto> getCategories(Long parentId) {
+    public List<ProductCateDto> getCategories(Long parentId) {
         return categoryRepository.findByParentIdOrderByName(parentId)
                 .stream()
-                .map(category -> CategoryDto.builder()
+                .map(category -> ProductCateDto.builder()
                         .id(category.getId())
                         .name(category.getName())
                         .build())
                 .toList();
     }
 
-    public List<BrandDto> getBrands() {
+    public List<ProductBrandDto> getBrands() {
         return brandRepository.findByActiveIsTrueOrderByEngNameAsc()
                 .stream()
-                .map(brand -> BrandDto.builder()
+                .map(brand -> ProductBrandDto.builder()
                         .id(brand.getId())
                         .engName(brand.getEngName())
                         .korName(brand.getKorName())
@@ -178,6 +180,88 @@ public class DefaultProductService implements ProductService {
         }
 
         return resource;
+    }
+
+    @Override
+    @Transactional
+    public ProductDetailDto getById(Long id) {
+        // 1. 상품 조회 및 조회수 증가
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다."));
+        product.increaseViewCount();
+
+        // 2. 카테고리 계층 구조 구성
+        List<ProductCateDto> categoryPath = new ArrayList<>();
+        Category currentCategory = product.getCategory();
+        while (currentCategory != null) {
+            categoryPath.add(0, ProductCateDto.builder()
+                    .id(currentCategory.getId())
+                    .name(currentCategory.getName())
+                    .level(currentCategory.getLevel())
+                    .build());
+            currentCategory = currentCategory.getParent();
+        }
+
+        // 3. 상품 이미지 정보 구성
+        List<ProductImageDto> images = product.getProductImages().stream()
+                .sorted(Comparator.comparing(ProductImage::getDisplayOrder))
+                .map(image -> ProductImageDto.builder()
+                        .id(image.getId())
+                        .displayOrder(image.getDisplayOrder())
+                        .imageUrl(getImageUrl(product.getId(), image.getDisplayOrder()))
+                        .build())
+                .toList();
+
+        // 4. 최저가 계산 (mapping_id가 같은 모든 상품 중 최신 날짜의 최저가)
+        Integer lowestPrice = priceHistoryRepository.findLowestCurrentPrice(product.getMappingId());
+
+        // 5. 판매처별 최신 가격 정보를 포함한 ShopDto 리스트 생성
+        List<Product> relatedProducts = productRepository
+                .findAllByMappingIdAndStateIsTrue(product.getMappingId());
+
+        List<ProductShopListDto> shops = relatedProducts.stream()
+                .map(p -> {
+                    Integer latestPrice = priceHistoryRepository.findLatestPriceByProductId(p.getId());
+
+                    return ProductShopListDto
+                            .builder()
+                            .id(p.getShoppingMall().getId())
+                            .productId(p.getId())
+                            .shopName(p.getShoppingMall().getEngName())
+                            .price(latestPrice)
+                            .productUrl(p.getUrl())
+                            .build();
+                })
+                .filter(shop -> shop.getPrice() != null)
+                .sorted(Comparator.comparing(ProductShopListDto::getPrice))
+                .toList();
+
+        // 6. 가격 정보 구성
+        ProductPriceInfoDto priceInfo = ProductPriceInfoDto.builder()
+                .retailPrice(product.getRetailPrice())
+                .salePrice(lowestPrice)
+                .discountRate(calculateDiscountRate(product.getRetailPrice(), lowestPrice))
+                .build();
+
+        // 7. 최종 DTO 구성
+        return ProductDetailDto.builder()
+                .id(product.getId())
+                .productName(product.getProductName())
+                .retailPrice(product.getRetailPrice())
+                .description(product.getDescription())
+                .categories(categoryPath)
+                .images(images)
+                .brandEngName(product.getBrand().getEngName())
+                .priceInfo(priceInfo)
+                .shops(shops)
+                .build();
+    }
+
+    private Integer calculateDiscountRate(Integer retailPrice, Integer salePrice) {
+        if (retailPrice == null || salePrice == null || retailPrice == 0) {
+            return 0;
+        }
+        return (int)(((retailPrice - salePrice) * 100.0) / retailPrice);
     }
 
     private void validateSort(String sort) {

@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CategoryDto {
+public class ProductImageDto {
     private Long id;
-    private String name;
+    private Integer displayOrder;
+    private String imageUrl;
 }
