@@ -10,12 +10,12 @@ useHead({
 </script>
 
 <template>
-  <div class="layout-container">
+  <div class="layout-container default-layout">
     <FuptoHeader />
     <div class="main-content">
       <slot />
     </div>
     <FuptoFooter />
-    <FuptoNavbar />
+    <FuptoNavbar v-if="!$route.path.match(/\/products\/.*\/detail/)" />
   </div>
 </template>
