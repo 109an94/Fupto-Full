@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from "vue";
 
 useHead({
-  link: [{ rel: "stylesheet", href: "/css/product-detail.css" }],
+  link: [{ rel: "stylesheet", href: "/css/product-single.css" }],
 });
 
 const currentSlide = ref(0);
@@ -19,7 +19,7 @@ const productId = route.params.id;
 
 const config = useRuntimeConfig();
 
-const { data: product } = await useFetch(`${config.public.apiBase}/products/${productId}`, {
+const { data: product } = await useFetch(`${config.public.apiBase}/products/${productId}/single`, {
   key: `product-${productId}`,
 });
 
@@ -153,20 +153,6 @@ onUnmounted(() => {
             ></div>
           </div>
         </section>
-
-        <section class="description-section">
-          <div class="section-header" @click="toggleDescription">
-            <span>상품 설명</span>
-            <svg class="arrow" :class="{ up: isDescriptionOpen }" viewBox="0 0 24 24" fill="none">
-              <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" />
-            </svg>
-          </div>
-          <div class="section-content" :class="{ open: isDescriptionOpen }">
-            <div class="description">
-              <p>{{ product?.description }}</p>
-            </div>
-          </div>
-        </section>
       </div>
 
       <div class="product-info">
@@ -189,12 +175,6 @@ onUnmounted(() => {
         </section>
 
         <section class="vendor-section">
-          <div class="section-header" @click="toggleVendorList">
-            <span>모든 할인 상품 둘러보기</span>
-            <svg class="arrow" :class="{ up: isVendorListOpen }" viewBox="0 0 24 24" fill="none">
-              <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" />
-            </svg>
-          </div>
           <div class="section-content" :class="{ open: isVendorListOpen }">
             <div class="vendor-list">
               <article v-for="shop in product?.shops" :key="shop.id" class="vendor-card">
@@ -212,7 +192,7 @@ onUnmounted(() => {
           </div>
         </section>
 
-        <section class="description-section">
+        <sention class="description-section">
           <div class="section-header" @click="toggleDescription">
             <span>상품 설명</span>
             <svg class="arrow" :class="{ up: isDescriptionOpen }" viewBox="0 0 24 24" fill="none">
@@ -224,7 +204,7 @@ onUnmounted(() => {
               <p>{{ product?.description }}</p>
             </div>
           </div>
-        </section>
+        </sention>
       </div>
     </div>
 

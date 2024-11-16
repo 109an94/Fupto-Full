@@ -43,6 +43,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.getById(id));
     }
 
+    @GetMapping("/{id}/single")
+    public ResponseEntity<ProductDetailDto> getSingleProduct(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.getSingleById(id));
+    }
+
     @GetMapping("/{id}/image/{displayOrder}")
     public ResponseEntity<Resource> getProductImage(
             @PathVariable Long id, @PathVariable Integer displayOrder) throws IOException {

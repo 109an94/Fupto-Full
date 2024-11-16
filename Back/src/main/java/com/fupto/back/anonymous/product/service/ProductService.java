@@ -13,4 +13,5 @@ public interface ProductService {
     List<ProductBrandDto> getBrands();
     Resource getProductImages(Long id, Integer displayOrder) throws IOException;
     ProductDetailDto getById(Long id);
+    ProductDetailDto getSingleById(Long id);
 }

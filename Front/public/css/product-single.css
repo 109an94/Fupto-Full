@@ -433,12 +433,6 @@
   }
 }
 
-@media (max-width: 1023px) {
-  .left-column > .description-section {
-    display: none;
-  }
-}
-
 @media (min-width: 769px) {
   .mobile-footer {
     display: none;
@@ -491,10 +485,6 @@
     max-width: 600px;
     margin-top: 1rem;
     justify-content: center;
-  }
-
-  .product-info > .description-section {
-    display: none;
   }
 
   .section-content.open {

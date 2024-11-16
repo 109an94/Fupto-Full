@@ -257,6 +257,64 @@ public class DefaultProductService implements ProductService {
                 .build();
     }
 
+    @Override
+    @Transactional
+    public ProductDetailDto getSingleById(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다."));
+        product.increaseViewCount();
+
+        List<ProductCateDto> categoryPath = new ArrayList<>();
+        Category currentCategory = product.getCategory();
+        while (currentCategory != null) {
+            categoryPath.add(0, ProductCateDto.builder()
+                    .id(currentCategory.getId())
+                    .name(currentCategory.getName())
+                    .level(currentCategory.getLevel())
+                    .build());
+            currentCategory = currentCategory.getParent();
+        }
+
+        List<ProductImageDto> images = product.getProductImages().stream()
+                .sorted(Comparator.comparing(ProductImage::getDisplayOrder))
+                .map(image -> ProductImageDto.builder()
+                        .id(image.getId())
+                        .displayOrder(image.getDisplayOrder())
+                        .imageUrl(getImageUrl(product.getId(), image.getDisplayOrder()))
+                        .build())
+                .toList();
+
+        Integer latestPrice = priceHistoryRepository.findLatestPriceByProductId(product.getId());
+
+        List<ProductShopListDto> shops = List.of(
+                ProductShopListDto.builder()
+                        .id(product.getShoppingMall().getId())
+                        .productId(product.getId())
+                        .shopName(product.getShoppingMall().getEngName())
+                        .price(latestPrice)
+                        .productUrl(product.getUrl())
+                        .build()
+        );
+
+        ProductPriceInfoDto priceInfo = ProductPriceInfoDto.builder()
+                .retailPrice(product.getRetailPrice())
+                .salePrice(latestPrice)
+                .discountRate(calculateDiscountRate(product.getRetailPrice(), latestPrice))
+                .build();
+
+        return ProductDetailDto.builder()
+                .id(product.getId())
+                .productName(product.getProductName())
+                .retailPrice(product.getRetailPrice())
+                .description(product.getDescription())
+                .categories(categoryPath)
+                .images(images)
+                .brandEngName(product.getBrand().getEngName())
+                .priceInfo(priceInfo)
+                .shops(shops)
+                .build();
+    }
+
     private Integer calculateDiscountRate(Integer retailPrice, Integer salePrice) {
         if (retailPrice == null || salePrice == null || retailPrice == 0) {
             return 0;
