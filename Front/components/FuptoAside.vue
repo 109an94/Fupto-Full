@@ -113,20 +113,33 @@ const handleSubCategoryChange = (category, subCategory) => {
 };
 
 const getSelectedCategories = () => {
-  const selectedCats = [];
+  const selectedCategories = {
+    category: [],
+    sub: [],
+  };
+
   categories.value.forEach((category) => {
-    if (category.subCategories) {
-      category.subCategories.forEach((subCat) => {
-        if (subCat.checked && !subCat.id.startsWith("all-")) {
-          selectedCats.push({
-            id: subCat.id,
-            name: subCat.name,
-          });
-        }
+    if (category.checked) {
+      selectedCategories.category.push({
+        id: category.id,
+        name: category.name,
       });
+
+      const allButton = category.subCategories.find((sub) => sub.id.startsWith("all-"));
+      if (!allButton?.checked) {
+        category.subCategories.forEach((subCat) => {
+          if (subCat.checked && !subCat.id.startsWith("all-")) {
+            selectedCategories.sub.push({
+              id: subCat.id,
+              name: subCat.name,
+            });
+          }
+        });
+      }
     }
   });
-  return selectedCats;
+
+  return selectedCategories;
 };
 
 const clearAll = () => {
@@ -235,7 +248,8 @@ const emitFilterChange = () => {
   const selectedBrands = getSelectedBrands();
 
   const filterData = {
-    cat: selectedCats,
+    category: selectedCats.category,
+    sub: selectedCats.sub,
     brand: selectedBrands,
   };
 
@@ -251,8 +265,10 @@ const handleSearch = () => {
     }
   }
 
+  const selectedCats = getSelectedCategories();
   const filterData = {
-    cat: getSelectedCategories(),
+    category: selectedCats.category,
+    sub: selectedCats.sub,
     brand: getSelectedBrands(),
     min: minPrice.value ? parseInt(minPrice.value) : null,
     max: maxPrice.value ? parseInt(maxPrice.value) : null,
@@ -285,28 +301,52 @@ defineExpose({
   },
 });
 
-// 선택된 카테고리 상태 복원
 const restoreSelectedCategories = async (selectedCatIds) => {
-  for (const category of categories.value) {
-    const hasSelectedSubCategory = category.subCategories.some((sub) => selectedCatIds.includes(sub.id.toString()));
-    if (hasSelectedSubCategory) {
-      category.checked = true;
-      category.isExpanded = true;
-      await loadThirdCategories(category);
+  if (route.query.category) {
+    const categoryIds = route.query.category.split(",");
+    for (const category of categories.value) {
+      if (categoryIds.includes(category.id.toString())) {
+        category.checked = true;
+        category.isExpanded = true;
+        if (category.subCategories.length === 1) {
+          await loadThirdCategories(category);
+        }
+      }
+    }
+  }
+
+  if (route.query.sub) {
+    const subIds = route.query.sub.split(",");
+    for (const category of categories.value) {
+      if (category.checked) {
+        await loadThirdCategories(category);
+        const allButton = category.subCategories.find((sub) => sub.id.startsWith("all-"));
+
+        category.subCategories.forEach((sub) => {
+          if (subIds.includes(sub.id.toString())) {
+            sub.checked = true;
+            if (allButton) {
+              allButton.checked = false;
+            }
+          }
+        });
+      }
     }
   }
 };
 
-// 초기 로드
 watch(
   [() => route.query.gender, () => props.initialGender],
-  ([queryGender, propGender]) => {
+  async ([queryGender, propGender]) => {
     const genderValue = queryGender || propGender;
     if (genderValue) {
       selectedGender.value = genderValue === "1" ? "male" : "female";
       clearPriceRange();
-      loadSecondCategories(genderValue);
-      loadBrands();
+      await loadSecondCategories(genderValue);
+      if (route.query.category || route.query.sub) {
+        await restoreSelectedCategories();
+      }
+      await loadBrands();
     }
   },
   { immediate: true }

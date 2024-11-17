@@ -12,7 +12,8 @@ const config = useRuntimeConfig();
 const gender = ref(route.query.gender);
 const asideRef = ref(null);
 const selectedFilters = ref({
-  cat: [],
+  category: [],
+  sub: [],
   brand: [],
 });
 
@@ -35,7 +36,8 @@ const { data: initialData } = await useFetch("/products", {
   baseURL: config.public.apiBase,
   params: {
     gender: route.query.gender,
-    cat: route.query.cat ? route.query.cat.split(",") : undefined,
+    category: route.query.category ? route.query.category.split(",") : undefined,
+    sub: route.query.sub ? route.query.sub.split(",") : undefined,
     brand: route.query.brand ? route.query.brand.split(",") : undefined,
     min: route.query.min || undefined,
     max: route.query.max || undefined,
@@ -49,6 +51,24 @@ if (initialData.value) {
   products.value = initialData.value.products;
   cursor.value = initialData.value.nextCursor;
   hasMore.value = initialData.value.hasMore;
+
+  if (route.query.category && route.query.categoryName) {
+    selectedFilters.value.category = [
+      {
+        id: route.query.category,
+        name: route.query.categoryName,
+      },
+    ];
+  }
+
+  if (route.query.sub && route.query.subName) {
+    selectedFilters.value.sub = [
+      {
+        id: route.query.sub,
+        name: route.query.subName,
+      },
+    ];
+  }
 }
 ////////////////////////////////////////////////////////////////////////////////
 const loadProducts = async (reset = false) => {
@@ -60,7 +80,8 @@ const loadProducts = async (reset = false) => {
       baseURL: config.public.apiBase,
       params: {
         gender: route.query.gender,
-        cat: route.query.cat ? route.query.cat.split(",") : undefined,
+        category: route.query.category ? route.query.category.split(",") : undefined,
+        sub: route.query.sub ? route.query.sub.split(",") : undefined,
         brand: route.query.brand ? route.query.brand.split(",") : undefined,
         min: route.query.min || undefined,
         max: route.query.max || undefined,
@@ -99,7 +120,8 @@ const selectOption = async (option) => {
     const response = await $fetch(`${config.public.apiBase}/products`, {
       params: {
         gender: route.query.gender,
-        cat: route.query.cat ? route.query.cat.split(",") : undefined,
+        category: route.query.category ? route.query.category.split(",") : undefined, // 수정
+        sub: route.query.sub ? route.query.sub.split(",") : undefined, // 수정
         brand: route.query.brand ? route.query.brand.split(",") : undefined,
         min: route.query.min || undefined,
         max: route.query.max || undefined,
@@ -132,25 +154,27 @@ const updateQueryParams = async (newParams) => {
 
   if (newParams.gender) {
     updatedQuery.gender = newParams.gender;
-    // 성별 변경시 정렬 쿼리 제거
     delete updatedQuery.sort;
   }
 
-  // 카테고리 처리
-  if (newParams.cat?.length) {
-    updatedQuery.cat = newParams.cat.map((c) => c.id).join(",");
+  if (newParams.category?.length) {
+    updatedQuery.category = newParams.category.map((c) => c.id).join(",");
   } else {
-    delete updatedQuery.cat;
+    delete updatedQuery.category;
   }
 
-  // 브랜드 처리
+  if (newParams.sub?.length) {
+    updatedQuery.sub = newParams.sub.map((c) => c.id).join(",");
+  } else {
+    delete updatedQuery.sub;
+  }
+
   if (newParams.brand?.length) {
     updatedQuery.brand = newParams.brand.map((b) => b.id).join(",");
   } else {
     delete updatedQuery.brand;
   }
 
-  // 가격 범위 처리
   if (newParams.min) updatedQuery.min = newParams.min;
   else delete updatedQuery.min;
 
@@ -173,33 +197,35 @@ const removeFilter = async (type, id) => {
 
   await asideRef.value?.updateFilterState({ type, id, checked: false });
 
-  // 현재 남아있는 필터 상태로 검색 실행
   const filterData = {
     gender: route.query.gender,
-    cat: selectedFilters.value.cat,
+    category: selectedFilters.value.category,
+    sub: selectedFilters.value.sub,
     brand: selectedFilters.value.brand,
     min: route.query.min,
     max: route.query.max,
   };
 
-  // 쿼리 파라미터 직접 업데이트
   const updatedQuery = { ...route.query };
 
-  // 카테고리 처리
-  if (filterData.cat?.length) {
-    updatedQuery.cat = filterData.cat.map((c) => c.id).join(",");
+  if (filterData.category?.length) {
+    updatedQuery.category = filterData.category.map((c) => c.id).join(",");
   } else {
-    delete updatedQuery.cat;
+    delete updatedQuery.category;
   }
 
-  // 브랜드 처리
+  if (filterData.sub?.length) {
+    updatedQuery.sub = filterData.sub.map((c) => c.id).join(",");
+  } else {
+    delete updatedQuery.sub;
+  }
+
   if (filterData.brand?.length) {
     updatedQuery.brand = filterData.brand.map((b) => b.id).join(",");
   } else {
     delete updatedQuery.brand;
   }
 
-  // 라우터 업데이트
   await router.replace({
     path: route.path,
     query: updatedQuery,
@@ -211,7 +237,8 @@ const removeFilter = async (type, id) => {
 // 검색 버튼 클릭
 const handleSearch = async (searchParams) => {
   selectedFilters.value = {
-    cat: searchParams.cat || [],
+    category: searchParams.category || [],
+    sub: searchParams.sub || [],
     brand: searchParams.brand || [],
   };
 
@@ -222,7 +249,8 @@ const handleSearch = async (searchParams) => {
 
   const queryParams = {
     ...searchParams,
-    cat: selectedFilters.value.cat,
+    category: selectedFilters.value.category,
+    sub: selectedFilters.value.sub,
     brand: selectedFilters.value.brand,
     min: searchParams.min || undefined,
     max: searchParams.max || undefined,
@@ -296,10 +324,17 @@ onUnmounted(() => {
       <FuptoAside ref="asideRef" :initialGender="gender" @filter-change="handleFilterChange" @search="handleSearch" />
       <div class="product-content">
         <!-- 필터 태그 -->
-        <section v-if="selectedFilters.cat.length || selectedFilters.brand.length" class="filter-tags">
-          <div v-for="cat in selectedFilters.cat" :key="`cat-${cat.id}`" class="filter-tag">
-            {{ cat.name }}
-            <button @click="removeFilter('cat', cat.id)">×</button>
+        <section
+          v-if="selectedFilters.category.length || selectedFilters.sub.length || selectedFilters.brand.length"
+          class="filter-tags"
+        >
+          <div v-for="category in selectedFilters.category" :key="`category-${category.id}`" class="filter-tag">
+            {{ category.name }}
+            <button @click="removeFilter('category', category.id)">×</button>
+          </div>
+          <div v-for="sub in selectedFilters.sub" :key="`sub-${sub.id}`" class="filter-tag">
+            {{ sub.name }}
+            <button @click="removeFilter('sub', sub.id)">×</button>
           </div>
           <div v-for="brand in selectedFilters.brand" :key="`brand-${brand.id}`" class="filter-tag">
             {{ brand.name }}

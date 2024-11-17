@@ -102,6 +102,28 @@ const openLowestPriceUrl = () => {
   }
 };
 
+const getQueryString = (clickedIndex) => {
+  if (!product.value?.categories) return {};
+
+  const query = {};
+
+  if (clickedIndex >= 0) {
+    query.gender = product.value.categories[0].id;
+  }
+
+  if (clickedIndex >= 1) {
+    query.category = product.value.categories[1].id;
+    query.categoryName = product.value.categories[1].name;
+  }
+
+  if (clickedIndex >= 2) {
+    query.sub = product.value.categories[2].id;
+    query.subName = product.value.categories[2].name;
+  }
+
+  return query;
+};
+
 watch(currentSlide, (newSlide) => {
   if (isModalOpen.value && product.value?.images) {
     selectedImage.value = product.value.images[newSlide];
@@ -119,10 +141,17 @@ onUnmounted(() => {
 
 <template>
   <main class="product product-detail-page">
-    <nav class="breadcrumb">
+    <nav class="categoty-list">
       <ol>
-        <li v-for="category in product?.categories" :key="category.id">
-          <a href="#">{{ category.name }}</a>
+        <li v-for="(category, index) in product?.categories" :key="category.id">
+          <nuxt-link
+            :to="{
+              path: '/products',
+              query: getQueryString(index),
+            }"
+          >
+            {{ category.name }}
+          </nuxt-link>
         </li>
       </ol>
     </nav>
@@ -171,21 +200,19 @@ onUnmounted(() => {
         </section>
 
         <section class="vendor-section">
-          <div class="section-content" :class="{ open: isVendorListOpen }">
-            <div class="vendor-list">
-              <article v-for="shop in product?.shops" :key="shop.id" class="vendor-card">
-                <div class="background-area" @click="navigateToRoute(`/products/${shop.productId}/single`)"></div>
-                <div class="vendor-logo" @click.stop>로고</div>
-                <div class="name-wrapper" @click.stop>
-                  <span class="vendor-name">{{ shop.shopName }}</span>
-                </div>
-                <div class="vendor-price">
-                  <p>{{ shop.price?.toLocaleString() }} ￦</p>
-                  <a :href="shop.productUrl" class="link" target="_blank" @click.stop>링크</a>
-                </div>
-              </article>
-            </div>
-          </div>
+          <ul class="vendor-list">
+            <li v-for="shop in product?.shops" :key="shop.id" class="vendor-card">
+              <div class="background-area" @click="navigateToRoute(`/products/${shop.productId}/single`)"></div>
+              <div class="vendor-logo" @click.stop>로고</div>
+              <div class="name-wrapper" @click.stop>
+                <span class="vendor-name">{{ shop.shopName }}</span>
+              </div>
+              <div class="vendor-price">
+                <p>{{ shop.price?.toLocaleString() }} ￦</p>
+                <a :href="shop.productUrl" class="link" target="_blank" @click.stop>링크</a>
+              </div>
+            </li>
+          </ul>
         </section>
 
         <section class="description-section">

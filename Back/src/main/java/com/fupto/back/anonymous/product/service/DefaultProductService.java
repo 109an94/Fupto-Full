@@ -63,7 +63,8 @@ public class DefaultProductService implements ProductService {
         // 상품 조회
         List<Product> products = productRepository.searchProducts(
                 searchDto.getGender(),
-                searchDto.getCat(),
+                searchDto.getCategory(),
+                searchDto.getSub(),
                 searchDto.getBrand(),
                 searchDto.getMin(),
                 searchDto.getMax(),

@@ -61,7 +61,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     LEFT JOIN FETCH p.brand b
     LEFT JOIN FETCH p.category c
     WHERE (:gender IS NULL OR c.parent.parent.id = :gender)
-    AND (:cat IS NULL OR c.id IN :cat)
+    AND (((:category IS NOT NULL AND :sub IS NULL) AND c.parent.id IN :category)
+        OR (:sub IS NOT NULL AND c.id IN :sub)
+        OR (:category IS NULL AND :sub IS NULL))
     AND (:brand IS NULL OR b.id IN :brand)
     AND (:min IS NULL OR EXISTS (
         SELECT 1 FROM PriceHistory ph 
@@ -116,7 +118,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     """)
     List<Product> searchProducts(
             @Param("gender") Long gender,
-            @Param("cat") List<Long> cat,
+            @Param("category") List<Long> category,
+            @Param("sub") List<Long> sub,
             @Param("brand") List<Long> brand,
             @Param("min") Integer min,
             @Param("max") Integer max,
