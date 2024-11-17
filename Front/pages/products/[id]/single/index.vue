@@ -1,10 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 
-useHead({
-  link: [{ rel: "stylesheet", href: "/css/product-single.css" }],
-});
-
 const currentSlide = ref(0);
 const isVendorListOpen = ref(true);
 const isDescriptionOpen = ref(true);
@@ -15,19 +11,19 @@ const modalCurrentSlide = ref(0);
 
 const route = useRoute();
 const router = useRouter();
+const config = useRuntimeConfig();
 const productId = route.params.id;
 
-const config = useRuntimeConfig();
-
-const { data: product } = await useFetch(`${config.public.apiBase}/products/${productId}/single`, {
-  key: `product-${productId}`,
-});
-
 useHead(() => ({
+  link: [{ rel: "stylesheet", href: "/css/product-single.css" }],
   bodyAttrs: {
     class: isModalOpen.value ? "modal-open" : "",
   },
 }));
+
+const { data: product } = await useFetch(`${config.public.apiBase}/products/${productId}/single`, {
+  key: `product-${productId}`,
+});
 
 const prevModalSlide = () => {
   if (modalCurrentSlide.value > 0) {
@@ -192,7 +188,7 @@ onUnmounted(() => {
           </div>
         </section>
 
-        <sention class="description-section">
+        <section class="description-section">
           <div class="section-header" @click="toggleDescription">
             <span>상품 설명</span>
             <svg class="arrow" :class="{ up: isDescriptionOpen }" viewBox="0 0 24 24" fill="none">
@@ -204,7 +200,7 @@ onUnmounted(() => {
               <p>{{ product?.description }}</p>
             </div>
           </div>
-        </sention>
+        </section>
       </div>
     </div>
 

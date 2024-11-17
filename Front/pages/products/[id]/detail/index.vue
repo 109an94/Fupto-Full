@@ -1,10 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 
-useHead({
-  link: [{ rel: "stylesheet", href: "/css/product-detail.css" }],
-});
-
 const currentSlide = ref(0);
 const isVendorListOpen = ref(true);
 const isDescriptionOpen = ref(true);
@@ -15,19 +11,19 @@ const modalCurrentSlide = ref(0);
 
 const route = useRoute();
 const router = useRouter();
+const config = useRuntimeConfig();
 const productId = route.params.id;
 
-const config = useRuntimeConfig();
-
-const { data: product } = await useFetch(`${config.public.apiBase}/products/${productId}`, {
-  key: `product-${productId}`,
-});
-
 useHead(() => ({
+  link: [{ rel: "stylesheet", href: "/css/product-detail.css" }],
   bodyAttrs: {
     class: isModalOpen.value ? "modal-open" : "",
   },
 }));
+
+const { data: product } = await useFetch(`${config.public.apiBase}/products/${productId}`, {
+  key: `product-${productId}`,
+});
 
 const prevModalSlide = () => {
   if (modalCurrentSlide.value > 0) {
