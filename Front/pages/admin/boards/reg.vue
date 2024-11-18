@@ -9,9 +9,12 @@ useHead({
 // 게시판 데이터
 const board = ref({
   title: '',
-  boardCategoryName: '공지사항',
   contents: '',
-  fileUpload: null,
+  password: '',
+  regMemberId: '7',
+  boardCategoryId: '',
+  active: true,
+  // fileUpload: null,
 });
 
 const imageUrl = ref('');
@@ -45,34 +48,33 @@ const previewImage = (event) => {
 // 제출 처리
 const handleSubmit = async() => {
   try{
+    const formData = new FormData();
 
-  const formData = new FormData();
-
-  formData.append('title', board.value.title);
-  formData.append('contents', board.value.contents);
-  formData.append('boardCategoryName', board.value.boardCategoryName);
-
-  // formData.append('boardData', JSON.stringify({
-  //   tilte: board.value.title,
-  //   contents: board.value.contents,
-  //   boardCategoryName: board.value.boardCategoryName
-  // }));
+    formData.append('boardData', JSON.stringify({
+    title: board.value.title,
+    contents: board.value.contents,
+    password: board.value.password,
+    regMemberId: board.value.regMemberId,
+    boardCategoryId: board.value.boardCategoryId,
+    active: board.value.active,
+  }));
   
   // 이미지 파일도 추가 (파일이 있으면)
   if (board.value.fileUpload) {
     formData.append('file', board.value.fileUpload);
   }
 
-  const response = await fetch('http://localhost:8080/api/v1/admin/boards/post',{
-    method: 'POST',
-    body: formData
-  });
+  const response = await fetch('http://localhost:8080/api/v1/admin/boards/post', {
+        method: 'POST',
+        body: formData,
+      });
 
   if(response.ok){
     const result = await response.json();
     console.log('게시글 등록 성공:',result);
     alert('게시글이 등록되었습니다.');
     resetForm();
+    window.location.href = 'http://localhost:3000/admin/boards';
   } else {
     const errorData = await response.json();
     console.error('게시글 등록 실패:', errorData);
@@ -87,8 +89,11 @@ const handleSubmit = async() => {
   const resetForm = () => {
     board.value = {
       title: '',
-      boardCategoryName: '',
       contents: '',
+      password: '',
+      regMemberId: '7',
+      boardCategoryId: '',
+      active: true,
       fileUpload: null,
     };
   };
@@ -113,7 +118,7 @@ const handleSubmit = async() => {
 
     <div class="card">
       <div class="card-body">
-        <form @submit.prevent="handleSubmit" enctype="multipart/form-data">
+        <form @submit.prevent="handleSubmit">
           <table class="table">
             <tbody>
               <tr>
@@ -127,11 +132,11 @@ const handleSubmit = async() => {
               <tr>
                 <th>게시판</th>
                 <td>
-                  <select v-model="board.boardCategoryName" class="select">
-                    <option value="공지사항">공지사항</option>
-                    <option value="커뮤니티">커뮤니티</option>
-                    <option value="FAQ">FAQ</option>
-                    <option value="고객센터">고객센터</option>
+                  <select v-model="board.boardCategoryId" class="select">
+                    <option value="1">공지사항</option>
+                    <option value="2">커뮤니티</option>
+                    <option value="3">FAQ</option>
+                    <option value="4">고객센터</option>
                   </select>
                 </td>
               </tr>
@@ -143,7 +148,7 @@ const handleSubmit = async() => {
                 </td>
               </tr>
 
-              <tr>
+              <!-- <tr>
                 <th>이미지</th>
                 <td>
                   <input type="file" id="fileUpload" @change="previewImage" accept="image/*">
@@ -151,7 +156,7 @@ const handleSubmit = async() => {
                     <img v-if="imageUrl" :src="imageUrl" alt="미리보기 이미지"/>
                   </div>
                 </td>
-              </tr>
+              </tr> -->
 
             </tbody>
           </table>

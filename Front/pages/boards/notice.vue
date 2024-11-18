@@ -1,4 +1,7 @@
 <script setup>
+useHead({
+  link: [{ rel: "stylesheet", href: "/css/board-notice.css" }],
+});
 
 </script>
 <template>
@@ -63,13 +66,8 @@
       </tr>
     </tbody>
   </table>
-  <button>글쓰기</button>
+  <button class="notice-btn">글쓰기</button>
     </div>
   </main>
 </template>
 
-<!-- <style scoped>
-@import url("@/assets/css/reset.css");
-@import url("@/assets/css/style.css");
-@import url("@/assets/css/board-notice.css");
-</style> -->

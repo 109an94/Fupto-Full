@@ -142,15 +142,6 @@ public class DefaultBoardService implements BoardService {
     }
 
 // ========== 등록 =========================================================================
-//@Override
-//public BoardListDto createPost(@RequestParam("title") String title,
-//                               @RequestParam("contents") String contents,
-//                               @RequestParam("boardCategoryName") String boardCategoryName,
-//                               @RequestParam("file") MultipartFile file,
-//                               @RequestParam("boardCategoryId") Long boardCategoryId,
-//                               @RequestParam("regMemberId") Long regMemberId) {
-//
-//    }
 
     @Override
     public BoardListDto createPost(BoardListDto boardListDto) {
@@ -181,6 +172,7 @@ public class DefaultBoardService implements BoardService {
     }
 
     // ========== 수정 =========================================================================
+
     @Override
     public BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception {
         Board board = boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("아이디가 존재하지 않습니다."));

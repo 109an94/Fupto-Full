@@ -21,17 +21,7 @@ public interface BoardService {
     BoardDefaultDto getSearch(BoardSearchDto boardSearchDto);
 
     // 등록
-//    BoardListDto createPost(BoardListDto boardListDto);
-//    BoardResponseDto createPost(BoardRequestsDto requestsDto);
     BoardListDto createPost(BoardListDto boardListDto);
-
-    // ========== 등록 =========================================================================
-//    BoardListDto createPost(@RequestParam("title") String title,
-//                            @RequestParam("contents") String contents,
-//                            @RequestParam("boardCategoryName") String boardCategoryName,
-//                            @RequestParam("file") MultipartFile file,
-//                            @RequestParam("boardCategoryId") Long boardCategoryId,
-//                            @RequestParam("regMemberId") Long regMemberId);
 
     // 수정
     BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception;
@@ -39,10 +29,11 @@ public interface BoardService {
     // 삭제
 //    SuccessResponseDto deletePost(Long id, BoardRequestsDto requestsDto) throws Exception;
     SuccessResponseDto deletePost(Long id) throws Exception;
+    void deleteSelected(List<Long> ids);
 
     // 엑티브 수정
     BoardListDto updateActive(Long id, Boolean active);
 
 
-    void deleteSelected(List<Long> ids);
+
 }
