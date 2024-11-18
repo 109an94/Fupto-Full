@@ -381,6 +381,8 @@ public class DefaultProductService implements ProductService {
                 .orElseThrow(() -> new EntityNotFoundException("브랜드를 찾을 수 없습니다.")));
         product.setShoppingMall(shoppingMallRepository.findById(updateDto.getShoppingMallId())
                 .orElseThrow(() -> new EntityNotFoundException("쇼핑몰을 찾을 수 없습니다.")));
+
+        product.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
     }
 
     private void updateImages(Product product, List<Long> existingImageIds,
@@ -448,6 +450,7 @@ public class DefaultProductService implements ProductService {
                 .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다."));
         product.setState(false);
         product.setActive(false);
+        product.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
         productRepository.save(product);
     }
 

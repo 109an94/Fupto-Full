@@ -150,15 +150,28 @@ const triggerFileUpload = (id) => {
 const handleFileUpload = (event, id) => {
   const files = event.target.files;
   const product = products.value[0];
+
+  if (!files || files.length === 0) {
+    return;
+  }
+
   if (product) {
-    product.fileList = [...(product.fileList || []), ...Array.from(files)];
+    if (!product.fileList) {
+      product.fileList = [];
+    }
+
+    product.fileList = [...product.fileList, ...Array.from(files)];
 
     const newImageUrls = Array.from(files).map((file) => URL.createObjectURL(file));
     const newImageNames = Array.from(files).map((file) => file.name);
 
     product.images = [...product.images, ...newImageUrls];
 
-    product.imageNames = [...product.existingImages.map((img) => img.originalName), ...newImageNames];
+    product.imageNames = [
+      ...product.existingImages.map((img) => img.originalName),
+      ...product.imageNames.slice(product.existingImages.length),
+      ...newImageNames,
+    ];
   }
 };
 
