@@ -11,7 +11,7 @@ const boards = ref([]);
 const totalElements = ref(0);
 const totalPages = ref(0);
 const currentPage = ref(1);
-const pageSize = ref(3);
+const pageSize = ref(10);
 
 const startDatePicker = ref(null);
 const endDatePicker = ref(null);
@@ -23,11 +23,11 @@ const noDataMessage = ref('');
 
 // 폼 데이터
 const formData = ref({
-  searchType: 'default_title', // 제목, 작성자, 내용(?)
+  searchType: 'title', // 제목, 작성자, 내용(?)
   searchKeyWord: '',
   boardCategoryName: '',
   active: '',
-  dateType: 'reg',
+  dateType: 'cre',
   startDate: '',
   endDate: '',
 })
@@ -36,9 +36,9 @@ const formData = ref({
 const showModal = ref(false);
 const selectedBoard = reactive({
   id: '',
-  regMemberNickName: '',
-  boardCategory: '',
   title: '',
+  boardCategoryName: '',
+  regMemberNickName: '',
   contents: '',
   img: ''
 });
@@ -46,6 +46,7 @@ const selectedBoard = reactive({
 // 모달 열기
 const openModal = (board) => {
   Object.assign(selectedBoard, board);
+  console.log(selectedBoard);
   showModal.value = true;
 };
 
@@ -53,7 +54,6 @@ const openModal = (board) => {
 const closeModal = () => {
   showModal.value = false;
 };
-
 
 // 체크박스 상태
 const selectAll = ref(false);
@@ -70,7 +70,7 @@ const fetchBoards = async () => {
     if (formData.value.searchType) params.append("searchType", formData.value.searchType);
     if (formData.value.searchKeyWord) params.append("searchKeyWord", formData.value.searchKeyWord);
     if (formData.value.active) params.append("active", formData.value.active);
-    if (formData.value.boardCategoryName) params.append("boardCategory", formData.value.boardCategory);
+    if (formData.value.boardCategoryName) params.append("boardCategory", formData.value.boardCategoryName);
     if (formData.value.dateType) params.append("dateType", formData.value.dateType);
     if (formData.value.startDate) params.append("startDate", formData.value.startDate);
     if (formData.value.endDate) params.append("endDate", formData.value.endDate);
@@ -106,6 +106,65 @@ const updateActive = async (boardId, active) => {
   }
 };
 
+
+// 삭제
+const confirmDelete = (boardId) => {
+  if (confirm('삭제하시겠습니까?')) {
+    handleDelete(boardId);
+  }
+};
+
+const handleDelete = async (boardId) => {
+  try {
+    const response = await fetch(`http://localhost:8080/api/v1/admin/boards/${boardId}`, {
+      method: "PATCH"
+    });
+
+    if (!response.ok) {
+      throw new Error("삭제에 실패했습니다.");
+    }
+
+
+    alert('삭제되었습니다.');
+    fetchBoards();
+
+  } catch (error) {
+    console.error("Error deleting board:", error);
+    alert(error.message);
+  }
+};
+
+const handleBulkDelete = async () => {
+  if (selectedItems.value.size === 0) {
+    alert('삭제할 게시글을 선택해주세요.');
+    return;
+  }
+
+  if (confirm('선택한 게시글을 삭제하시겠습니까?')) {
+    try {
+      const response = await fetch('http://localhost:8080/api/v1/admin/brands/bulk-update-state', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(Array.from(selectedItems.value)),
+      });
+
+      if (!response.ok) {
+        throw new Error('삭제에 실패했습니다.');
+      }
+
+      alert('삭제되었습니다.');
+      selectedItems.value.clear();
+      selectAll.value = false;
+      fetchBoards();
+    } catch (error) {
+      console.error('Error deleting boards:', error);
+      alert(error.message);
+    }
+  }
+};
+
 // active 토글 핸들러
 const handleActiveChange = async (brand) => {
   await updateActive(brand.id, brand.active);
@@ -123,6 +182,13 @@ const pageSizeChange = (event) => {
   currentPage.value = 1;
   fetchBoards();
 };
+
+// 현재 페이지에 따라 표시할 페이지 번호 범위를 동적으로 계산
+const visiblePages = computed(() => {
+  const startPage = Math.floor((currentPage.value - 1) / 5) * 5 + 1;
+  const endPage = Math.min(startPage + 4, totalPages.value);
+  return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+});
 
 
 // Flatpickr 로딩 체크
@@ -177,6 +243,7 @@ const setYesterday = () => {
   }
 };
 
+
 const setToday = () => {
   const today = new Date();
   if (startDatePicker.value && endDatePicker.value) {
@@ -216,7 +283,7 @@ const handleSelectAll = (event) => {
   event.preventDefault();
   const checked = event.target.checked;
   if (checked) {
-    selectedItems.value = new Set(brands.value.map((board) => board.id));
+    selectedItems.value = new Set(boards.value.map((board) => board.id));
   } else {
     selectedItems.value.clear();
   }
@@ -313,11 +380,11 @@ onMounted(() => {
                 <th>게시판</th>
                 <td>
                   <select v-model="formData.boardCategoryName" name="st" class="select">
-                    <option value="default_name">전체</option>
-                    <option value="notice_comm">커뮤니티</option>
-                    <option value="notice_info">공지사항</option>
-                    <option value="notice_faq">FAQ</option>
-                    <option value="notice_cen">고객센터</option>
+                    <option value="">전체</option>
+                    <option value="공지사항">공지사항</option>
+                    <option value="커뮤니티">커뮤니티</option>
+                    <option value="FAQ">FAQ</option>
+                    <option value="고객센터">고객센터</option>
                   </select>
                 </td>
               </tr>
@@ -336,13 +403,12 @@ onMounted(() => {
               <tr>
                 <th>게시글</th>
                 <td>
-                  <select v-model="formData.searchKeyWord" name="sc" class="select">
-                    <option value="notice_all">전체</option>
+                  <select v-model="formData.searchType" name="sc" class="select">
                     <option value="title">제목</option>
                     <option value="regMemberNickName">작성자</option>
                     <option value="contents">내용</option>
                   </select>
-                  <input type="text" name="ss" class="input-text" />
+                  <input v-model="formData.searchKeyWord" type="text" name="ss" class="input-text" />
                 </td>
               </tr>
 
@@ -360,15 +426,15 @@ onMounted(() => {
       <div class="card-body">
         <div class="d-flex">
           <div class="d-flex-1">
-            <button class="btn btn-outline-danger">삭제</button>
+            <button class="btn btn-outline-danger" @click="handleBulkDelete">삭제</button>
           </div>
 
           <div class="d-flex">
             <select class="select ml-2" v-model="pageSize" @change="pageSizeChange">
-              <option :value="3">3</option>
               <option :value="5">5</option>
               <option :value="10">10</option>
               <option :value="15">15</option>
+              <option :value="20">20</option>
             </select>
             <div>
             <router-link to="/admin/boards/reg" class="btn btn-outline-primary">글쓰기</router-link>
@@ -379,11 +445,14 @@ onMounted(() => {
           <table class="table product-list-table">
             <thead>
               <tr class="text-md">
-                <th>
+                <!-- <th>
                   <div class="custom-control custom-checkbox">
                     <input type="checkbox" class="custom-control-input" id="selectAll" />
                     <label class="custom-control-label" for="selectAll"></label>
                   </div>
+                </th> -->
+                <th>
+                  <input type="checkbox" id="selectAll" :checked="selectAll" @change="handleSelectAll" class="pl-checkbox" />
                 </th>
                 <th>NO.</th>
                 <th>Title</th>
@@ -398,10 +467,13 @@ onMounted(() => {
             <tbody>
               <tr v-for="board in boards" :key="board.id">
                 <td>
-                  <div class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input" :id="'notice' + board.id" />
-                    <label class="custom-control-label" :for="'notice' + board.id"></label>
-                  </div>
+                    <input
+                    type="checkbox"
+                    :id="'board' + board.id"
+                    :checked="selectedItems.has(board.id)"
+                    @change="(e) => handleSelectItem(e, board.id)"
+                    class="pl-checkbox"
+                  />
                 </td>
                 <td>{{ board.id }}</td>
                 <td class="product-cell"><a href="#">{{ board.title }}</a></td>
@@ -413,20 +485,61 @@ onMounted(() => {
                     <label class="custom-control-label" :for="'active' + board.id"></label>
                   </div>
                 </td>
-                <td class="text-md">{{ board.createdAt }}</td>
-                <td class="text-md">{{ board.modifiedAt }}</td>
+                <td class="text-md">{{ formatDate(board.createdAt)[0] }}<br>{{ formatDate(board.createdAt)[1] }}</td>
+                <td class="text-md">{{ formatDate(board.modifiedAt)[0] }}<br>{{ formatDate(board.modifiedAt)[1] }}</td>
                 <td>
-                  <button class="btn btn-outline-secondary btn-sm">
-                    <i class="mdi mdi-pencil"></i>
+                  <button class="btn btn-outline-third btn-sm toggle-brands" @click="openModal(board)">
+                    <i class="mdi mdi-chevron-down"></i>
                   </button>
-                  <button class="btn btn-outline-danger btn-sm">
-                    <i class="mdi mdi-delete"></i>
+                  <button class="btn btn-outline-secondary btn-sm">
+                    <i class="bx bxs-pencil"></i>
+                  </button>
+                  <button class="btn btn-outline-danger btn-sm" @click="confirmDelete(board.id)">
+                    <i class="bx bx-trash"></i>
                   </button>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
+
+          <div class="pagination-container">
+          <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+              <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                <a class="page-link" href="#" @click.prevent="pageChange(currentPage - 1)">이전</a>
+              </li>
+              <li class="page-item" v-for="page in visiblePages" :key="page" :class="{ active: currentPage === page }">
+                <a class="page-link" href="#" @click.prevent="pageChange(page)">{{ page }}</a>
+              </li>
+              <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                <a class="page-link" href="#" @click.prevent="pageChange(currentPage + 1)">다음</a>
+              </li>
+            </ul>
+          </nav>
+          </div>
+
+      </div>
+    </div>
+
+    <div v-if="showModal" class="modal-overlay" @click="closeModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h5 class="modal-title">게시글</h5>
+          <button type="button" class="close" @click="closeModal">
+            &times;
+          </button>
+        </div>
+        
+        <div class="modal-body">
+          <p class="modal-no"><strong>NO. </strong> {{ selectedBoard.id }}</p>
+          <p class="modal-tit"><strong>TITLE: </strong> {{ selectedBoard.title }}</p>
+          <p class="modal-cat"><strong>CATERORY: </strong> {{ selectedBoard.boardCategoryName }}</p>
+          <p class="modal-wri"><strong>WRITER: </strong> {{ selectedBoard.regMemberNickName }}</p>
+          <br>
+          <p class="modal-con"><strong>CONTENTS:</strong>{{ selectedBoard.contents }}</p>
+        </div>
+        
       </div>
     </div>
   </main>

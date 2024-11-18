@@ -9,8 +9,7 @@ useHead({
 // 게시판 데이터
 const board = ref({
   title: '',
-  boardCategory: '',
-  active: false,
+  boardCategoryName: '공지사항',
   contents: '',
   fileUpload: null,
 });
@@ -53,7 +52,7 @@ const handleSubmit = async() => {
     tilte: board.value.title,
     contents: board.value.contents,
     active: board.value.active,
-    boardCategory: board.value.boardCategory
+    boardCategoryName: board.value.boardCategoryName
   }));
   
   // 이미지 파일도 추가 (파일이 있으면)
@@ -61,7 +60,7 @@ const handleSubmit = async() => {
     formData.append('file', board.value.fileUpload);
   }
 
-  const response = await fetch('http://localhost:8080/api/v1/admin/boards/reg',{
+  const response = await fetch('http://localhost:8080/api/v1/admin/boards/post',{
     method: 'POST',
     body: formData
   });
@@ -85,8 +84,7 @@ const handleSubmit = async() => {
   const resetForm = () => {
     board.value = {
       title: '',
-      boardCategory: '',
-      active: false,
+      boardCategoryName: '',
       contents: '',
       fileUpload: null,
     };
@@ -126,22 +124,12 @@ const handleSubmit = async() => {
               <tr>
                 <th>게시판</th>
                 <td>
-                  <select v-model="board.boardCategory" class="select">
-                    <option value="board_notice">공지사항</option>
-                    <option value="board_comm">커뮤니티</option>
-                    <option value="board_faq">FAQ</option>
-                    <option value="board_cen">고객센터</option>
+                  <select v-model="board.boardCategoryName" class="select">
+                    <option value="공지사항">공지사항</option>
+                    <option value="커뮤니티">커뮤니티</option>
+                    <option value="FAQ">FAQ</option>
+                    <option value="고객센터">고객센터</option>
                   </select>
-                </td>
-              </tr>
-
-              <tr>
-                <th>노출</th>
-                <td>
-                  <input type="checkbox" id="toggle" v-model="board.visible" hidden/>
-                  <label for="toggle" class="toggleSwitch">
-                    <span class="toggleButton"></span>
-                  </label>
                 </td>
               </tr>
 

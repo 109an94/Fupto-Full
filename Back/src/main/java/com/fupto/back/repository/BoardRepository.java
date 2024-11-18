@@ -22,7 +22,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     void deleteById(Long id);
 
     @Query("SELECT b FROM Board b WHERE " +
-            "(:searchType = 'default_name' OR " +
+            "(:searchType IS NULL OR " +
             "(:searchKeyWord IS NULL OR " +
             "(:searchType = 'title' AND b.title LIKE %:searchKeyWord%) OR " +
             "(:searchType = 'regMemberNickName' AND b.regMember.nickname LIKE %:searchKeyWord%) OR " +

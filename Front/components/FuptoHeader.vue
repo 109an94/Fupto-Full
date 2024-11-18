@@ -12,7 +12,7 @@
           <a href="#">쇼핑몰</a>
         </li>
         <li class="main-nav_link">
-          <NuxtLink to="/board/notice">게시글</NuxtLink>
+          <NuxtLink to="/boards">게시글</NuxtLink>
         </li>
       </ul>
     </nav>

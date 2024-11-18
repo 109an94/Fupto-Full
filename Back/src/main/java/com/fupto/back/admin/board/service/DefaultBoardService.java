@@ -166,8 +166,8 @@ public class DefaultBoardService implements BoardService {
     @Override
     public BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception {
         Board board = boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("아이디가 존재하지 않습니다."));
-        if (!requestsDto.getPassword().equals(board.getPassword()))
-            throw new Exception("비밀번호가 일치하지 않습니다.");
+//        if (!requestsDto.getPassword().equals(board.getPassword()))
+//            throw new Exception("비밀번호가 일치하지 않습니다.");
 
         board.update(requestsDto);
         boardRepository.save(board);
@@ -182,8 +182,8 @@ public class DefaultBoardService implements BoardService {
         Board board = boardRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
         );
-        if (!requestsDto.getPassword().equals(board.getPassword()))
-            throw new Exception("비밀번호가 일치하지 않습니다.");
+//        if (!requestsDto.getPassword().equals(board.getPassword()))
+//            throw new Exception("비밀번호가 일치하지 않습니다.");
 
         boardRepository.deleteById(id);
         return new SuccessResponseDto(true);

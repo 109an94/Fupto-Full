@@ -56,18 +56,20 @@ public class Board {
     @Column(name = "active", nullable = false)
     private Boolean active = false;
 
+    @Column(name = "state", nullable = true)
+    private Boolean state = false;
+
     @PrePersist
     public void onPrePersist() {
         ZonedDateTime nowInKST = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
         this.modifiedAt = nowInKST.toInstant();
     }
 
-
     public void update(BoardRequestsDto requestsDto) {
 
         this.title = requestsDto.getTitle();
         this.contents = requestsDto.getContents();
-        this.password = requestsDto.getPassword();
+//        this.password = requestsDto.getPassword();
         this.modifiedAt = Instant.now().plusSeconds(9 * 3600);
 
     }

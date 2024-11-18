@@ -23,5 +23,6 @@ public class BoardListDto {
     private Long boardCategoryId;
     private String boardCategoryName;
     private Boolean active;
+    private Boolean state;
 
 }
