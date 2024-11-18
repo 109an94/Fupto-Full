@@ -21,6 +21,7 @@ const selectedGender = ref(props.initialGender);
 const toggleGender = async (gender) => {
   selectedGender.value = gender;
   const genderId = gender === "male" ? "1" : "2";
+  clearPriceRange();
   emit("filter-change", { gender: genderId });
   await loadSecondCategories(genderId);
   await loadBrands();
@@ -34,13 +35,13 @@ const loadSecondCategories = async (genderId) => {
   if (!genderId) return;
 
   const config = useRuntimeConfig();
-  const { data } = await useFetch("/products/categories", {
+  const data = await $fetch("/products/categories", {
     baseURL: config.public.apiBase,
     params: { parentId: genderId },
   });
 
-  if (data.value) {
-    categories.value = data.value.map((category) => ({
+  if (data) {
+    categories.value = data.map((category) => ({
       id: category.id,
       name: category.name,
       checked: false,
@@ -48,7 +49,6 @@ const loadSecondCategories = async (genderId) => {
       subCategories: [{ id: `all-${category.id}`, name: "All", checked: true }],
     }));
 
-    // URL에서 선택된 카테고리 복원
     if (route.query.cat) {
       const selectedCatIds = route.query.cat.split(",");
       await restoreSelectedCategories(selectedCatIds);
@@ -58,15 +58,15 @@ const loadSecondCategories = async (genderId) => {
 
 const loadThirdCategories = async (category) => {
   const config = useRuntimeConfig();
-  const { data } = await useFetch("/products/categories", {
+  const data = await $fetch("/products/categories", {
     baseURL: config.public.apiBase,
     params: { parentId: category.id },
   });
 
-  if (data.value) {
+  if (data) {
     category.subCategories = [
       { id: `all-${category.id}`, name: "All", checked: true },
-      ...data.value.map((subCat) => ({
+      ...data.map((subCat) => ({
         id: subCat.id.toString(),
         name: subCat.name,
         checked: false,
@@ -113,20 +113,33 @@ const handleSubCategoryChange = (category, subCategory) => {
 };
 
 const getSelectedCategories = () => {
-  const selectedCats = [];
+  const selectedCategories = {
+    category: [],
+    sub: [],
+  };
+
   categories.value.forEach((category) => {
-    if (category.subCategories) {
-      category.subCategories.forEach((subCat) => {
-        if (subCat.checked && !subCat.id.startsWith("all-")) {
-          selectedCats.push({
-            id: subCat.id,
-            name: subCat.name,
-          });
-        }
+    if (category.checked) {
+      selectedCategories.category.push({
+        id: category.id,
+        name: category.name,
       });
+
+      const allButton = category.subCategories.find((sub) => sub.id.startsWith("all-"));
+      if (!allButton?.checked) {
+        category.subCategories.forEach((subCat) => {
+          if (subCat.checked && !subCat.id.startsWith("all-")) {
+            selectedCategories.sub.push({
+              id: subCat.id,
+              name: subCat.name,
+            });
+          }
+        });
+      }
     }
   });
-  return selectedCats;
+
+  return selectedCategories;
 };
 
 const clearAll = () => {
@@ -146,19 +159,18 @@ const brands = ref([]);
 
 const loadBrands = async () => {
   const config = useRuntimeConfig();
-  const { data } = await useFetch("/products/brands", {
+  const data = await $fetch("/products/brands", {
     baseURL: config.public.apiBase,
   });
 
-  if (data.value) {
-    brands.value = data.value.map((brand) => ({
+  if (data) {
+    brands.value = data.map((brand) => ({
       id: `brand-${brand.id}`,
       originalId: brand.id,
       name: `${brand.engName}(${brand.korName})`,
       checked: false,
     }));
 
-    // URL에서 선택된 브랜드 복원
     if (route.query.brand) {
       const selectedBrandIds = route.query.brand.split(",");
       brands.value.forEach((brand) => {
@@ -236,7 +248,8 @@ const emitFilterChange = () => {
   const selectedBrands = getSelectedBrands();
 
   const filterData = {
-    cat: selectedCats,
+    category: selectedCats.category,
+    sub: selectedCats.sub,
     brand: selectedBrands,
   };
 
@@ -252,8 +265,10 @@ const handleSearch = () => {
     }
   }
 
+  const selectedCats = getSelectedCategories();
   const filterData = {
-    cat: getSelectedCategories(),
+    category: selectedCats.category,
+    sub: selectedCats.sub,
     brand: getSelectedBrands(),
     min: minPrice.value ? parseInt(minPrice.value) : null,
     max: maxPrice.value ? parseInt(maxPrice.value) : null,
@@ -286,26 +301,52 @@ defineExpose({
   },
 });
 
-// 선택된 카테고리 상태 복원
 const restoreSelectedCategories = async (selectedCatIds) => {
-  for (const category of categories.value) {
-    const hasSelectedSubCategory = category.subCategories.some((sub) => selectedCatIds.includes(sub.id.toString()));
-    if (hasSelectedSubCategory) {
-      category.checked = true;
-      category.isExpanded = true;
-      await loadThirdCategories(category);
+  if (route.query.category) {
+    const categoryIds = route.query.category.split(",");
+    for (const category of categories.value) {
+      if (categoryIds.includes(category.id.toString())) {
+        category.checked = true;
+        category.isExpanded = true;
+        if (category.subCategories.length === 1) {
+          await loadThirdCategories(category);
+        }
+      }
+    }
+  }
+
+  if (route.query.sub) {
+    const subIds = route.query.sub.split(",");
+    for (const category of categories.value) {
+      if (category.checked) {
+        await loadThirdCategories(category);
+        const allButton = category.subCategories.find((sub) => sub.id.startsWith("all-"));
+
+        category.subCategories.forEach((sub) => {
+          if (subIds.includes(sub.id.toString())) {
+            sub.checked = true;
+            if (allButton) {
+              allButton.checked = false;
+            }
+          }
+        });
+      }
     }
   }
 };
 
-// 초기 로드
 watch(
-  () => props.initialGender,
-  (newGender) => {
-    if (newGender) {
-      selectedGender.value = newGender === "1" ? "male" : "female";
-      loadSecondCategories(newGender);
-      loadBrands();
+  [() => route.query.gender, () => props.initialGender],
+  async ([queryGender, propGender]) => {
+    const genderValue = queryGender || propGender;
+    if (genderValue) {
+      selectedGender.value = genderValue === "1" ? "male" : "female";
+      clearPriceRange();
+      await loadSecondCategories(genderValue);
+      if (route.query.category || route.query.sub) {
+        await restoreSelectedCategories();
+      }
+      await loadBrands();
     }
   },
   { immediate: true }

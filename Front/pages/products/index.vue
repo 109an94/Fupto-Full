@@ -7,11 +7,18 @@ useHead({
 
 const route = useRoute();
 const router = useRouter();
+const config = useRuntimeConfig();
+
 const gender = ref(route.query.gender);
 const asideRef = ref(null);
+const selectedFilters = ref({
+  category: [],
+  sub: [],
+  brand: [],
+});
 
-// 정렬 관련
 const isActive = ref(false);
+const selectedSort = ref("popular");
 const sortOptions = [
   { label: "인기순", value: "popular" },
   { label: "최근 등록순", value: "recent" },
@@ -19,7 +26,87 @@ const sortOptions = [
   { label: "높은 가격순", value: "priceDesc" },
   { label: "할인율 높은순", value: "discountDesc" },
 ];
-const selectedSort = ref("popular");
+
+const products = ref([]);
+const loading = ref(false);
+const hasMore = ref(true);
+const cursor = ref(null);
+
+const { data: initialData } = await useFetch("/products", {
+  baseURL: config.public.apiBase,
+  params: {
+    gender: route.query.gender,
+    category: route.query.category ? route.query.category.split(",") : undefined,
+    sub: route.query.sub ? route.query.sub.split(",") : undefined,
+    brand: route.query.brand ? route.query.brand.split(",") : undefined,
+    min: route.query.min || undefined,
+    max: route.query.max || undefined,
+    sort: selectedSort.value,
+    cursor: null,
+    limit: 20,
+  },
+});
+
+if (initialData.value) {
+  products.value = initialData.value.products;
+  cursor.value = initialData.value.nextCursor;
+  hasMore.value = initialData.value.hasMore;
+
+  if (route.query.category && route.query.categoryName) {
+    selectedFilters.value.category = [
+      {
+        id: route.query.category,
+        name: route.query.categoryName,
+      },
+    ];
+  }
+
+  if (route.query.sub && route.query.subName) {
+    selectedFilters.value.sub = [
+      {
+        id: route.query.sub,
+        name: route.query.subName,
+      },
+    ];
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
+const loadProducts = async (reset = false) => {
+  if (loading.value || (!hasMore.value && !reset)) return;
+  loading.value = true;
+
+  try {
+    const data = await $fetch("/products", {
+      baseURL: config.public.apiBase,
+      params: {
+        gender: route.query.gender,
+        category: route.query.category ? route.query.category.split(",") : undefined,
+        sub: route.query.sub ? route.query.sub.split(",") : undefined,
+        brand: route.query.brand ? route.query.brand.split(",") : undefined,
+        min: route.query.min || undefined,
+        max: route.query.max || undefined,
+        sort: selectedSort.value,
+        cursor: reset ? null : cursor.value,
+        limit: 20,
+      },
+    });
+
+    if (reset) {
+      products.value = [];
+      cursor.value = null;
+    }
+
+    if (data) {
+      products.value.push(...data.products);
+      cursor.value = data.nextCursor;
+      hasMore.value = data.hasMore;
+    }
+  } catch (error) {
+    console.error("Failed to load products:", error);
+  } finally {
+    loading.value = false;
+  }
+};
 
 const toggleDropdown = () => {
   isActive.value = !isActive.value;
@@ -28,13 +115,13 @@ const toggleDropdown = () => {
 const selectOption = async (option) => {
   selectedSort.value = option.value;
   isActive.value = false;
-  const config = useRuntimeConfig();
 
   try {
     const response = await $fetch(`${config.public.apiBase}/products`, {
       params: {
         gender: route.query.gender,
-        cat: route.query.cat ? route.query.cat.split(",") : undefined,
+        category: route.query.category ? route.query.category.split(",") : undefined, // 수정
+        sub: route.query.sub ? route.query.sub.split(",") : undefined, // 수정
         brand: route.query.brand ? route.query.brand.split(",") : undefined,
         min: route.query.min || undefined,
         max: route.query.max || undefined,
@@ -50,7 +137,6 @@ const selectOption = async (option) => {
       hasMore.value = response.hasMore;
     }
 
-    // URL 업데이트
     await router.replace({
       query: {
         ...route.query,
@@ -62,36 +148,33 @@ const selectOption = async (option) => {
   }
 };
 
-// 필터 태그 관련
-const selectedFilters = ref({
-  cat: [],
-  brand: [],
-});
-
 // URL 쿼리 파라미터 업데이트
 const updateQueryParams = async (newParams) => {
-  // async 추가
   const updatedQuery = { ...route.query };
 
   if (newParams.gender) {
     updatedQuery.gender = newParams.gender;
+    delete updatedQuery.sort;
   }
 
-  // 카테고리 처리
-  if (newParams.cat?.length) {
-    updatedQuery.cat = newParams.cat.map((c) => c.id).join(",");
+  if (newParams.category?.length) {
+    updatedQuery.category = newParams.category.map((c) => c.id).join(",");
   } else {
-    delete updatedQuery.cat;
+    delete updatedQuery.category;
   }
 
-  // 브랜드 처리
+  if (newParams.sub?.length) {
+    updatedQuery.sub = newParams.sub.map((c) => c.id).join(",");
+  } else {
+    delete updatedQuery.sub;
+  }
+
   if (newParams.brand?.length) {
     updatedQuery.brand = newParams.brand.map((b) => b.id).join(",");
   } else {
     delete updatedQuery.brand;
   }
 
-  // 가격 범위 처리
   if (newParams.min) updatedQuery.min = newParams.min;
   else delete updatedQuery.min;
 
@@ -99,7 +182,6 @@ const updateQueryParams = async (newParams) => {
   else delete updatedQuery.max;
 
   await router.replace({
-    // await 추가
     path: route.path,
     query: updatedQuery,
   });
@@ -113,114 +195,67 @@ const handleFilterChange = (filterData) => {
 const removeFilter = async (type, id) => {
   selectedFilters.value[type] = selectedFilters.value[type].filter((item) => item.id !== id);
 
-  // aside 컴포넌트 상태 업데이트
   await asideRef.value?.updateFilterState({ type, id, checked: false });
 
-  // 현재 남아있는 필터 상태로 검색 실행
   const filterData = {
-    gender: route.query.gender, // gender 유지
-    cat: selectedFilters.value.cat, // 현재 선택된 카테고리
-    brand: selectedFilters.value.brand, // 현재 선택된 브랜드
-    min: route.query.min, // 가격 범위 유지
+    gender: route.query.gender,
+    category: selectedFilters.value.category,
+    sub: selectedFilters.value.sub,
+    brand: selectedFilters.value.brand,
+    min: route.query.min,
     max: route.query.max,
   };
 
-  // 쿼리 파라미터 직접 업데이트
-  const updatedQuery = { ...route.query }; // 현재 쿼리 복사
+  const updatedQuery = { ...route.query };
 
-  // 카테고리 처리
-  if (filterData.cat?.length) {
-    updatedQuery.cat = filterData.cat.map((c) => c.id).join(",");
+  if (filterData.category?.length) {
+    updatedQuery.category = filterData.category.map((c) => c.id).join(",");
   } else {
-    delete updatedQuery.cat;
+    delete updatedQuery.category;
   }
 
-  // 브랜드 처리
+  if (filterData.sub?.length) {
+    updatedQuery.sub = filterData.sub.map((c) => c.id).join(",");
+  } else {
+    delete updatedQuery.sub;
+  }
+
   if (filterData.brand?.length) {
     updatedQuery.brand = filterData.brand.map((b) => b.id).join(",");
   } else {
     delete updatedQuery.brand;
   }
 
-  // 라우터 업데이트
   await router.replace({
     path: route.path,
     query: updatedQuery,
   });
 
-  // 상품 검색 실행
   loadProducts(true);
 };
 
-// 상품 목록 관련
-const products = ref([]);
-const loading = ref(false);
-const hasMore = ref(true);
-const cursor = ref(null);
-
-// 상품 로드
-const loadProducts = async (reset = false) => {
-  if (loading.value || (!hasMore.value && !reset)) return;
-  loading.value = true;
-
-  try {
-    const config = useRuntimeConfig();
-    const { data } = await useFetch("/products", {
-      baseURL: config.public.apiBase,
-      params: {
-        gender: route.query.gender,
-        cat: route.query.cat ? route.query.cat.split(",") : undefined,
-        brand: route.query.brand ? route.query.brand.split(",") : undefined,
-        min: route.query.min || undefined,
-        max: route.query.max || undefined,
-        sort: selectedSort.value,
-        cursor: reset ? null : cursor.value,
-        limit: 20,
-      },
-    });
-
-    if (reset) {
-      products.value = [];
-      cursor.value = null;
-    }
-
-    if (data.value) {
-      products.value.push(...data.value.products);
-      cursor.value = data.value.nextCursor;
-      hasMore.value = data.value.hasMore;
-    }
-  } catch (error) {
-    console.error("Failed to load products:", error);
-  } finally {
-    loading.value = false;
-  }
-};
-
-// 검색 버튼 클릭 처리
+// 검색 버튼 클릭
 const handleSearch = async (searchParams) => {
-  // async 추가
-  // 선택된 필터 상태 업데이트
   selectedFilters.value = {
-    cat: searchParams.cat || [],
+    category: searchParams.category || [],
+    sub: searchParams.sub || [],
     brand: searchParams.brand || [],
   };
 
-  // 가격도 selectedFilters에 포함
   if (searchParams.min || searchParams.max) {
     selectedFilters.value.min = searchParams.min;
     selectedFilters.value.max = searchParams.max;
   }
 
-  // 쿼리 파라미터 업데이트 및 상품 검색 - 한번에 처리
   const queryParams = {
     ...searchParams,
-    cat: selectedFilters.value.cat,
+    category: selectedFilters.value.category,
+    sub: selectedFilters.value.sub,
     brand: selectedFilters.value.brand,
     min: searchParams.min || undefined,
     max: searchParams.max || undefined,
   };
 
-  // 쿼리 파라미터 업데이트를 기다린 후 상품 검색 실행
   await updateQueryParams(queryParams);
   await loadProducts(true);
 };
@@ -252,21 +287,24 @@ watch(() => products.value.length, updateObserver);
 
 // URL 파라미터 변경 감지
 watch(
-  () => route.path + route.query.gender, // 페이지 경로와 gender 쿼리 모두 감시
-  () => {
-    selectedSort.value = "popular"; // 새 페이지에서는 항상 인기순으로 초기화
-    loadProducts(true);
+  () => route.query.gender,
+  async (newGender) => {
+    if (newGender) {
+      gender.value = newGender;
+      selectedSort.value = "popular";
+      onNuxtReady(async () => {
+        await loadProducts(true);
+      });
+    }
   }
 );
 
-// 외부 클릭 이벤트 핸들러 유지
 const handleClickOutside = (e) => {
   if (!e.target.closest(".filter-select")) {
     isActive.value = false;
   }
 };
 
-// mounted, unmounted 이벤트 핸들러 유지
 onMounted(() => {
   setupIntersectionObserver();
   document.addEventListener("click", handleClickOutside);
@@ -286,10 +324,17 @@ onUnmounted(() => {
       <FuptoAside ref="asideRef" :initialGender="gender" @filter-change="handleFilterChange" @search="handleSearch" />
       <div class="product-content">
         <!-- 필터 태그 -->
-        <section v-if="selectedFilters.cat.length || selectedFilters.brand.length" class="filter-tags">
-          <div v-for="cat in selectedFilters.cat" :key="`cat-${cat.id}`" class="filter-tag">
-            {{ cat.name }}
-            <button @click="removeFilter('cat', cat.id)">×</button>
+        <section
+          v-if="selectedFilters.category.length || selectedFilters.sub.length || selectedFilters.brand.length"
+          class="filter-tags"
+        >
+          <div v-for="category in selectedFilters.category" :key="`category-${category.id}`" class="filter-tag">
+            {{ category.name }}
+            <button @click="removeFilter('category', category.id)">×</button>
+          </div>
+          <div v-for="sub in selectedFilters.sub" :key="`sub-${sub.id}`" class="filter-tag">
+            {{ sub.name }}
+            <button @click="removeFilter('sub', sub.id)">×</button>
           </div>
           <div v-for="brand in selectedFilters.brand" :key="`brand-${brand.id}`" class="filter-tag">
             {{ brand.name }}
@@ -330,7 +375,7 @@ onUnmounted(() => {
                       : undefined
                   "
                 >
-                  <a href="#">
+                  <nuxt-link :to="`/products/${product.id}/detail`">
                     <div class="product-img-frame">
                       <div class="product-img-container">
                         <img class="product-images primary-img" :src="product.mainImageUrl" alt="product-img" />
@@ -345,7 +390,7 @@ onUnmounted(() => {
                         <span class="price-unit">원</span>
                       </div>
                     </div>
-                  </a>
+                  </nuxt-link>
                 </li>
               </template>
               <template v-else>
@@ -364,7 +409,6 @@ onUnmounted(() => {
   </main>
 </template>
 <style scoped>
-/* 필터 태그 영역 */
 .filter-tags {
   display: flex;
   flex-wrap: wrap;

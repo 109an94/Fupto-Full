@@ -1,15 +1,15 @@
-package com.fupto.back.anonymous.product.dto;
+package com.fupto.back.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class CategoryDto {
-    private Long id;
-    private String name;
+public class AuthRequestDto {
+    private String username;
+    private String password;
 }

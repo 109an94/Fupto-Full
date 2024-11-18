@@ -16,7 +16,7 @@ import java.util.Collection;
 public class FuptoUserDetails implements UserDetails {
 
     private Long id;
-    private String username;
+    private String username; //userId에 해당하는 격
     private String password;
     private String email;
 

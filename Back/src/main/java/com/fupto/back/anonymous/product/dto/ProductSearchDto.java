@@ -13,13 +13,14 @@ import java.util.List;
 @Builder
 public class ProductSearchDto {
     private Long gender;
-    private List<Long> cat;
+    private List<Long> category;
+    private List<Long> sub;
     private List<Long> brand;
     private Integer min;
     private Integer max;
 
     @Builder.Default
-    private String sort = "popular"; // popular, recent, priceAsc, priceDesc, discountDesc
+    private String sort = "popular";
 
     private Long cursor;
 
