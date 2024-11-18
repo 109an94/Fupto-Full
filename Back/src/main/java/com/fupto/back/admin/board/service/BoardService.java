@@ -1,6 +1,7 @@
 package com.fupto.back.admin.board.service;
 
 import com.fupto.back.admin.board.dto.*;
+import com.fupto.back.admin.brand.dto.BrandListDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +23,7 @@ public interface BoardService {
 
     // 등록
     BoardListDto createPost(BoardListDto boardListDto);
+//    BoardCreateDto createBoard(BoardCreateDto boardCreateDto, MultipartFile file);
 
     // 수정
     BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception;
@@ -33,7 +35,5 @@ public interface BoardService {
 
     // 엑티브 수정
     BoardListDto updateActive(Long id, Boolean active);
-
-
 
 }

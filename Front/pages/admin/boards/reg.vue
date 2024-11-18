@@ -11,8 +11,8 @@ const board = ref({
   title: '',
   contents: '',
   password: '',
-  regMemberId: '7',
-  boardCategoryId: '',
+  regMemberId: '11',
+  boardCategoryId: '공지사항',
   active: true,
   // fileUpload: null,
 });
@@ -53,7 +53,6 @@ const handleSubmit = async() => {
     formData.append('boardData', JSON.stringify({
     title: board.value.title,
     contents: board.value.contents,
-    password: board.value.password,
     regMemberId: board.value.regMemberId,
     boardCategoryId: board.value.boardCategoryId,
     active: board.value.active,
@@ -64,7 +63,7 @@ const handleSubmit = async() => {
     formData.append('file', board.value.fileUpload);
   }
 
-  const response = await fetch('http://localhost:8080/api/v1/admin/boards/post', {
+  const response = await fetch('http://localhost:8080/api/v1/admin/boards/reg', {
         method: 'POST',
         body: formData,
       });

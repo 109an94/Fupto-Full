@@ -171,6 +171,32 @@ public class DefaultBoardService implements BoardService {
         return modelMapper.map(savedBoard, BoardListDto.class);
     }
 
+//    @Override
+//    public BoardCreateDto createBoard(BoardCreateDto boardCreateDto) {
+//        ModelMapper modelMapper = new ModelMapper();
+//
+//        Board newBoards = modelMapper.map(boardCreateDto, Board.class);
+//        Long boardCategoryId = boardCreateDto.getBoardCategoryId();
+//        BoardCategory boardCategory = boardCategoryRepository.findById(boardCategoryId)
+//                .orElseThrow(() -> new RuntimeException("BoardCategory not found"));
+//
+//        newBoards.setBoardCategory(boardCategory);
+//
+//        // 멤버
+//
+//        Long regMemberId = boardCreateDto.getRegMemberId();
+//        Member member = memberRepository.findById(regMemberId).orElseThrow(() -> new RuntimeException("RegMember not found"));
+//
+//        newBoards.setRegMember(member);
+//        newBoards.setCreatedAt(Instant.now());
+//
+//
+//        // DB에 게시글 저장
+//        Board savedBoard = boardRepository.save(newBoards);
+//
+//        return modelMapper.map(savedBoard, BoardCreateDto.class);
+//    }
+
     // ========== 수정 =========================================================================
 
     @Override
