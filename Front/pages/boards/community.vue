@@ -37,9 +37,3 @@
   <button>글쓰기</button>
   </main>
 </template>
-
-<!-- <style scoped>
-@import url("@/assets/css/reset.css");
-@import url("@/assets/css/style.css");
-@import url("@/assets/css/board-notice.css");
-</style> -->

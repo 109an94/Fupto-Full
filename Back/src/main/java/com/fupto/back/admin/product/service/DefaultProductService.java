@@ -25,9 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service("adminProductService")
@@ -164,9 +162,9 @@ public class DefaultProductService implements ProductService {
     }
 
     @Override
-    public Resource getProductImage(Long id) throws IOException {
-        ProductImage productImage = productImageRepository.findByProductIdAndDisplayOrder(id, 1)
-                .orElseThrow(() -> new EntityNotFoundException("대표 이미지를 찾을 수 없습니다."));
+    public Resource getProductImage(Long id, Integer order) throws IOException {
+        ProductImage productImage = productImageRepository.findByProductIdAndDisplayOrder(id, order)
+                .orElseThrow(() -> new EntityNotFoundException("해당 순서의 이미지를 찾을 수 없습니다."));
 
         Path imagePath = Paths.get(uploadPath, productImage.getFilePath());
         Resource resource = new FileSystemResource(imagePath.toFile());
@@ -299,32 +297,151 @@ public class DefaultProductService implements ProductService {
         return product;
     }
 
+    @Override
+    public ProductUpdateDto getProductForEdit(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다."));
+
+        // 카테고리 계층 구조 가져오기
+        Category thirdCategory = product.getCategory();
+        Category secondCategory = thirdCategory.getParent();
+        Category firstCategory = secondCategory.getParent();
+
+        // 최근 가격 조회
+        Integer latestPrice = priceHistoryRepository.findLatestPriceByProductId(product.getId());
+
+        // 이미지 정보 변환
+        List<ProductImageDto> imageDtos = product.getProductImages().stream()
+                .map(image -> ProductImageDto.builder()
+                        .id(image.getId())
+                        .originalName(image.getOriginalName())
+                        .filePath(image.getFilePath())
+                        .displayOrder(image.getDisplayOrder())
+                        .build())
+                .sorted(Comparator.comparing(ProductImageDto::getDisplayOrder))
+                .toList();
+
+        return ProductUpdateDto.builder()
+                .id(product.getId())
+                .productName(product.getProductName())
+                .retailPrice(product.getRetailPrice())
+                .url(product.getUrl())
+                .description(product.getDescription())
+                .presentId(product.getPresentId())
+                .mappingId(product.getMappingId())
+                .active(product.getActive())
+                .category1Id(firstCategory.getId())
+                .category2Id(secondCategory.getId())
+                .category3Id(thirdCategory.getId())
+                .brandId(product.getBrand().getId())
+                .shoppingMallId(product.getShoppingMall().getId())
+                .salePrice(latestPrice)
+                .productImages(imageDtos)
+                .build();
+    }
 
     @Override
-    public ProductListDto update(ProductListDto productListDto) {
-        Product product = productRepository.findById(productListDto.getId()).orElseThrow();
+    @Transactional
+    public ProductListDto update(Long id, ProductUpdateRequestDto updateDto, List<MultipartFile> files) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다."));
 
-        if(productListDto.getProductName() != null)
-            product.setProductName(productListDto.getProductName());
-        if(productListDto.getRetailPrice() != null)
-            product.setRetailPrice(productListDto.getRetailPrice());
-        if(productListDto.getUrl() != null)
-            product.setUrl(productListDto.getUrl());
-        if(productListDto.getDescription() != null)
-            product.setDescription(productListDto.getDescription());
-        if(productListDto.getPresentId() != null)
-            product.setPresentId(productListDto.getPresentId());
-        if(productListDto.getMappingId() != null)
-            product.setMappingId(productListDto.getMappingId());
-        if(productListDto.getActive() != null)
-            product.setActive(productListDto.getActive());
-        if(productListDto.getState() != null)
-            product.setState(productListDto.getState());
+        // 1. 기본 정보 업데이트
+        updateBasicInfo(product, updateDto);
+
+        // 2. 가격 업데이트 (변경된 경우에만)
+        if (!Objects.equals(updateDto.getSalePrice(),
+                priceHistoryRepository.findLatestPriceByProductId(id))) {
+            PriceHistory priceHistory = PriceHistory.builder()
+                    .product(product)
+                    .salePrice(updateDto.getSalePrice())
+                    .build();
+            priceHistoryRepository.save(priceHistory);
+        }
+
+        // 3. 이미지 처리
+        updateImages(product, updateDto.getExistingImageIds(), updateDto.getImageOrders(), files);
 
         productRepository.save(product);
-        Product updateProduct = productRepository.findById(productListDto.getId()).orElseThrow();
+        return convertToProductListDto(product);
+    }
 
-        return modelMapper.map(updateProduct, ProductListDto.class);
+    private void updateBasicInfo(Product product, ProductUpdateRequestDto updateDto) {
+        product.setProductName(updateDto.getProductName());
+        product.setRetailPrice(updateDto.getRetailPrice());
+        product.setUrl(updateDto.getUrl());
+        product.setDescription(updateDto.getDescription());
+        product.setPresentId(updateDto.getPresentId());
+        product.setActive(updateDto.getActive());
+
+        // 카테고리, 브랜드, 쇼핑몰 업데이트
+        product.setCategory(categoryRepository.findById(updateDto.getCategory3Id())
+                .orElseThrow(() -> new EntityNotFoundException("카테고리를 찾을 수 없습니다.")));
+        product.setBrand(brandRepository.findById(updateDto.getBrandId())
+                .orElseThrow(() -> new EntityNotFoundException("브랜드를 찾을 수 없습니다.")));
+        product.setShoppingMall(shoppingMallRepository.findById(updateDto.getShoppingMallId())
+                .orElseThrow(() -> new EntityNotFoundException("쇼핑몰을 찾을 수 없습니다.")));
+
+        product.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+    }
+
+    private void updateImages(Product product, List<Long> existingImageIds,
+                              List<ImageOrderDto> imageOrders, List<MultipartFile> newFiles) {
+        // 1. 삭제된 이미지 처리
+        List<ProductImage> currentImages = product.getProductImages();
+        List<ProductImage> toDelete = currentImages.stream()
+                .filter(img -> !existingImageIds.contains(img.getId()))
+                .toList();
+
+        // 파일 시스템에서 삭제
+        toDelete.forEach(image -> {
+            try {
+                Files.deleteIfExists(Paths.get(uploadPath, image.getFilePath()));
+            } catch (IOException e) {
+                log.error("Failed to delete image file: {}", image.getFilePath(), e);
+            }
+        });
+
+        // DB에서 삭제
+        productImageRepository.deleteAll(toDelete);
+        currentImages.removeAll(toDelete);
+
+        // 2. 기존 이미지 순서 업데이트
+        imageOrders.stream()
+                .filter(order -> !order.getIsNew())
+                .forEach(order -> {
+                    ProductImage image = product.getProductImages().stream()
+                            .filter(img -> img.getId().equals(order.getId()))
+                            .findFirst()
+                            .orElseThrow();
+                    image.setDisplayOrder(order.getDisplayOrder());
+                });
+
+        // 3. 새 이미지 저장
+        if (newFiles != null && !newFiles.isEmpty()) {
+            imageOrders.stream()
+                    .filter(ImageOrderDto::getIsNew)
+                    .forEach(order -> {
+                        int newFileIndex = order.getDisplayOrder() - 1 - existingImageIds.size();
+                        if (newFileIndex >= 0 && newFileIndex < newFiles.size()) {
+                            MultipartFile file = newFiles.get(newFileIndex);
+                            try {
+                                String filePath = fileService.saveFile(file, product.getId());
+                                ProductImage image = ProductImage.builder()
+                                        .product(product)
+                                        .fileName(filePath.substring(filePath.lastIndexOf("/") + 1))
+                                        .originalName(file.getOriginalFilename())
+                                        .filePath(filePath)
+                                        .displayOrder(order.getDisplayOrder())
+                                        .build();
+                                product.getProductImages().add(image);
+                            } catch (IOException e) {
+                                log.error("Failed to save new image file", e);
+                                throw new RuntimeException("이미지 저장 실패", e);
+                            }
+                        }
+                    });
+        }
     }
 
     // 일반 상품 삭제
@@ -333,6 +450,7 @@ public class DefaultProductService implements ProductService {
                 .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다."));
         product.setState(false);
         product.setActive(false);
+        product.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
         productRepository.save(product);
     }
 
@@ -426,7 +544,7 @@ public class DefaultProductService implements ProductService {
                 .filter(image -> image.getDisplayOrder() == 1)
                 .findFirst()
                 .ifPresent(image -> productListDto.setImagePath(
-                        "http://localhost:8080/api/v1/admin/products/" + product.getId() + "/image"
+                        "http://localhost:8080/api/v1/admin/products/" + product.getId() + "/image/1"
                 ));
 
         return productListDto;

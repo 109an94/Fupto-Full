@@ -1,13 +1,14 @@
 package com.fupto.back.admin.board.service;
 
 import com.fupto.back.admin.board.dto.*;
-import com.fupto.back.admin.brand.dto.BrandResponseDto;
 import com.fupto.back.entity.Board;
 import com.fupto.back.entity.BoardCategory;
+import com.fupto.back.entity.Brand;
 import com.fupto.back.entity.Member;
 import com.fupto.back.repository.BoardCategoryRepository;
 import com.fupto.back.repository.BoardRepository;
 import com.fupto.back.repository.MemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,12 +16,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 //@RequiredArgsConstructor
@@ -42,25 +47,27 @@ public class DefaultBoardService implements BoardService {
         this.memberRepository = memberRepository;
     }
 
-// ========== 전체 조회 =========================================================================
+    // ========== 전체 조회 =========================================================================
     @Override
     public List<BoardListDto> getList() {
         List<Board> boards = boardRepository.findAll();
         List<BoardListDto> boardListDtos = boards.stream()
-                .map(board -> {BoardListDto boardListDto = modelMapper.map(board, BoardListDto.class);
-                    return boardListDto;})
+                .map(board -> {
+                    BoardListDto boardListDto = modelMapper.map(board, BoardListDto.class);
+                    return boardListDto;
+                })
                 .toList();
         return boardListDtos;
     }
 
-// ========== 검색 조회 =========================================================================
+    // ========== 검색 조회 =========================================================================
     @Override
     public BoardDefaultDto getSearch(BoardSearchDto boardSearchDto) {
         Sort sort = Sort.by(
                 boardSearchDto.getSortOrder().equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
                 boardSearchDto.getSortBy() != null ? boardSearchDto.getSortBy() : "createDate"
         );
-        Pageable pageable = PageRequest.of(boardSearchDto.getPage() -1, boardSearchDto.getSize(), sort);
+        Pageable pageable = PageRequest.of(boardSearchDto.getPage() - 1, boardSearchDto.getSize(), sort);
 
         Instant startDate = null;
         Instant endDate = null;
@@ -69,7 +76,7 @@ public class DefaultBoardService implements BoardService {
             ZoneId zoneId = ZoneId.of("Asia/Seoul");
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.UTC);
 
-            if(boardSearchDto.getStartDate() != null && !boardSearchDto.getStartDate().isEmpty()) {
+            if (boardSearchDto.getStartDate() != null && !boardSearchDto.getStartDate().isEmpty()) {
                 LocalDate localStratDate = LocalDate.parse(boardSearchDto.getStartDate(), DateTimeFormatter.ISO_DATE);
                 startDate = localStratDate.atStartOfDay(zoneId).plusHours(9).toInstant();
             }
@@ -97,8 +104,10 @@ public class DefaultBoardService implements BoardService {
         List<BoardListDto> boardListDtos = boardPage
                 .getContent()
                 .stream()
-                .map(board -> {BoardListDto boardListDto = modelMapper.map(board, BoardListDto.class);
-                return boardListDto;})
+                .map(board -> {
+                    BoardListDto boardListDto = modelMapper.map(board, BoardListDto.class);
+                    return boardListDto;
+                })
                 .toList();
 
         long totalElements = boardPage.getTotalElements();
@@ -120,8 +129,7 @@ public class DefaultBoardService implements BoardService {
                 .build();
     }
 
-
-// ========== id 조회 =========================================================================
+    // ========== id 조회 =========================================================================
     @Override
     public BoardDetailDto getBoardById(Long id) {
         Board board = boardRepository.findById(id).orElse(null);
@@ -134,6 +142,7 @@ public class DefaultBoardService implements BoardService {
     }
 
 // ========== 등록 =========================================================================
+
     @Override
     public BoardListDto createPost(BoardListDto boardListDto) {
         // BoardListDto -> Board Entity 변환
@@ -162,7 +171,8 @@ public class DefaultBoardService implements BoardService {
         return modelMapper.map(savedBoard, BoardListDto.class);
     }
 
-// ========== 수정 =========================================================================
+    // ========== 수정 =========================================================================
+
     @Override
     public BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception {
         Board board = boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("아이디가 존재하지 않습니다."));
@@ -176,9 +186,20 @@ public class DefaultBoardService implements BoardService {
     }
 
 
-// ========== 삭제 =========================================================================
+    // ========== 삭제 =========================================================================
+//    @Override
+//    public SuccessResponseDto deletePost(Long id, BoardRequestsDto requestsDto) throws Exception {
+//        Board board = boardRepository.findById(id).orElseThrow(
+//                () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
+//        );
+////        if (!requestsDto.getPassword().equals(board.getPassword()))
+////            throw new Exception("비밀번호가 일치하지 않습니다.");
+//
+//        boardRepository.deleteById(id);
+//        return new SuccessResponseDto(true);
+//    }
     @Override
-    public SuccessResponseDto deletePost(Long id, BoardRequestsDto requestsDto) throws Exception {
+    public SuccessResponseDto deletePost(Long id) throws Exception {
         Board board = boardRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
         );
@@ -189,6 +210,32 @@ public class DefaultBoardService implements BoardService {
         return new SuccessResponseDto(true);
     }
 
-}
+    @Override
+    public void deleteSelected(List<Long> ids) {
+        List<Board> boards = boardRepository.findAllById(ids);
+        for (Board board : boards) {
+            boardRepository.delete(board);
+        }
+    }
 
+// ========== 엑티브 =========================================================================
+
+    @Override
+    public BoardListDto updateActive(Long id, Boolean active) {
+
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
+
+        board.setActive(active);
+//        board.setModifiedAt(Instant.now());
+        board.setModifiedAt(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+
+
+        boardRepository.save(board);
+
+        return modelMapper.map(board, BoardListDto.class);
+    }
+
+
+}
 

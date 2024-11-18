@@ -230,7 +230,7 @@ onUnmounted(() => {
                 </div>
                 <div class="vendor-price">
                   <p>{{ shop.price?.toLocaleString() }} ￦</p>
-                  <a :href="shop.productUrl" class="link" target="_blank" @click.stop>링크</a>
+                  <a :href="shop.productUrl" class="link" target="_blank" @click.stop>이동</a>
                 </div>
               </li>
             </ul>

@@ -17,6 +17,7 @@ const categories = ref({
 
 const brands = ref([]);
 const shops = ref([]);
+const config = useRuntimeConfig();
 
 const addProductForm = () => {
   products.value.push({
@@ -46,7 +47,7 @@ const fetchCategories = async (level, parentId = null) => {
     if (parentId) params.append("parentId", parentId);
     params.append("level", level);
 
-    const data = await $fetch(`http://localhost:8080/api/v1/admin/products/categories?${params.toString()}`);
+    const data = await $fetch(`${config.public.apiBase}/admin/products/categories?${params.toString()}`);
 
     if (level === 1) {
       categories.value.level1 = data;
@@ -83,7 +84,7 @@ const handleCategory2Change = async (product) => {
 
 const fetchBrands = async () => {
   try {
-    const data = await $fetch("http://localhost:8080/api/v1/admin/products/brands");
+    const data = await $fetch(`${config.public.apiBase}/admin/products/brands`);
 
     brands.value = data.map((brand) => ({
       id: brand.id,
@@ -96,7 +97,7 @@ const fetchBrands = async () => {
 
 const fetchShops = async () => {
   try {
-    const data = await $fetch("http://localhost:8080/api/v1/admin/products/shopping-malls");
+    const data = await $fetch(`${config.public.apiBase}/admin/products/shopping-malls`);
 
     shops.value = data.map((shop) => ({
       id: shop.id,
@@ -212,7 +213,7 @@ const submitForm = async () => {
       }
     });
 
-    await $fetch("http://localhost:8080/api/v1/admin/products", {
+    await $fetch(`${config.public.apiBase}/admin/products`, {
       method: "POST",
       body: formData,
     });

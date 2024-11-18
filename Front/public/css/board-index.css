@@ -2,11 +2,11 @@
 .board_ul{
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 10px;
   /* border-bottom: solid 1px var(--color-text-unselected); */
 }
 
-li{
+.board_ul li{
   margin: 10px 8px;
 }
 
@@ -28,13 +28,13 @@ button.active{
 
 
 @media (max-width: 768px) {
-  ul {
+  .board_ul{
     flex-wrap: wrap; 
     justify-content: center;
     width: 100%; 
   }
 
-  li {
+  .board_ul li {
     flex: 1 1 auto; 
     max-width: 120px;
   }

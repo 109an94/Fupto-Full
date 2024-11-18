@@ -60,7 +60,7 @@ small {
   border: solid 1px var(--color-text-caption);
 }
 
-button {
+.notice-btn {
   width: 80px;
   height: 30px;
   align-self: flex-end;
@@ -71,22 +71,9 @@ button {
   margin-right: 50px;
 }
 
-button:hover,
-button.active{
-  background-color: var(--color-main-default);
-  color: white;
+.notice-btn:hover,
+.notice-btn.active{
+  background-color: var(--color-text-caption);
+  color: black;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
