@@ -22,13 +22,15 @@ public interface ProductService {
 
     List<ShoppingMallSelectDto> getShoppingMalls();
 
-    Resource getProductImage(Long id) throws IOException;
+    Resource getProductImage(Long id, Integer order) throws IOException;
 
     List<ProductListDto> create(List<ProductRegDto> regDtos,
                                 Map<Integer, List<MultipartFile>> filesMap,
                                 Map<Integer, Map<String, MultipartFile>> filesByNameMap);
 
-    ProductListDto update(ProductListDto productListDto);
+    ProductListDto update(Long id, ProductUpdateRequestDto updateDto, List<MultipartFile> files) throws IOException;
+
+    ProductUpdateDto getProductForEdit(Long id);
 
     void updateState(Long id);
 
@@ -37,4 +39,5 @@ public interface ProductService {
     void delete(Long id);
 
     void promoteAndDelete(Long id);
+
 }

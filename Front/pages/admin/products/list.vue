@@ -554,9 +554,9 @@ onMounted(() => {
                   <button class="btn btn-outline-secondary btn-sm" @click="() => toggleProductRows(p.id)">
                     <i class="bx" :class="isExpanded(p.id) ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
                   </button>
-                  <button class="btn btn-outline-secondary btn-sm">
+                  <NuxtLink :to="`/admin/products/${p.id}/edit`" class="btn btn-outline-secondary btn-sm">
                     <i class="bx bxs-pencil"></i>
-                  </button>
+                  </NuxtLink>
                   <button class="btn btn-outline-danger btn-sm" @click="() => handleDelete(p.id, true)">
                     <i class="bx bx-trash"></i>
                   </button>
@@ -566,69 +566,74 @@ onMounted(() => {
               <!-- 매핑된 상품 행 -->
               <tr v-if="isExpanded(p.id)" class="mapping-products">
                 <td colspan="11">
-                  <table class="table" v-if="mappedProducts[p.id]">
-                    <tbody>
-                      <tr v-for="mp in mappedProducts[p.id]" :key="mp.id">
-                        <td>
-                          <input
-                            type="checkbox"
-                            :id="'product' + mp.id"
-                            :checked="selectedItems.has(mp.id)"
-                            @change="(e) => handleSelectItem(e, mp.id)"
-                            class="pl-checkbox"
-                          />
-                        </td>
-                        <td>{{ mp.id }}</td>
-                        <td class="product-cell">
-                          <div class="d-flex align-items-center">
-                            <img
-                              :src="mp.imagePath || 'https://via.placeholder.com/70'"
-                              :alt="mp.productName"
-                              class="product-img"
-                            />
-                            <div class="product-info ml-2">
-                              <span class="text-md">{{ mp.productName }}</span>
-                              <small class="d-block text-muted text-sm">{{ mp.brandEngName }}</small>
-                            </div>
-                          </div>
-                        </td>
-                        <td class="text-md">{{ mp.shoppingMallEngName }}</td>
-                        <td>
-                          <span class="badge-pill badge-light text-md">{{ mp.categoryName }}</span>
-                        </td>
-                        <td class="text-md">￦{{ formatNumber(mp.retailPrice) }}</td>
-                        <td class="text-md">￦{{ formatNumber(mp.salePrice) }}</td>
-                        <td>
-                          <button class="btn btn-outline-primary btn-sm">
-                            <a :href="mp.url" target="_blank">판매처<br />이동</a>
-                          </button>
-                        </td>
-                        <td>
-                          <label class="pl-switch">
+                  <template v-if="mappedProducts[p.id] && mappedProducts[p.id].length > 0">
+                    <table class="table">
+                      <tbody>
+                        <tr v-for="mp in mappedProducts[p.id]" :key="mp.id">
+                          <td>
                             <input
                               type="checkbox"
-                              :id="'active' + mp.id"
-                              v-model="mp.active"
-                              @change="() => handleActiveChange(mp)"
+                              :id="'product' + mp.id"
+                              :checked="selectedItems.has(mp.id)"
+                              @change="(e) => handleSelectItem(e, mp.id)"
+                              class="pl-checkbox"
                             />
-                            <span class="pl-slider round"></span>
-                          </label>
-                        </td>
-                        <td class="date-cell">
-                          <div>{{ formatDate(mp.updateDate)[0] }}</div>
-                          <div>{{ formatDate(mp.updateDate)[1] }}</div>
-                        </td>
-                        <td>
-                          <button class="btn btn-outline-secondary btn-sm">
-                            <i class="bx bxs-pencil"></i>
-                          </button>
-                          <button class="btn btn-outline-danger btn-sm" @click="() => handleDelete(mp.id, false)">
-                            <i class="bx bx-trash"></i>
-                          </button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                          </td>
+                          <td>{{ mp.id }}</td>
+                          <td class="product-cell">
+                            <div class="d-flex align-items-center">
+                              <img
+                                :src="mp.imagePath || 'https://via.placeholder.com/70'"
+                                :alt="mp.productName"
+                                class="product-img"
+                              />
+                              <div class="product-info ml-2">
+                                <span class="text-md">{{ mp.productName }}</span>
+                                <small class="d-block text-muted text-sm">{{ mp.brandEngName }}</small>
+                              </div>
+                            </div>
+                          </td>
+                          <td class="text-md">{{ mp.shoppingMallEngName }}</td>
+                          <td>
+                            <span class="badge-pill badge-light text-md">{{ mp.categoryName }}</span>
+                          </td>
+                          <td class="text-md">￦{{ formatNumber(mp.retailPrice) }}</td>
+                          <td class="text-md">￦{{ formatNumber(mp.salePrice) }}</td>
+                          <td>
+                            <button class="btn btn-outline-primary btn-sm">
+                              <a :href="mp.url" target="_blank">판매처<br />이동</a>
+                            </button>
+                          </td>
+                          <td>
+                            <label class="pl-switch">
+                              <input
+                                type="checkbox"
+                                :id="'active' + mp.id"
+                                v-model="mp.active"
+                                @change="() => handleActiveChange(mp)"
+                              />
+                              <span class="pl-slider round"></span>
+                            </label>
+                          </td>
+                          <td class="date-cell">
+                            <div>{{ formatDate(mp.updateDate)[0] }}</div>
+                            <div>{{ formatDate(mp.updateDate)[1] }}</div>
+                          </td>
+                          <td>
+                            <NuxtLink :to="`/admin/products/${mp.id}/edit`" class="btn btn-outline-secondary btn-sm">
+                              <i class="bx bxs-pencil"></i>
+                            </NuxtLink>
+                            <button class="btn btn-outline-danger btn-sm" @click="() => handleDelete(mp.id, false)">
+                              <i class="bx bx-trash"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </template>
+                  <template v-else>
+                    <div class="no-mapping-message">현재 이 상품은 매핑 상품이 존재하지 않습니다.</div>
+                  </template>
                 </td>
               </tr>
             </template>
