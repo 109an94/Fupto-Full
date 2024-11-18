@@ -54,12 +54,34 @@ public class BoardController {
         return boardService.updatePost(id, requestsDto);
     }
 
-    // 선택한 게시글 삭제
+    // 게시글 삭제
+
     @DeleteMapping("{id}")
-    public SuccessResponseDto deletePost(@PathVariable Long id, @RequestBody BoardRequestsDto requestsDto) throws Exception {
-        return boardService.deletePost(id,requestsDto);
+    public SuccessResponseDto deletePost(@PathVariable Long id) throws Exception {
+        return boardService.deletePost(id);
+    }
+//    @DeleteMapping("{id}") 비밀번호 추가
+//    public SuccessResponseDto deletePost(@PathVariable Long id, @RequestBody BoardRequestsDto requestsDto) throws Exception {
+//        return boardService.deletePost(id,requestsDto);
+//    }
+
+    @DeleteMapping("/selected")
+    public ResponseEntity<Void> deleteSelected(@RequestBody List<Long> ids){
+      try{
+          boardService.deleteSelected(ids);
+          return ResponseEntity.noContent().build();
+      } catch (Exception e) {
+          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+      }
     }
 
+    // 액티브 변경
+    @PatchMapping("{id}/active")
+    public ResponseEntity<BoardListDto> updateActive(
+            @PathVariable("id") Long id,
+            @RequestParam Boolean active) throws Exception {
+        return ResponseEntity.ok(boardService.updateActive(id, active));
+    }
 }
 
 

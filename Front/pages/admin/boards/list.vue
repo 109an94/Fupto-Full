@@ -117,13 +117,12 @@ const confirmDelete = (boardId) => {
 const handleDelete = async (boardId) => {
   try {
     const response = await fetch(`http://localhost:8080/api/v1/admin/boards/${boardId}`, {
-      method: "PATCH"
+      method: "DELETE"
     });
 
     if (!response.ok) {
       throw new Error("삭제에 실패했습니다.");
     }
-
 
     alert('삭제되었습니다.');
     fetchBoards();
@@ -134,7 +133,9 @@ const handleDelete = async (boardId) => {
   }
 };
 
-const handleBulkDelete = async () => {
+
+// 선택삭제
+const selectedDelete = async () => {
   if (selectedItems.value.size === 0) {
     alert('삭제할 게시글을 선택해주세요.');
     return;
@@ -142,8 +143,8 @@ const handleBulkDelete = async () => {
 
   if (confirm('선택한 게시글을 삭제하시겠습니까?')) {
     try {
-      const response = await fetch('http://localhost:8080/api/v1/admin/brands/bulk-update-state', {
-        method: 'PATCH',
+      const response = await fetch('http://localhost:8080/api/v1/admin/boards/selected', {
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -166,8 +167,8 @@ const handleBulkDelete = async () => {
 };
 
 // active 토글 핸들러
-const handleActiveChange = async (brand) => {
-  await updateActive(brand.id, brand.active);
+const handleActiveChange = async (board) => {
+  await updateActive(board.id, board.active);
 };
 
 // 페이지네이션 핸들러
@@ -426,7 +427,7 @@ onMounted(() => {
       <div class="card-body">
         <div class="d-flex">
           <div class="d-flex-1">
-            <button class="btn btn-outline-danger" @click="handleBulkDelete">삭제</button>
+            <button class="btn btn-outline-danger" @click="selectedDelete">삭제</button>
           </div>
 
           <div class="d-flex">
@@ -481,7 +482,7 @@ onMounted(() => {
                 <td class="text-md">{{ board.regMemberNickName }}</td>
                 <td>
                   <div class="custom-control custom-switch active-toggle">
-                    <input type="checkbox" class="custom-control-input" v-model="board.active" :id="'active' + board.id" />
+                    <input type="checkbox" class="custom-control-input" v-model="board.active" :id="'active' + board.id" @change="() => handleActiveChange(board)"/>
                     <label class="custom-control-label" :for="'active' + board.id"></label>
                   </div>
                 </td>

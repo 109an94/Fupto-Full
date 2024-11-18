@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Long> {
@@ -44,5 +45,6 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
             @Param("endDate") Instant endDate,
             @Param("dateType") String dateType,
             Pageable pageable);
+
 }
 

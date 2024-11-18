@@ -53,11 +53,11 @@ public class Board {
     @JoinColumn(name = "board_category_id", nullable = false)
     private BoardCategory boardCategory;
 
-    @Column(name = "active", nullable = false)
-    private Boolean active = false;
+    @Column(name = "active")
+    private Boolean active;
 
-    @Column(name = "state", nullable = true)
-    private Boolean state = false;
+    @Column(name = "state")
+    private Boolean state ;
 
     @PrePersist
     public void onPrePersist() {

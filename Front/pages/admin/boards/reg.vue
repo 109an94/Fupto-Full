@@ -48,12 +48,15 @@ const handleSubmit = async() => {
 
   const formData = new FormData();
 
-  formData.append('boardData', JSON.stringify({
-    tilte: board.value.title,
-    contents: board.value.contents,
-    active: board.value.active,
-    boardCategoryName: board.value.boardCategoryName
-  }));
+  formData.append('title', board.value.title);
+  formData.append('contents', board.value.contents);
+  formData.append('boardCategoryName', board.value.boardCategoryName);
+
+  // formData.append('boardData', JSON.stringify({
+  //   tilte: board.value.title,
+  //   contents: board.value.contents,
+  //   boardCategoryName: board.value.boardCategoryName
+  // }));
   
   // 이미지 파일도 추가 (파일이 있으면)
   if (board.value.fileUpload) {
@@ -77,7 +80,7 @@ const handleSubmit = async() => {
     }
   } catch(error) {
     console.error('Error:',error);
-    alert('게시글 등록 중 오류가 발생했습니다.: ${error.message}');
+    alert('게시글 등록 중 오류가 발생했습니다.');
   }
   };
 
