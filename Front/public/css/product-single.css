@@ -303,6 +303,7 @@
   padding: 20px;
   color: #60646b;
   font-size: 14px;
+  white-space: pre-wrap;
 }
 
 .description ul {
