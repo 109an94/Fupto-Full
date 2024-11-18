@@ -151,6 +151,11 @@
   border-right: 2px solid var(--blue);
   border-bottom: 2px solid var(--blue);
 }
+.no-mapping-message {
+  text-align: center;
+  padding: 2rem 0;
+  color: #7d6c6d;
+}
 .d-flex {
   display: flex;
   justify-content: end;

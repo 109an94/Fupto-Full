@@ -55,9 +55,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.getMappingProducts(id));
     }
 
-    @GetMapping("/{id}/image")
-    public ResponseEntity<Resource> getProductImage(@PathVariable Long id) throws IOException {
-        Resource imageResource = productService.getProductImage(id);
+    @GetMapping("/{id}/image/{order}")
+    public ResponseEntity<Resource> getProductImage(
+            @PathVariable Long id,
+            @PathVariable Integer order) throws IOException {
+        Resource imageResource = productService.getProductImage(id, order);
         String contentType = Files.probeContentType(
                 Paths.get(imageResource.getURI())
         );
@@ -76,6 +78,11 @@ public class ProductController {
             @PathVariable("id") Long id){
 
         return ResponseEntity.ok(productService.getById(id));
+    }
+
+    @GetMapping("/{id}/edit")
+    public ResponseEntity<ProductUpdateDto> getProductForEdit(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.getProductForEdit(id));
     }
 
     @PostMapping
@@ -104,6 +111,14 @@ public class ProductController {
             log.error("Error creating products", e);
             throw e;
         }
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ProductListDto> update(
+            @PathVariable Long id,
+            @RequestPart("data") ProductUpdateRequestDto updateDto,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) throws IOException {
+        return ResponseEntity.ok(productService.update(id, updateDto, files));
     }
 
     @PatchMapping("{id}/state")
