@@ -11,7 +11,7 @@ const activeDropdown = ref(null);
 const activeMenuItem = ref(null);
 const previousState = ref({
   menuItem: null,
-  dropdown: null
+  dropdown: null,
 });
 
 // 드롭다운 토글
@@ -91,7 +91,6 @@ watch(
   }
 );
 
-
 watch(
   () => props.isCollapsed,
   (newValue) => {
@@ -99,11 +98,9 @@ watch(
       // 사이드바가 접힐 때 현재 상태 저장
       previousState.value = {
         menuItem: activeMenuItem.value,
-        dropdown: activeDropdown.value
+        dropdown: activeDropdown.value,
       };
-      // 드롭다운만 닫기
       activeDropdown.value = null;
-      // activeMenuItem은 유지
     } else {
       // 사이드바가 펼쳐질 때 이전 상태 복원
       activeMenuItem.value = previousState.value.menuItem;
@@ -135,11 +132,6 @@ watch(
           <li>
             <NuxtLink to="/admin/products/reg" :class="{ 'sub-menu-active': isSubMenuActive('/admin/products/reg') }">
               상품 등록
-            </NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/products/map" :class="{ 'sub-menu-active': isSubMenuActive('/admin/products/map') }">
-              상품 매핑
             </NuxtLink>
           </li>
         </ul>

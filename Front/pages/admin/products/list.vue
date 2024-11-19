@@ -173,10 +173,14 @@ const handleMapping = async () => {
   }
 };
 
-const handleCloseCompleteModal = () => {
+const handleCloseCompleteModal = async () => {
   showCompleteModal.value = false;
   selectedItems.value.clear();
-  fetchProducts();
+  await fetchProducts();
+
+  for (const productId of expandedRows.value) {
+    await fetchMappingProducts(productId);
+  }
 };
 
 // 매핑된 상품만 가져오기
@@ -473,7 +477,7 @@ onMounted(() => {
       <div class="modal-content">
         <h3>매핑 관리</h3>
         <p v-if="selectedMainProducts.length > 0">
-          <br />선택한 상품 중 다음 상품들은 대표상품입니다:<br /><br />
+          <br />선택한 상품 중 다음 상품(들)은 대표상품입니다:<br /><br />
           <template v-for="product in selectedMainProducts" :key="product.id">
             <strong>NO.{{ product.id }}</strong> : {{ product.productName }} ({{ product.brandEngName }})<br />
           </template>
@@ -608,7 +612,7 @@ onMounted(() => {
             </tbody>
           </table>
           <div class="text-center">
-            <button type="submit" class="btn btn-primary">검 색</button>
+            <button type="submit" class="btn btn-primary btn-modify">검&nbsp;&nbsp;&nbsp;색</button>
           </div>
         </form>
       </div>
