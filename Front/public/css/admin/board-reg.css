@@ -118,6 +118,7 @@
 
 
 .image-preview {
+  position: relative;
   margin-top: 15px;
 }
 
@@ -130,6 +131,26 @@
   display: flex;
 }
 
+.remove-img-btn {
+  position: absolute;
+  top: 5px;
+
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 13px;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  line-height: 22px; /* 텍스트가 버튼의 가운데에 오도록 조정 */
+  cursor: pointer;
+  z-index: 10; /* 다른 요소 위에 버튼이 위치하도록 z-index 값 조정 */
+}
+
+.remove-img-btn:hover {
+  background-color: red;
+}
 
 
 

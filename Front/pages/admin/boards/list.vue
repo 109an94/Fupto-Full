@@ -438,7 +438,7 @@ onMounted(() => {
               <option :value="20">20</option>
             </select>
             <div>
-            <router-link to="/admin/boards/reg" class="btn btn-outline-primary">글쓰기</router-link>
+            <nuxt-link to="/admin/boards/reg" class="btn btn-outline-primary">글쓰기</nuxt-link>
           </div>
           </div>
         </div>
@@ -492,9 +492,11 @@ onMounted(() => {
                   <button class="btn btn-outline-third btn-sm toggle-brands" @click="openModal(board)">
                     <i class="mdi mdi-chevron-down"></i>
                   </button>
-                  <button class="btn btn-outline-secondary btn-sm">
-                    <i class="bx bxs-pencil"></i>
-                  </button>
+                  <nuxt-link :to="`/admin/bords/${ board.id }/edit`">
+                    <button class="btn btn-outline-secondary btn-sm">
+                      <i class="bx bxs-pencil"></i>
+                    </button>
+                  </nuxt-link>
                   <button class="btn btn-outline-danger btn-sm" @click="confirmDelete(board.id)">
                     <i class="bx bx-trash"></i>
                   </button>
@@ -537,6 +539,10 @@ onMounted(() => {
           <p class="modal-tit"><strong>TITLE: </strong> {{ selectedBoard.title }}</p>
           <p class="modal-cat"><strong>CATERORY: </strong> {{ selectedBoard.boardCategoryName }}</p>
           <p class="modal-wri"><strong>WRITER: </strong> {{ selectedBoard.regMemberNickName }}</p>
+          <p><strong>IMAGE:</strong><br>
+              <img v-if="selectedBoard.img" :src="'http://localhost:8080/api/v1/' + selectedBoard.img" :alt="selectedBoard.img" />
+              <p v-else>이미지 없음</p>
+          </p>
           <br>
           <p class="modal-con"><strong>CONTENTS:</strong>{{ selectedBoard.contents }}</p>
         </div>

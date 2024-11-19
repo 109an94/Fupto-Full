@@ -24,13 +24,8 @@ public interface BoardService {
     BoardDefaultDto getSearch(BoardSearchDto boardSearchDto);
 
     // 등록
-    BoardListDto createPost(BoardListDto boardListDto);
-
-//    BoardCreateDto createBoard(BoardCreateDto boardCreateDto);
-
-//    BoardListDto createBoard(BoardCreateDto boardCreateDto) throws IOException;
-
-    BoardListDto createBoard(BoardCreateDto boardCreateDto, MultipartFile file) throws IOException;
+//    BoardListDto createPost(BoardListDto boardListDto);
+    BoardListDto createPost(BoardListDto boardListDto, MultipartFile file) throws IOException;
 
     // 수정
     BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception;

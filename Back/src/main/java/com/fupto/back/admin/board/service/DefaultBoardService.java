@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -148,71 +147,92 @@ public class DefaultBoardService implements BoardService {
 
 // ========== 등록 =========================================================================
 
+//    @Override
+//    public BoardListDto createPost(BoardListDto boardListDto) {
+//        // BoardListDto -> Board Entity 변환
+//        Board newBoard = modelMapper.map(boardListDto, Board.class);
+//
+//        // 카테고리
+//        Long boardCategoryId = boardListDto.getBoardCategoryId();  // BoardListDto에서 category ID를 가져옴
+//        BoardCategory boardCategory = boardCategoryRepository.findById(boardCategoryId)
+//                .orElseThrow(() -> new RuntimeException("BoardCategory not found"));
+//
+//        newBoard.setBoardCategory(boardCategory);
+//
+//        // 멤버
+//
+//        Long regMemberId = boardListDto.getRegMemberId();
+//        Member member = memberRepository.findById(regMemberId).orElseThrow(() -> new RuntimeException("RegMember not found"));
+//
+//        newBoard.setRegMember(member);
+//        newBoard.setCreatedAt(Instant.now());
+//
+//
+//        // DB에 게시글 저장
+//        Board savedBoard = boardRepository.save(newBoard);
+//
+//        // 저장된 게시글을 BoardListDto로 변환하여 반환
+//        return modelMapper.map(savedBoard, BoardListDto.class);
+//    }
+
     @Override
-    public BoardListDto createPost(BoardListDto boardListDto) {
+    public BoardListDto createPost(BoardListDto boardListDto, MultipartFile file) throws IOException {
         // BoardListDto -> Board Entity 변환
-        Board newBoard = modelMapper.map(boardListDto, Board.class);
+        Board newBoard = new Board();
+        newBoard.setTitle(boardListDto.getTitle());
+        newBoard.setContents(boardListDto.getContents());
+        newBoard.setActive(boardListDto.getActive());
 
         // 카테고리
-        Long boardCategoryId = boardListDto.getBoardCategoryId();  // BoardListDto에서 category ID를 가져옴
-        BoardCategory boardCategory = boardCategoryRepository.findById(boardCategoryId)
+        BoardCategory boardCategory = boardCategoryRepository.findById(boardListDto.getBoardCategoryId())
                 .orElseThrow(() -> new RuntimeException("BoardCategory not found"));
-
         newBoard.setBoardCategory(boardCategory);
 
         // 멤버
-
-        Long regMemberId = boardListDto.getRegMemberId();
-        Member member = memberRepository.findById(regMemberId).orElseThrow(() -> new RuntimeException("RegMember not found"));
-
+        Member member = memberRepository.findById(boardListDto.getRegMemberId())
+                .orElseThrow(() -> new RuntimeException("RegMember not found"));
         newBoard.setRegMember(member);
-        newBoard.setCreatedAt(Instant.now());
 
-
-        // DB에 게시글 저장
         Board savedBoard = boardRepository.save(newBoard);
 
-        // 저장된 게시글을 BoardListDto로 변환하여 반환
-        return modelMapper.map(savedBoard, BoardListDto.class);
-    }
-
-    @Override
-    public BoardListDto createBoard(BoardCreateDto boardCreateDto, MultipartFile file) throws IOException {
-
-        Board board = modelMapper.map(boardCreateDto, Board.class);
-
-        board.setImg("-");
-
-        Board savedBoard = boardRepository.save(board);
-        Long boardId = savedBoard.getId();
-
-
+        // 게시글 저장 (파일은 따로 처리)
         if (file != null && !file.isEmpty()) {
-            String fileName = saveFile(file, boardId); //
-            savedBoard.setImg(fileName); // 파일명 설정
+            String fileName = saveFile(file, savedBoard.getId());  // 게시글 ID로 디렉토리 생성 후 파일 저장
+            savedBoard.setImg(fileName);
         }
 
         // DB에 게시글 저장
         savedBoard = boardRepository.save(savedBoard);
 
-        return modelMapper.map(savedBoard, BoardListDto.class);
+        // 반환할 DTO 변환
+        BoardListDto savedBoardDto = new BoardListDto();
+        savedBoardDto.setId(savedBoard.getId());
+        savedBoardDto.setTitle(savedBoard.getTitle());
+        savedBoardDto.setContents(savedBoard.getContents());
+        savedBoardDto.setImg(savedBoard.getImg());
+        savedBoardDto.setBoardCategoryId(savedBoard.getBoardCategory().getId());
+        savedBoardDto.setRegMemberId(savedBoard.getRegMember().getId());
+        savedBoardDto.setActive(savedBoard.getActive());
+
+        return savedBoardDto;
     }
 
-    private String saveFile(MultipartFile file, Long boardId) throws IOException {
+    private String saveFile(MultipartFile file, Long id) throws IOException {
         // 파일 이름에 UUID 추가
         String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
 
         // 브랜드 ID를 포함한 디렉토리 생성
-        Path boardUploadDir = Paths.get(uploadPath, "boards", boardId.toString());
+        Path boardUploadDir = Paths.get("uploads", "boards", id.toString());
         if (!Files.exists(boardUploadDir)) {
             Files.createDirectories(boardUploadDir);
         }
 
         // 최종 파일 경로 설정
         Path filePath = boardUploadDir.resolve(fileName);
-        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(file.getInputStream(), filePath);
 
         // 경로가 포함된 파일명을 반환 (백슬래시를 포워드 슬래시로 변경)
+//        return fileName;
         return filePath.toString().replace("\\", "/");
     }
 
@@ -280,9 +300,6 @@ public class DefaultBoardService implements BoardService {
 
         return modelMapper.map(board, BoardListDto.class);
     }
-
-// ========== 엑티브 =========================================================================
-
 
 }
 

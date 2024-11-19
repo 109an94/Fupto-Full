@@ -51,34 +51,32 @@ public class BoardController {
 
     // 게시글 등록
     @PostMapping("/post")
-    public ResponseEntity<BoardListDto> createPost( @RequestBody BoardListDto boardListDto){
+    public ResponseEntity<BoardListDto> createPost(
+            @RequestParam("boardData") String boardDataJson,  // JSON 데이터로 게시글 정보 받음
+            @RequestParam(value = "file", required = false) MultipartFile file) {  // 파일 (선택적)
 
-        BoardListDto createBoard = boardService.createPost(boardListDto);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(createBoard);
-    }
-//    @PostMapping("/reg")
-//    public ResponseEntity<BoardCreateDto> createBoard( @RequestBody BoardCreateDto boardCreateDto){
-//
-//        BoardCreateDto regBoard = boardService.createBoard(boardCreateDto);
-//
-//        return ResponseEntity.status(HttpStatus.CREATED).body(regBoard);
-//    }
-
-    @PostMapping(value = "/reg", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BoardListDto> regBoard(
-            @RequestPart("boardData") String boardDataJson,
-            @RequestPart(value = "file", required = false) MultipartFile file) {
         try {
+            // boardDataJson을 BoardListDto 객체로 변환
             ObjectMapper objectMapper = new ObjectMapper();
-            BoardCreateDto boardCreateDto = objectMapper.readValue(boardDataJson, BoardCreateDto.class);
+            BoardListDto boardListDto = objectMapper.readValue(boardDataJson, BoardListDto.class);
 
-            BoardListDto createdBoard = boardService.createBoard(boardCreateDto, file);
+            // 서비스 호출하여 게시글 생성 (파일도 있을 수 있음)
+            BoardListDto createdBoard = boardService.createPost(boardListDto, file);
+
             return ResponseEntity.status(HttpStatus.CREATED).body(createdBoard);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
+
+//    // 게시글 등록
+//    @PostMapping("/post")
+//    public ResponseEntity<BoardListDto> createPost( @RequestBody BoardListDto boardListDto){
+//
+//        BoardListDto createBoard = boardService.createPost(boardListDto);
+//
+//        return ResponseEntity.status(HttpStatus.CREATED).body(createBoard);
+//    }
 
     // 선택한 게시글 수정
     @PutMapping("/{id}")

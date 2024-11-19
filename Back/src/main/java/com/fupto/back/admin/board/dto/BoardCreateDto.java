@@ -15,7 +15,7 @@ public class BoardCreateDto {
 //    private Long id;
     private String title;
     private String contents;
-//    private Long regMemberId;
+    private Long regMemberId;
 //    private String regMemberNickName;
 //    private Instant createdAt;
 //    private Instant modifiedAt;
