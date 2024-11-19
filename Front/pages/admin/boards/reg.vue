@@ -51,7 +51,7 @@ const handleSubmit = async() => {
     formData.append('boardData', JSON.stringify({
     title: board.value.title,
     contents: board.value.contents,
-    regMemberId: board.value.regMemberId,
+    // regMemberId: board.value.regMemberId,
     boardCategoryId: board.value.boardCategoryId,
     active: board.value.active,
   }));

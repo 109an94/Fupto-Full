@@ -72,6 +72,7 @@ public class BoardController {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             BoardCreateDto boardCreateDto = objectMapper.readValue(boardDataJson, BoardCreateDto.class);
+
             BoardListDto createdBoard = boardService.createBoard(boardCreateDto, file);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdBoard);
         } catch (Exception e) {
