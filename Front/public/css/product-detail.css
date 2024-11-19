@@ -132,6 +132,25 @@
   margin-top: 8px;
 }
 
+.title-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.favorite-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.favorite {
+  width: 28.42px;
+  height: 25px;
+}
+
 .price-info {
   padding: 20px;
   text-align: right;
@@ -303,6 +322,7 @@
   padding: 20px;
   color: #60646b;
   font-size: 14px;
+  white-space: pre-wrap;
 }
 
 .description ul {

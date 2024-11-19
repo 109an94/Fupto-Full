@@ -10,6 +10,8 @@ spring:
       max-request-size: 300MB #여러개 올때 총 사이즈
 
 server:
+  http2:
+    enabled: true
   servlet:
     context-path: /api/v1
 

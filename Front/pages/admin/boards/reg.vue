@@ -10,11 +10,9 @@ useHead({
 const board = ref({
   title: '',
   contents: '',
-  password: '',
-  regMemberId: '7',
-  boardCategoryId: '',
+  boardCategoryId: 1,
   active: true,
-  // fileUpload: null,
+  fileUpload: null,
 });
 
 const imageUrl = ref('');
@@ -53,8 +51,7 @@ const handleSubmit = async() => {
     formData.append('boardData', JSON.stringify({
     title: board.value.title,
     contents: board.value.contents,
-    password: board.value.password,
-    regMemberId: board.value.regMemberId,
+    // regMemberId: board.value.regMemberId,
     boardCategoryId: board.value.boardCategoryId,
     active: board.value.active,
   }));
@@ -64,7 +61,7 @@ const handleSubmit = async() => {
     formData.append('file', board.value.fileUpload);
   }
 
-  const response = await fetch('http://localhost:8080/api/v1/admin/boards/post', {
+  const response = await fetch('http://localhost:8080/api/v1/admin/boards/reg', {
         method: 'POST',
         body: formData,
       });
@@ -90,12 +87,11 @@ const handleSubmit = async() => {
     board.value = {
       title: '',
       contents: '',
-      password: '',
-      regMemberId: '7',
-      boardCategoryId: '',
+      boardCategoryId: 1,
       active: true,
       fileUpload: null,
     };
+    imageUrl.value = '';
   };
 
   const handleCancel = resetForm;
@@ -118,7 +114,7 @@ const handleSubmit = async() => {
 
     <div class="card">
       <div class="card-body">
-        <form @submit.prevent="handleSubmit">
+        <form @submit.prevent="handleSubmit" enctype="multipart/form-data">
           <table class="table">
             <tbody>
               <tr>
@@ -133,10 +129,20 @@ const handleSubmit = async() => {
                 <th>게시판</th>
                 <td>
                   <select v-model="board.boardCategoryId" class="select">
-                    <option value="1">공지사항</option>
+                    <option value="1" selected>공지사항</option>
                     <option value="2">커뮤니티</option>
                     <option value="3">FAQ</option>
                     <option value="4">고객센터</option>
+                  </select>
+                </td>
+              </tr>
+
+              <tr>
+                <th>공개</th>
+                <td>
+                  <select v-model="board.active" class="select">
+                    <option :value="true" selected>공개</option>
+                    <option :value="false">비공개</option>
                   </select>
                 </td>
               </tr>
@@ -148,7 +154,7 @@ const handleSubmit = async() => {
                 </td>
               </tr>
 
-              <!-- <tr>
+              <tr>
                 <th>이미지</th>
                 <td>
                   <input type="file" id="fileUpload" @change="previewImage" accept="image/*">
@@ -156,7 +162,7 @@ const handleSubmit = async() => {
                     <img v-if="imageUrl" :src="imageUrl" alt="미리보기 이미지"/>
                   </div>
                 </td>
-              </tr> -->
+              </tr>
 
             </tbody>
           </table>

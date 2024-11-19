@@ -3,33 +3,38 @@ package com.fupto.back.admin.board.service;
 import com.fupto.back.admin.board.dto.*;
 import com.fupto.back.entity.Board;
 import com.fupto.back.entity.BoardCategory;
-import com.fupto.back.entity.Brand;
 import com.fupto.back.entity.Member;
 import com.fupto.back.repository.BoardCategoryRepository;
 import com.fupto.back.repository.BoardRepository;
 import com.fupto.back.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 @Service
 //@RequiredArgsConstructor
 public class DefaultBoardService implements BoardService {
+
+    @Value("uploads")
+    private String uploadPath;
 
     private final BoardRepository boardRepository;
     private final BoardCategoryRepository boardCategoryRepository;
@@ -171,6 +176,46 @@ public class DefaultBoardService implements BoardService {
         return modelMapper.map(savedBoard, BoardListDto.class);
     }
 
+    @Override
+    public BoardListDto createBoard(BoardCreateDto boardCreateDto, MultipartFile file) throws IOException {
+
+        Board board = modelMapper.map(boardCreateDto, Board.class);
+
+        board.setImg("-");
+
+        Board savedBoard = boardRepository.save(board);
+        Long boardId = savedBoard.getId();
+
+
+        if (file != null && !file.isEmpty()) {
+            String fileName = saveFile(file, boardId); //
+            savedBoard.setImg(fileName); // 파일명 설정
+        }
+
+        // DB에 게시글 저장
+        savedBoard = boardRepository.save(savedBoard);
+
+        return modelMapper.map(savedBoard, BoardListDto.class);
+    }
+
+    private String saveFile(MultipartFile file, Long boardId) throws IOException {
+        // 파일 이름에 UUID 추가
+        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+
+        // 브랜드 ID를 포함한 디렉토리 생성
+        Path boardUploadDir = Paths.get(uploadPath, "boards", boardId.toString());
+        if (!Files.exists(boardUploadDir)) {
+            Files.createDirectories(boardUploadDir);
+        }
+
+        // 최종 파일 경로 설정
+        Path filePath = boardUploadDir.resolve(fileName);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        // 경로가 포함된 파일명을 반환 (백슬래시를 포워드 슬래시로 변경)
+        return filePath.toString().replace("\\", "/");
+    }
+
     // ========== 수정 =========================================================================
 
     @Override
@@ -235,6 +280,8 @@ public class DefaultBoardService implements BoardService {
 
         return modelMapper.map(board, BoardListDto.class);
     }
+
+// ========== 엑티브 =========================================================================
 
 
 }
