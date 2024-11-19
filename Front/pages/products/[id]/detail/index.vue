@@ -228,11 +228,6 @@ onUnmounted(() => {
             <span class="discount">{{ product?.priceInfo.discountRate }}%</span>
             <span class="sale-price">{{ product?.priceInfo.salePrice?.toLocaleString() }} ￦</span>
           </p>
-          <div class="additional-costs">
-            <span>+ 관세 8%</span>
-            <span>+ 부가세 10%</span>
-            <span>+ 배송비 ~27$</span>
-          </div>
         </section>
 
         <section class="vendor-section">

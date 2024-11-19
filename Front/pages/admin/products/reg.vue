@@ -20,14 +20,16 @@ const shops = ref([]);
 const config = useRuntimeConfig();
 
 const addProductForm = () => {
+  const lastProduct = products.value[products.value.length - 1];
+
   products.value.push({
     presentId: nextId.value === 1,
     id: nextId.value++,
     active: true,
-    category1: "",
-    category2: "",
-    category3: "",
-    brandId: "",
+    category1: lastProduct ? lastProduct.category1 : "",
+    category2: lastProduct ? lastProduct.category2 : "",
+    category3: lastProduct ? lastProduct.category3 : "",
+    brandId: lastProduct ? lastProduct.brandId : "",
     shoppingMallId: "",
     url: "https://",
     productName: "",
@@ -38,6 +40,13 @@ const addProductForm = () => {
     imageNames: [],
     fileList: [],
   });
+
+  if (lastProduct && lastProduct.category1) {
+    fetchCategories(2, lastProduct.category1);
+    if (lastProduct.category2) {
+      fetchCategories(3, lastProduct.category2);
+    }
+  }
 };
 
 // 카테고리 데이터 가져오기
