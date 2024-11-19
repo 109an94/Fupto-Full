@@ -15,7 +15,8 @@ public class BoardListDto {
     private Long id;
     private String title;
     private String contents;
-    private String password;
+    private String img;
+//    private String password;
     private Long regMemberId;
     private String regMemberNickName;
     private Instant createdAt;

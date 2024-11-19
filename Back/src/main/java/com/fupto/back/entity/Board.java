@@ -30,8 +30,11 @@ public class Board {
     @Column(name = "contents", nullable = false, length = 1000)
     private String contents;
 
-    @Column(name = "password", nullable = true, length = 200)
-    private String password;
+//    @Column(name = "password", nullable = true, length = 200)
+//    private String password;
+
+    @Column(name = "img")
+    private String img;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "reg_member_id", nullable = false)
