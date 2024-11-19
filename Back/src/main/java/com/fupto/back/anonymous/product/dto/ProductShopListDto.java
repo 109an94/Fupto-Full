@@ -15,4 +15,7 @@ public class ProductShopListDto {
     private String shopName;
     private Integer price;
     private String productUrl;
+    private String logoUrl;
+    private Integer deliveryFee;
+    private Integer taxes;
 }

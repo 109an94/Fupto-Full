@@ -264,6 +264,14 @@
   justify-content: center;
   z-index: 3;
   cursor: pointer;
+  overflow: hidden;
+}
+
+.vendor-logo img {
+  width: 95%;
+  height: 95%;
+  object-fit: contain;
+  border-radius: 50%;
 }
 
 .name-wrapper {
