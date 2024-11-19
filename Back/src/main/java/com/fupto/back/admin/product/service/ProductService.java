@@ -30,6 +30,8 @@ public interface ProductService {
 
     ProductListDto update(Long id, ProductUpdateRequestDto updateDto, List<MultipartFile> files) throws IOException;
 
+    void createMapping(ProductMappingDto request);
+
     ProductUpdateDto getProductForEdit(Long id);
 
     void updateState(Long id);
