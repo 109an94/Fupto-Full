@@ -113,6 +113,12 @@ public class ProductController {
         }
     }
 
+    @PostMapping("/mapping")
+    public ResponseEntity<?> createMapping(@RequestBody ProductMappingDto request) {
+        productService.createMapping(request);
+        return ResponseEntity.ok().build();
+    }
+
     @PatchMapping("/{id}")
     public ResponseEntity<ProductListDto> update(
             @PathVariable Long id,

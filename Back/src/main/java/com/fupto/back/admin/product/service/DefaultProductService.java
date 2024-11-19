@@ -243,6 +243,94 @@ public class DefaultProductService implements ProductService {
         return results;
     }
 
+    @Transactional
+    public void createMapping(ProductMappingDto request) {
+        // 새로운 대표상품이 될 상품 조회
+        Product newMainProduct = productRepository.findById(request.getMainProductId())
+                .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다."));
+
+        // 선택된 상품들 조회
+        List<Product> selectedProducts = productRepository.findAllById(request.getMappingProductIds());
+
+        // 같은 매핑 그룹인지 확인
+        boolean isSameGroup = selectedProducts.stream()
+                .allMatch(product ->
+                        product.getMappingId() != null &&
+                                product.getMappingId().equals(newMainProduct.getMappingId()));
+
+        if (isSameGroup) {
+            // 같은 매핑 그룹인 경우 대표상품만 변경
+            newMainProduct.setPresentId(true);
+            newMainProduct.setMappingId(newMainProduct.getId());
+            newMainProduct.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+            productRepository.save(newMainProduct);
+
+            // 선택된 다른 상품들은 매핑상품으로 설정
+            for (Product selectedProduct : selectedProducts) {
+                if (!selectedProduct.getId().equals(newMainProduct.getId())) {
+                    selectedProduct.setPresentId(false);
+                    selectedProduct.setMappingId(newMainProduct.getId());
+                    selectedProduct.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+                    productRepository.save(selectedProduct);
+                }
+            }
+
+            // 같은 매핑 그룹의 나머지 상품들도 새로운 대표상품 ID로 매핑
+            List<Product> otherGroupProducts = productRepository.findAllByMappingIdAndStateTrue(newMainProduct.getMappingId());
+            for (Product product : otherGroupProducts) {
+                if (!selectedProducts.contains(product) && !product.getId().equals(newMainProduct.getId())) {
+                    product.setMappingId(newMainProduct.getId());
+                    product.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+                    productRepository.save(product);
+                }
+            }
+        } else {
+            // 다른 매핑 그룹인 경우
+            newMainProduct.setPresentId(true);
+            newMainProduct.setMappingId(newMainProduct.getId());
+            newMainProduct.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+            productRepository.save(newMainProduct);
+
+            // 선택된 상품들 중 대표상품들 확인 및 처리
+            for (Product selectedProduct : selectedProducts) {
+                if (selectedProduct.getPresentId()) {
+                    // 해당 대표상품의 매핑된 상품들 조회
+                    List<Product> mappingProducts = productRepository.findAllByMappingIdAndStateTrue(selectedProduct.getId());
+
+                    if (!mappingProducts.isEmpty()) {
+                        // 첫 번째 매핑상품을 새로운 대표상품으로 승격
+                        Product newSubMainProduct = mappingProducts.get(0);
+                        newSubMainProduct.setPresentId(true);
+                        newSubMainProduct.setMappingId(newSubMainProduct.getId());
+                        newSubMainProduct.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+                        productRepository.save(newSubMainProduct);
+
+                        // 나머지 매핑상품들의 mapping_id를 새로운 대표상품 ID로 변경
+                        if (mappingProducts.size() > 1) {
+                            for (int i = 1; i < mappingProducts.size(); i++) {
+                                Product mappingProduct = mappingProducts.get(i);
+                                mappingProduct.setMappingId(newSubMainProduct.getId());
+                                mappingProduct.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+                            }
+                            productRepository.saveAll(mappingProducts.subList(1, mappingProducts.size()));
+                        }
+                    }
+
+                    // 기존 대표상품을 새로운 매핑관계로 설정
+                    selectedProduct.setPresentId(false);
+                    selectedProduct.setMappingId(newMainProduct.getId());
+                    selectedProduct.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+                    productRepository.save(selectedProduct);
+                } else {
+                    // 일반 매핑상품 처리
+                    selectedProduct.setMappingId(newMainProduct.getId());
+                    selectedProduct.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+                    productRepository.save(selectedProduct);
+                }
+            }
+        }
+    }
+
     private Product createSingleProduct(ProductRegDto regDto,
                                         List<MultipartFile> files,
                                         Map<String, MultipartFile> filesByName,

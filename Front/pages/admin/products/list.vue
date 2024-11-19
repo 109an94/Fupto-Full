@@ -6,12 +6,20 @@ useHead({
 });
 
 // 상태 관리
+const config = useRuntimeConfig();
 const products = ref([]);
 const totalElements = ref(0);
 const totalPages = ref(0);
 const currentPage = ref(0);
 const pageSize = ref(10);
 const sortField = ref("id");
+
+const showConfirmModal = ref(false);
+const showMappingModal = ref(false);
+const showCompleteModal = ref(false);
+const selectedMainProducts = ref([]);
+const mappingMainProduct = ref(null);
+
 const mappedProducts = ref({});
 const expandedRows = ref(new Set());
 const categories = ref({
@@ -78,7 +86,7 @@ const fetchProducts = async () => {
 
     console.log("Search Parameters:", params.toString());
 
-    const data = await $fetch(`http://localhost:8080/api/v1/admin/products?${params.toString()}`);
+    const data = await $fetch(`${config.public.apiBase}/admin/products?${params.toString()}`);
 
     products.value = data.products;
     totalElements.value = data.totalElements;
@@ -89,10 +97,92 @@ const fetchProducts = async () => {
   }
 };
 
+// 매핑 모달 관련
+const handleMappingManagement = () => {
+  if (selectedItems.value.size < 2) {
+    alert("매핑할 상품을 2개 이상 선택해주세요.");
+    return;
+  }
+
+  selectedMainProducts.value = products.value.filter((p) => selectedItems.value.has(p.id) && p.presentId);
+
+  if (selectedMainProducts.value.length > 0) {
+    showConfirmModal.value = true;
+  } else {
+    showMappingModal.value = true;
+  }
+};
+
+const getProductName = (id) => {
+  const mainProduct = products.value.find((p) => p.id === id);
+  if (mainProduct) return mainProduct.productName;
+
+  for (const mappedList of Object.values(mappedProducts.value)) {
+    const mappedProduct = mappedList.find((p) => p.id === id);
+    if (mappedProduct) return mappedProduct.productName;
+  }
+  return "";
+};
+
+const getProductDetails = (id) => {
+  const mainProduct = products.value.find((p) => p.id === id);
+  if (mainProduct) {
+    return `(NO.${mainProduct.id}) ${mainProduct.brandEngName} / ${mainProduct.shoppingMallEngName} / ￦${formatNumber(
+      mainProduct.salePrice
+    )}`;
+  }
+
+  for (const mappedList of Object.values(mappedProducts.value)) {
+    const mappedProduct = mappedList.find((p) => p.id === id);
+    if (mappedProduct) {
+      return `(NO.${mappedProduct.id}) ${mappedProduct.brandEngName} / ${mappedProduct.shoppingMallEngName} / ￦${formatNumber(
+        mappedProduct.salePrice
+      )}`;
+    }
+  }
+  return "";
+};
+
+const handleConfirmMapping = () => {
+  showConfirmModal.value = false;
+  showMappingModal.value = true;
+};
+
+const handleCloseConfirmModal = () => {
+  showConfirmModal.value = false;
+  selectedMainProducts.value = [];
+};
+
+const handleMapping = async () => {
+  try {
+    const request = {
+      mainProductId: mappingMainProduct.value,
+      mappingProductIds: Array.from(selectedItems.value).filter((id) => id !== mappingMainProduct.value),
+    };
+
+    await $fetch(`${config.public.apiBase}/admin/products/mapping`, {
+      method: "POST",
+      body: request,
+    });
+
+    showMappingModal.value = false;
+    showCompleteModal.value = true;
+  } catch (error) {
+    console.error("매핑 처리 중 오류:", error);
+    alert("매핑 처리 중 오류가 발생했습니다.");
+  }
+};
+
+const handleCloseCompleteModal = () => {
+  showCompleteModal.value = false;
+  selectedItems.value.clear();
+  fetchProducts();
+};
+
 // 매핑된 상품만 가져오기
 const fetchMappingProducts = async (productId) => {
   try {
-    const data = await $fetch(`http://localhost:8080/api/v1/admin/products/${productId}/mapping`);
+    const data = await $fetch(`${config.public.apiBase}/admin/products/${productId}/mapping`);
 
     mappedProducts.value[productId] = data;
   } catch (error) {
@@ -107,7 +197,7 @@ const fetchCategories = async (level, parentId = null) => {
     if (parentId) params.append("parentId", parentId);
     params.append("level", level);
 
-    const data = await $fetch(`http://localhost:8080/api/v1/admin/products/categories?${params.toString()}`);
+    const data = await $fetch(`${config.public.apiBase}/admin/products/categories?${params.toString()}`);
 
     if (level === 1) {
       categories.value.level1 = data;
@@ -125,7 +215,7 @@ const fetchCategories = async (level, parentId = null) => {
 const updateActive = async (productId, active) => {
   try {
     console.log(`Updating active status: productId=${productId}, active=${active}`);
-    await $fetch(`http://localhost:8080/api/v1/admin/products/${productId}/active?active=${active}`, {
+    await $fetch(`${config.public.apiBase}/admin/products/${productId}/active?active=${active}`, {
       method: "PATCH",
     });
   } catch (error) {
@@ -143,19 +233,15 @@ const handleActiveChange = async (product) => {
 const updateState = async (productId, isMainProduct = false) => {
   try {
     if (isMainProduct) {
-      // 대표상품 삭제
-      await $fetch(`http://localhost:8080/api/v1/admin/products/${productId}/promote`, {
+      await $fetch(`${config.public.apiBase}/admin/products/${productId}/promote`, {
         method: "PATCH",
       });
-      // 대표상품 삭제 시 전체 목록 새로고침
       fetchProducts();
     } else {
-      // 매핑상품 삭제
-      await $fetch(`http://localhost:8080/api/v1/admin/products/${productId}/state`, {
+      await $fetch(`${config.public.apiBase}/admin/products/${productId}/state`, {
         method: "PATCH",
       });
 
-      // 매핑상품 삭제 시 해당 대표상품의 매핑 목록만 새로고침
       const parentProduct = products.value.find((p) => mappedProducts.value[p.id]?.some((mp) => mp.id === productId));
 
       if (parentProduct) {
@@ -382,6 +468,61 @@ onMounted(() => {
 
 <template>
   <main>
+    <!-- 매핑 관리 전 확인 -->
+    <div v-if="showConfirmModal" class="confirm-modal">
+      <div class="modal-content">
+        <h3>매핑 관리</h3>
+        <p v-if="selectedMainProducts.length > 0">
+          <br />선택한 상품 중 다음 상품들은 대표상품입니다:<br /><br />
+          <template v-for="product in selectedMainProducts" :key="product.id">
+            <strong>NO.{{ product.id }}</strong> : {{ product.productName }} ({{ product.brandEngName }})<br />
+          </template>
+          <br />
+          매핑 설정을 진행하시겠습니까?
+        </p>
+        <div class="modal-actions">
+          <button class="btn btn-primary" @click="handleConfirmMapping">확인</button>
+          <button class="btn btn-secondary" @click="handleCloseConfirmModal">취소</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 매핑 선택 모달 -->
+    <div v-if="showMappingModal" class="mapping-modal">
+      <div class="modal-content">
+        <h3>매핑 관리</h3>
+        <br />
+        <div class="selected-products">
+          <div v-for="id in selectedItems" :key="id" class="product-item">
+            <input type="radio" :value="id" v-model="mappingMainProduct" name="mainProduct" :id="`product-${id}`" />
+            <label :for="`product-${id}`" class="product-info">
+              <div class="product-name">상품명 : {{ getProductName(id) }}</div>
+              <div class="product-details">
+                {{ getProductDetails(id) }}
+              </div>
+            </label>
+          </div>
+        </div>
+        <p class="info-text">
+          <strong><br />* 선택한 상품 중 하나를 대표 상품으로 지정해주세요.</strong><br />
+        </p>
+        <div class="modal-actions">
+          <button class="btn btn-primary" @click="handleMapping" :disabled="!mappingMainProduct">매핑 처리</button>
+          <button class="btn btn-secondary" @click="showMappingModal = false">취소</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 완료 알림 모달 -->
+    <div v-if="showCompleteModal" class="complete-modal">
+      <div class="modal-content">
+        <p>매핑이 완료되었습니다.</p>
+        <div class="modal-actions">
+          <button class="btn btn-primary" @click="handleCloseCompleteModal">확인</button>
+        </div>
+      </div>
+    </div>
+
     <h1 class="title">상품</h1>
     <ul class="breadcrumbs">
       <li><a href="#">FUPTO</a></li>
@@ -484,7 +625,9 @@ onMounted(() => {
             <option :value="50">50</option>
             <option :value="100">100</option>
           </select>
-          <button class="btn btn-outline-secondary mr-2">Export</button>
+          <button class="btn btn-primary mr-2" @click="handleMappingManagement" :disabled="selectedItems.size < 2">
+            매핑 관리
+          </button>
           <router-link to="/admin/products/reg" class="btn btn-primary">+ Add Product</router-link>
         </div>
 
@@ -673,6 +816,7 @@ onMounted(() => {
 </template>
 
 <style>
+/*페이지네이션*/
 .pagination-container {
   margin-top: 1rem;
 }
@@ -765,5 +909,55 @@ input:checked + .pl-slider {
 
 input:checked + .pl-slider:before {
   transform: translateX(15px);
+}
+
+/*매핑 모달*/
+.confirm-modal,
+.mapping-modal,
+.complete-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  width: fit-content;
+  min-width: 400px;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.product-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.product-item input[type="radio"] {
+  margin-right: 8px;
+  transform: scale(1.5);
+}
+
+.product-info {
+  display: flex;
+  flex-direction: column;
 }
 </style>
