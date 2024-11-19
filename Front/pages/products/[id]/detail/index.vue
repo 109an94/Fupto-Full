@@ -72,6 +72,23 @@ const nextSlide = () => {
 };
 
 // 기존 토글 함수들
+const toggleFavorite = (event) => {
+  event.preventDefault();
+  const button = event.currentTarget;
+  const isFavorite = button.getAttribute("data-favorite") === "true";
+  const img = button.querySelector("img");
+
+  if (isFavorite) {
+    button.setAttribute("data-favorite", "false");
+    img.src = "/imgs/icon/favorite.svg";
+    img.alt = "즐겨찾기 추가";
+  } else {
+    button.setAttribute("data-favorite", "true");
+    img.src = "/imgs/icon/favorite-fill.svg";
+    img.alt = "즐겨찾기 제거";
+  }
+};
+
 const toggleVendorList = () => {
   isVendorListOpen.value = !isVendorListOpen.value;
 };
@@ -197,7 +214,12 @@ onUnmounted(() => {
       <div class="product-info">
         <section class="header">
           <p class="brand">{{ product?.brandEngName }}</p>
-          <h1 class="title">{{ product?.productName }}</h1>
+          <div class="title-container">
+            <h1 class="title">{{ product?.productName }}</h1>
+            <button data-favorite="false" @click="toggleFavorite" class="favorite-btn">
+              <img class="favorite" src="/imgs/icon/favorite.svg" alt="찜" />
+            </button>
+          </div>
         </section>
 
         <section class="price-info">
