@@ -1,9 +1,6 @@
 package com.fupto.back.admin.brand.service;
 
-import com.fupto.back.admin.brand.dto.BrandCreateDto;
-import com.fupto.back.admin.brand.dto.BrandListDto;
-import com.fupto.back.admin.brand.dto.BrandResponseDto;
-import com.fupto.back.admin.brand.dto.BrandSearchDto;
+import com.fupto.back.admin.brand.dto.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -19,4 +16,8 @@ public interface BrandService {
     BrandListDto updateState(Long id, boolean b);
 
     void bulkUpdateState(List<Long> brandIds, boolean b);
+
+    BrandListDto show(Long id);
+
+    BrandListDto update(Long id, BrandUpdateDto brandUpdateDto, MultipartFile file) throws IOException;
 }

@@ -1,9 +1,9 @@
 package com.fupto.back.admin.shoppingmall.service;
 
-import com.fupto.back.admin.shoppingmall.dto.ShoppingmallCreateDto;
-import com.fupto.back.admin.shoppingmall.dto.ShoppingmallListDto;
-import com.fupto.back.admin.shoppingmall.dto.ShoppingmallResponseDto;
-import com.fupto.back.admin.shoppingmall.dto.ShoppingmallSearchDto;
+import com.fupto.back.admin.brand.dto.BrandListDto;
+import com.fupto.back.admin.brand.dto.BrandUpdateDto;
+import com.fupto.back.admin.shoppingmall.dto.*;
+import com.fupto.back.entity.Brand;
 import com.fupto.back.entity.ShoppingMall;
 import com.fupto.back.repository.ShoppingMallRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -177,6 +177,51 @@ public class DefaultShoppingmallSerivce implements ShoppingmallSerivce {
             shoppingMall.setState(state);
         }
         shoppingMallRepository.saveAll(shoppingMallsToUpdate);
+    }
+
+    @Override
+    public ShoppingmallListDto show(Long id) {
+        ShoppingMall shoppingmall = shoppingMallRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Shoppingmall not found with id: " + id));
+
+        return ShoppingmallListDto.builder()
+                .korName(shoppingmall.getKorName())
+                .engName(shoppingmall.getEngName())
+                .url(shoppingmall.getUrl())
+                .active(shoppingmall.getActive())
+                .description(shoppingmall.getDescription())
+                .img(shoppingmall.getImg())
+                .deliveryfee(shoppingmall.getDeliveryfee())
+                .taxes(shoppingmall.getTaxes())
+                .build();
+    }
+
+    @Override
+    public ShoppingmallListDto update(Long id, ShoppingmallUpdateDto shoppingmallUpdateDto, MultipartFile file) throws IOException {
+        ShoppingMall shoppingmall = shoppingMallRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Shoppingmall not found with id: " + id));
+
+        // 브랜드 정보 업데이트
+        shoppingmall.setKorName(shoppingmallUpdateDto.getKorName());
+        shoppingmall.setEngName(shoppingmallUpdateDto.getEngName());
+        shoppingmall.setUrl(shoppingmallUpdateDto.getUrl());
+        shoppingmall.setActive(shoppingmallUpdateDto.getActive());
+        shoppingmall.setDescription(shoppingmallUpdateDto.getDescription());
+
+        // 파일 처리
+        if (file != null && !file.isEmpty()) {
+            String fileName = saveFile(file, id);
+            shoppingmall.setImg(fileName);
+        }
+
+        // 수정 날짜 업데이트
+        shoppingmall.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+
+        // 브랜드 저장
+        ShoppingMall updatedShoppingmall = shoppingMallRepository.save(shoppingmall);
+
+        // BrandListDto로 변환하여 반환
+        return convertToShoppingmallListDto(updatedShoppingmall);
     }
 
     private String saveFile(MultipartFile file, Long shoppingmallId) throws IOException {

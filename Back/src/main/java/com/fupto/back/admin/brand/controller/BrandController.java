@@ -1,17 +1,18 @@
 package com.fupto.back.admin.brand.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fupto.back.admin.brand.dto.BrandCreateDto;
-import com.fupto.back.admin.brand.dto.BrandListDto;
-import com.fupto.back.admin.brand.dto.BrandResponseDto;
-import com.fupto.back.admin.brand.dto.BrandSearchDto;
+import com.fupto.back.admin.brand.dto.*;
 import com.fupto.back.admin.brand.service.BrandService;
+import com.fupto.back.admin.product.dto.ProductListDto;
+import com.fupto.back.admin.product.dto.ProductUpdateRequestDto;
+import com.fupto.back.entity.Brand;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController("adminBrandController")
@@ -48,6 +49,32 @@ public class BrandController {
         }
     }
 
+    @GetMapping("{id}/edit")
+    public ResponseEntity<BrandListDto> show(@PathVariable Long id) {
+        return ResponseEntity.ok(brandService.show(id));
+    }
+
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BrandListDto> updateBrand(
+            @PathVariable Long id,
+            @RequestPart("brandData") String brandDataJson,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+        try {
+            // brandDataJson 로그 찍기
+            System.out.println("Received brand data: " + brandDataJson);
+            ObjectMapper objectMapper = new ObjectMapper();
+            BrandUpdateDto brandUpdateDto = objectMapper.readValue(brandDataJson, BrandUpdateDto.class);
+
+            // 서비스 호출하여 브랜드 업데이트
+            BrandListDto updatedBrand = brandService.update(id, brandUpdateDto, file);
+
+            return ResponseEntity.ok(updatedBrand);
+        } catch (Exception e) {
+            e.printStackTrace(); // 에러 로그 출력
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
     @PatchMapping("{id}/active")
     public ResponseEntity<BrandListDto> updateActive(
             @PathVariable("id") Long id,
@@ -55,7 +82,7 @@ public class BrandController {
         return ResponseEntity.ok(brandService.updateActive(id, active));
     }
 
-    @PatchMapping("{id}")
+    @PatchMapping("{id}/state")
     public ResponseEntity<BrandListDto> updateBrandState(@PathVariable("id") Long id) {
         try {
             BrandListDto updatedBrand = brandService.updateState(id, false);

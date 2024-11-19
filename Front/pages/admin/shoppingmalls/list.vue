@@ -132,7 +132,7 @@ const confirmDelete = (shoppingmallId) => {
 
 const handleDelete = async (shoppingmallId) => {
   try {
-    const response = await fetch(`http://localhost:8080/api/v1/admin/shoppingmalls/${shoppingmallId}`, {
+    const response = await fetch(`http://localhost:8080/api/v1/admin/shoppingmalls/${shoppingmallId}/state`, {
       method: "PATCH"
     });
 
@@ -512,9 +512,9 @@ onMounted(() => {
                   <button class="btn btn-outline-secondary btn-sm toggle-shoppingmalls" @click="openModal(sm)">
                     <i class="mdi mdi-chevron-down"></i>
                   </button>
-                  <button class="btn btn-outline-secondary btn-sm">
+                  <NuxtLink :to="`/admin/shoppingmalls/${sm.id}/edit`" class="btn btn-outline-secondary btn-sm">
                     <i class="bx bxs-pencil"></i>
-                  </button>
+                  </NuxtLink>
                   <button class="btn btn-outline-danger btn-sm" @click="confirmDelete(sm.id)">
                     <i class="bx bx-trash"></i>
                   </button>
