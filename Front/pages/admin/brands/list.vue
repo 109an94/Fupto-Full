@@ -109,7 +109,7 @@ const confirmDelete = (brandId) => {
 
 const handleDelete = async (brandId) => {
   try {
-    const response = await fetch(`http://localhost:8080/api/v1/admin/brands/${brandId}`, {
+    const response = await fetch(`http://localhost:8080/api/v1/admin/brands/${brandId}/state`, {
       method: "PATCH"
     });
 
@@ -478,9 +478,9 @@ onMounted(() => {
                   <button class="btn btn-outline-secondary btn-sm toggle-brands" @click="openModal(b)">
                     <i class="mdi mdi-chevron-down"></i>
                   </button>
-                  <button class="btn btn-outline-secondary btn-sm">
+                  <NuxtLink :to="`/admin/brands/${b.id}/edit`" class="btn btn-outline-secondary btn-sm">
                     <i class="bx bxs-pencil"></i>
-                  </button>
+                  </NuxtLink>
                   <button class="btn btn-outline-danger btn-sm" @click="confirmDelete(b.id)">
                     <i class="bx bx-trash"></i>
                   </button>

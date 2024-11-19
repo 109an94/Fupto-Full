@@ -1,11 +1,7 @@
 package com.fupto.back.admin.brand.service;
 
-import com.fupto.back.admin.brand.dto.BrandCreateDto;
-import com.fupto.back.admin.brand.dto.BrandListDto;
-import com.fupto.back.admin.brand.dto.BrandResponseDto;
-import com.fupto.back.admin.brand.dto.BrandSearchDto;
+import com.fupto.back.admin.brand.dto.*;
 import com.fupto.back.entity.Brand;
-import com.fupto.back.entity.Product;
 import com.fupto.back.repository.BrandRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
@@ -178,6 +174,49 @@ public class DefaultBrandService implements BrandService {
             brand.setState(state);
         }
         brandRepository.saveAll(brandsToUpdate);
+    }
+
+    @Override
+    public BrandListDto show(Long id) {
+        Brand brand = brandRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Brand not found with id: " + id));
+
+        return BrandListDto.builder()
+                .korName(brand.getKorName())
+                .engName(brand.getEngName())
+                .url(brand.getUrl())
+                .active(brand.getActive())
+                .description(brand.getDescription())
+                .img(brand.getImg())
+                .build();
+    }
+
+    @Override
+    public BrandListDto update(Long id, BrandUpdateDto brandUpdateDto, MultipartFile file) throws IOException {
+        Brand brand = brandRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Brand not found with id: " + id));
+
+        // 브랜드 정보 업데이트
+        brand.setKorName(brandUpdateDto.getKorName());
+        brand.setEngName(brandUpdateDto.getEngName());
+        brand.setUrl(brandUpdateDto.getUrl());
+        brand.setActive(brandUpdateDto.getActive());
+        brand.setDescription(brandUpdateDto.getDescription());
+
+        // 파일 처리
+        if (file != null && !file.isEmpty()) {
+            String fileName = saveFile(file, id);
+            brand.setImg(fileName);
+        }
+
+        // 수정 날짜 업데이트
+        brand.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+
+        // 브랜드 저장
+        Brand updatedBrand = brandRepository.save(brand);
+
+        // BrandListDto로 변환하여 반환
+        return convertToBrandListDto(updatedBrand);
     }
 
     private String saveFile(MultipartFile file, Long brandId) throws IOException {

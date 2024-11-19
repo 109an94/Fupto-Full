@@ -1,10 +1,9 @@
 package com.fupto.back.admin.shoppingmall.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fupto.back.admin.shoppingmall.dto.ShoppingmallCreateDto;
-import com.fupto.back.admin.shoppingmall.dto.ShoppingmallListDto;
-import com.fupto.back.admin.shoppingmall.dto.ShoppingmallResponseDto;
-import com.fupto.back.admin.shoppingmall.dto.ShoppingmallSearchDto;
+import com.fupto.back.admin.brand.dto.BrandListDto;
+import com.fupto.back.admin.brand.dto.BrandUpdateDto;
+import com.fupto.back.admin.shoppingmall.dto.*;
 import com.fupto.back.admin.shoppingmall.service.ShoppingmallSerivce;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -48,6 +47,32 @@ public class ShoppingmallController {
         }
     }
 
+    @GetMapping("{id}/edit")
+    public ResponseEntity<ShoppingmallListDto> show(@PathVariable Long id) {
+        return ResponseEntity.ok(shoppingmallService.show(id));
+    }
+
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ShoppingmallListDto> updateShoppingmall(
+            @PathVariable Long id,
+            @RequestPart("shoppingmallData") String shoppingmallDataJson,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+        try {
+            // shoppingmallDataJson 로그 찍기
+            System.out.println("Received shoppingmall data: " + shoppingmallDataJson);
+            ObjectMapper objectMapper = new ObjectMapper();
+            ShoppingmallUpdateDto shoppingmallUpdateDto = objectMapper.readValue(shoppingmallDataJson, ShoppingmallUpdateDto.class);
+
+            // 서비스 호출하여 브랜드 업데이트
+            ShoppingmallListDto updatedShoppingmall = shoppingmallService.update(id, shoppingmallUpdateDto, file);
+
+            return ResponseEntity.ok(updatedShoppingmall);
+        } catch (Exception e) {
+            e.printStackTrace(); // 에러 로그 출력
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
     @PatchMapping("{id}/active")
     public ResponseEntity<ShoppingmallListDto> updateActive(
             @PathVariable("id") Long id,
@@ -55,7 +80,7 @@ public class ShoppingmallController {
         return ResponseEntity.ok(shoppingmallService.updateActive(id, active));
     }
 
-    @PatchMapping("{id}")
+    @PatchMapping("{id}/state")
     public ResponseEntity<ShoppingmallListDto> updateShoppingmallState(@PathVariable("id") Long id) {
         try {
             ShoppingmallListDto updatedShoppingmall = shoppingmallService.updateState(id, false);

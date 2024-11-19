@@ -1,9 +1,6 @@
 package com.fupto.back.admin.shoppingmall.service;
 
-import com.fupto.back.admin.shoppingmall.dto.ShoppingmallCreateDto;
-import com.fupto.back.admin.shoppingmall.dto.ShoppingmallListDto;
-import com.fupto.back.admin.shoppingmall.dto.ShoppingmallResponseDto;
-import com.fupto.back.admin.shoppingmall.dto.ShoppingmallSearchDto;
+import com.fupto.back.admin.shoppingmall.dto.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -19,4 +16,8 @@ public interface ShoppingmallSerivce {
     ShoppingmallListDto updateState(Long id, boolean b);
 
     void bulkUpdateState(List<Long> shoppingmallIds, boolean b);
+
+    ShoppingmallListDto show(Long id);
+
+    ShoppingmallListDto update(Long id, ShoppingmallUpdateDto shoppingmallUpdateDto, MultipartFile file) throws IOException;
 }
