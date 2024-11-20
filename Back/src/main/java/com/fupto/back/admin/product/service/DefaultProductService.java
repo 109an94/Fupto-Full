@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service("adminProductService")
@@ -245,89 +246,153 @@ public class DefaultProductService implements ProductService {
 
     @Transactional
     public void createMapping(ProductMappingDto request) {
-        // 새로운 대표상품이 될 상품 조회
         Product newMainProduct = productRepository.findById(request.getMainProductId())
                 .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다."));
 
-        // 선택된 상품들 조회
         List<Product> selectedProducts = productRepository.findAllById(request.getMappingProductIds());
+        Product selectedProduct = selectedProducts.get(0);
 
-        // 같은 매핑 그룹 내의 변경인지 확인
-        boolean isSameGroup = false;
-        Product currentMainProduct;
+        boolean isNewMainProductPresent = newMainProduct.getPresentId();  // 새 대표상품이 원래 대표상품이었는지
+        boolean isSelectedProductPresent = selectedProduct.getPresentId();  // 선택된 상품이 대표상품인지
 
-        if (newMainProduct.getMappingId() != null) {
-            // 선택된 상품이 매핑상품인 경우, 해당 그룹의 대표상품 찾기
-            currentMainProduct = productRepository.findById(newMainProduct.getMappingId())
-                    .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다."));
-
-            // 선택된 모든 상품이 같은 매핑 그룹인지 확인
-            isSameGroup = selectedProducts.stream()
-                    .allMatch(product ->
-                            product.getMappingId() != null &&
-                                    product.getMappingId().equals(currentMainProduct.getId()));
-        } else {
-            currentMainProduct = null;
+        // 둘 다 매핑상품인 경우
+        if (!isNewMainProductPresent && !isSelectedProductPresent) {
+            handleMappingOnlyNewGroup(newMainProduct, selectedProducts);
+            return;
         }
 
-        if (isSameGroup) {
-            // 같은 매핑 그룹 내에서의 변경
-            handleSameGroupMapping(newMainProduct, selectedProducts, currentMainProduct);
+        // 같은 그룹의 대표상품과 매핑상품인 경우
+        if (!isNewMainProductPresent &&
+                newMainProduct.getMappingId() != null &&
+                newMainProduct.getMappingId().equals(selectedProduct.getId())) {
+            handleSameGroupMapping(newMainProduct, selectedProducts);
+            return;
+        }
+
+        // 둘 다 대표상품인 경우
+        if (isNewMainProductPresent && isSelectedProductPresent) {
+            handleMappingProductAsNewMain(newMainProduct, selectedProducts);
+            return;
+        }
+
+        // 서로 다른 그룹의 대표상품과 매핑상품인 경우
+        if (isNewMainProductPresent) {
+            // newMainProduct가 원래 대표상품인 경우
+            handleMainProductAsNewMain(newMainProduct, selectedProducts);
         } else {
-            // 다른 매핑 그룹들 간의 변경
-            handleDifferentGroupMapping(newMainProduct, selectedProducts);
+            // newMainProduct가 원래 매핑상품인 경우
+            handleMappingToMainProduct(newMainProduct, selectedProducts);
         }
     }
 
-    private void handleSameGroupMapping(Product newMainProduct, List<Product> selectedProducts, Product currentMainProduct) {
+    // 매핑 상품들끼리의 새로운 그룹 생성
+    private void handleMappingOnlyNewGroup(Product newMainProduct, List<Product> selectedProducts) {
         // 새로운 대표상품 설정
         newMainProduct.setPresentId(true);
         newMainProduct.setMappingId(newMainProduct.getId());
         newMainProduct.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
         productRepository.save(newMainProduct);
 
-        // 현재 대표상품도 매핑상품으로 변경
-        currentMainProduct.setPresentId(false);
-        currentMainProduct.setMappingId(newMainProduct.getId());
-        currentMainProduct.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
-        productRepository.save(currentMainProduct);
-
-        // 나머지 매핑상품들 처리
-        List<Product> mappingProducts = productRepository.findAllByMappingIdAndStateTrue(currentMainProduct.getId());
-        for (Product product : mappingProducts) {
+        // 선택된 매핑상품들을 새로운 그룹으로 이동
+        for (Product product : selectedProducts) {
             if (!product.getId().equals(newMainProduct.getId())) {
+                product.setPresentId(false);
                 product.setMappingId(newMainProduct.getId());
+                product.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+                productRepository.save(product);
+            }
+        }
+    }
+
+    // 같은 그룹의 대표상품과 매핑상품 서로 변경
+    private void handleSameGroupMapping(Product newMainProduct, List<Product> selectedProducts) {
+        // 현재 대표상품 찾기 (현재 1번)
+        Product currentMainProduct = productRepository.findById(newMainProduct.getMappingId())
+                .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다."));
+
+        // 새로운 대표상품 설정 (2번을 대표로)
+        newMainProduct.setPresentId(true);
+        newMainProduct.setMappingId(newMainProduct.getId());  // 2번의 mapping_id를 2번 id로
+        newMainProduct.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+        productRepository.save(newMainProduct);
+
+        // 현재 그룹의 모든 상품 조회 (1,2,3,4번)
+        List<Product> allGroupProducts = productRepository.findAllByMappingIdAndStateTrue(currentMainProduct.getId());
+        allGroupProducts.add(currentMainProduct);  // 대표상품도 포함 (1번)
+
+        // 모든 상품의 매핑 정보 업데이트 (1,3,4번)
+        for (Product product : allGroupProducts) {
+            if (!product.getId().equals(newMainProduct.getId())) {  // 2번이 아닌 모든 상품
+                product.setPresentId(false);  // present_id를 false로
+                product.setMappingId(newMainProduct.getId());  // mapping_id를 2번 id로
                 product.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
             }
         }
-        productRepository.saveAll(mappingProducts);
+        productRepository.saveAll(allGroupProducts);
     }
 
-    private void handleDifferentGroupMapping(Product newMainProduct, List<Product> selectedProducts) {
-        // 새로운 대표상품 설정
+    // 대표 상품끼리 매핑 할시 대표로 선택된 상품 밑으로 전체 이동
+    private void handleMappingProductAsNewMain(Product newMainProduct, List<Product> selectedProducts) {
+        // 선택된 상품들 처리
+        for (Product selectedProduct : selectedProducts) {
+            if (selectedProduct.getPresentId()) {
+                List<Product> oldGroupProducts = productRepository.findAllByMappingIdAndStateTrue(selectedProduct.getId());
+
+                for (Product product : oldGroupProducts) {
+                    product.setPresentId(false);
+                    product.setMappingId(newMainProduct.getId());
+                    product.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+                    productRepository.save(product);
+                }
+
+                selectedProduct.setPresentId(false);
+                selectedProduct.setMappingId(newMainProduct.getId());
+                selectedProduct.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+                productRepository.save(selectedProduct);
+            }
+        }
+    }
+
+    // 매핑 상품과 다른 대표 상품 선택시, 매핑 상품이 다른 대표 상품으로 이동
+    private void handleMainProductAsNewMain(Product newMainProduct, List<Product> selectedProducts) {
+        for (Product product : selectedProducts) {
+            if (!product.getId().equals(newMainProduct.getId())) {
+                product.setPresentId(false);
+                product.setMappingId(newMainProduct.getId());
+                product.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+                productRepository.save(product);
+            }
+        }
+    }
+
+    // 매핑 상품과 다른 대표 상품 선택시, 매핑 상품이 새로운 대표 상품이 되고, 기존 대표 상품과 그 매핑 상품들이 새로운 대표 상품 밑으로 이동
+    private void handleMappingToMainProduct(Product newMainProduct, List<Product> selectedProducts) {
+        // 매핑상품을 새로운 대표상품으로 설정
         newMainProduct.setPresentId(true);
         newMainProduct.setMappingId(newMainProduct.getId());
         newMainProduct.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
         productRepository.save(newMainProduct);
 
-        // 선택된 상품들 처리
-        for (Product selectedProduct : selectedProducts) {
-            if (selectedProduct.getPresentId()) {
-                // 대표상품의 모든 매핑상품들을 새로운 대표상품의 매핑상품으로 설정
-                List<Product> mappingProducts = productRepository.findAllByMappingIdAndStateTrue(selectedProduct.getId());
-                for (Product product : mappingProducts) {
-                    product.setMappingId(newMainProduct.getId());
-                    product.setPresentId(false);
-                    product.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
-                }
-                productRepository.saveAll(mappingProducts);
-            }
+        // 기존 대표상품과 그 매핑상품들을 새로운 대표상품 밑으로 이동
+        for (Product product : selectedProducts) {
+            if (product.getPresentId()) {  // 대표상품인 경우
+                // 대표상품의 매핑상품들 조회
+                List<Product> mappingProducts = productRepository.findAllByMappingIdAndStateTrue(product.getId());
 
-            // 선택된 상품을 새로운 매핑상품으로 설정
-            selectedProduct.setPresentId(false);
-            selectedProduct.setMappingId(newMainProduct.getId());
-            selectedProduct.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
-            productRepository.save(selectedProduct);
+                // 매핑상품들을 새로운 대표상품 밑으로 이동
+                for (Product mappingProduct : mappingProducts) {
+                    mappingProduct.setMappingId(newMainProduct.getId());
+                    mappingProduct.setPresentId(false);
+                    mappingProduct.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+                    productRepository.save(mappingProduct);
+                }
+
+                // 대표상품도 새로운 대표상품의 매핑상품으로 이동
+                product.setMappingId(newMainProduct.getId());
+                product.setPresentId(false);
+                product.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+                productRepository.save(product);
+            }
         }
     }
 
