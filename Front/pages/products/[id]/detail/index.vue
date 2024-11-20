@@ -130,12 +130,10 @@ const getQueryString = (clickedIndex) => {
 
   if (clickedIndex >= 1) {
     query.category = product.value.categories[1].id;
-    query.categoryName = product.value.categories[1].name;
   }
 
   if (clickedIndex >= 2) {
     query.sub = product.value.categories[2].id;
-    query.subName = product.value.categories[2].name;
   }
 
   return query;
