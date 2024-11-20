@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-@RestController
+@RestController("adminBoardController")
 //@RequiredArgsConstructor
 @RequestMapping("admin/boards")
 public class BoardController {

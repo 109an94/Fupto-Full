@@ -1,7 +1,13 @@
 <script setup>
+import { onMounted,ref } from 'vue';
+
 useHead({
   link: [{ rel: "stylesheet", href: "/css/board-notice.css" }],
 });
+
+const route = useRoute();
+const isActive = ref(false);
+
 
 </script>
 <template>
