@@ -9,7 +9,7 @@ const shoppingmalls = ref([]);
 const totalElements = ref(0);
 const totalPages = ref(0);
 const currentPage = ref(1);
-const pageSize = ref(3);
+const pageSize = ref(10);
 
 const startDatePicker = ref(null);
 const endDatePicker = ref(null);
@@ -439,10 +439,10 @@ onMounted(() => {
           <div>
             <button class="btn btn-outline-danger" @click="handleBulkDelete">일괄 삭제</button>
             <select class="select ml-2" v-model="pageSize" @change="pageSizeChange">
-              <option :value="3">3</option>
-              <option :value="4">4</option>
-              <option :value="5">5</option>
-              <option :value="6">6</option>
+              <option :value="10">10</option>
+              <option :value="20">20</option>
+              <option :value="30">30</option>
+              <option :value="50">50</option>
             </select>
           </div>
           <div>
