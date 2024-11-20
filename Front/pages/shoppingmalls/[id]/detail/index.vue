@@ -13,9 +13,9 @@ const asideRef = ref(null);
 const selectedFilters = ref({
   category: [],
   sub: [],
-  brand: [],
+  shoppingmall: [],
 });
-const brandId = route.params.id;
+const shoppingmallId = route.params.id;
 
 const isActive = ref(false);
 const selectedSort = ref("popular");
@@ -32,15 +32,15 @@ const loading = ref(false);
 const hasMore = ref(true);
 const cursor = ref(null);
 
-const { data: brand } = await useFetch(`${config.public.apiBase}/brands/${brandId}`, {
-  key: `brand-${brandId}`,
+const { data: shoppingmall } = await useFetch(`${config.public.apiBase}/shoppingmalls/${shoppingmallId}`, {
+  key: `shoppingmall-${shoppingmallId}`,
 });
 
 const loadProducts = async (reset = false) => {
   if (loading.value || (!hasMore.value && !reset)) return;
   loading.value = true;
   try {
-    const data = await $fetch(`/products/brand/${brandId}`, {
+    const data = await $fetch(`/products/shoppingmall/${shoppingmallId}`, {
       baseURL: config.public.apiBase,
       params: {
         gender: route.query.gender,
@@ -69,7 +69,7 @@ const loadProducts = async (reset = false) => {
   }
 };
 
-const { data: initialData } = await useFetch(`/products/brand/${brandId}`, {
+const { data: initialData } = await useFetch(`/products/shoppingmall/${shoppingmallId}`, {
   baseURL: config.public.apiBase,
   params: {
     gender: route.query.gender,
@@ -113,7 +113,7 @@ const selectOption = async (option) => {
   selectedSort.value = option.value;
   isActive.value = false;
   try {
-    const response = await $fetch(`${config.public.apiBase}/products/brand/${brandId}`, {
+    const response = await $fetch(`${config.public.apiBase}/products/shoppingmall/${shoppingmallId}`, {
       params: {
         gender: route.query.gender,
         category: route.query.category ? route.query.category.split(",") : undefined,
@@ -206,7 +206,7 @@ const handleSearch = async (searchParams) => {
   selectedFilters.value = {
     category: searchParams.category || [],
     sub: searchParams.sub || [],
-    brand: searchParams.brand || [],
+    shoppingmall: searchParams.shoppingmall || [],
   };
   if (searchParams.min || searchParams.max) {
     selectedFilters.value.min = searchParams.min;
@@ -216,7 +216,7 @@ const handleSearch = async (searchParams) => {
     ...searchParams,
     category: selectedFilters.value.category,
     sub: selectedFilters.value.sub,
-    brand: selectedFilters.value.brand,
+    shoppingmall: selectedFilters.value.shoppingmall,
     min: searchParams.min || undefined,
     max: searchParams.max || undefined,
   };
@@ -287,18 +287,18 @@ onUnmounted(() => {
       <div class="product-content">
 
         <section>
-          <!-- Brand Profile Section -->
-          <div class="brand-profile">
+          <!-- Shoppingmall Profile Section -->
+          <div class="shoppingmall-profile">
 
-            <div class="brand-background">
-              <img class="brand-background-img" src="/imgs/brands/lemaire-bg.jpeg" alt="Brand Background">
+            <div class="shoppingmall-background">
+              <img class="shoppingmall-background-img" src="/imgs/brands/lemaire-bg.jpeg" alt="Brand Background">
             </div>
 
-            <div class="brand-header">
-              <img class="brand-image" :src="'http://localhost:8080/api/v1/' + brand.img" :alt="brand.korName" />
-              <div class="brand-info">
-                <h1 class="brand-name">{{ brand.engName }}</h1>
-                <p class="brand-subtitle">{{ brand.korName }}</p>
+            <div class="shoppingmall-header">
+              <img class="shoppingmall-image" :src="'http://localhost:8080/api/v1/' + shoppingmall.img" :alt="shoppingmall.korName" />
+              <div class="shoppingmall-info">
+                <h1 class="shoppingmall-name">{{ shoppingmall.engName }}</h1>
+                <p class="shoppingmall-subtitle">{{ shoppingmall.korName }}</p>
               </div>
             </div>
 
@@ -312,9 +312,9 @@ onUnmounted(() => {
               </span>
             </div>
 
-            <div v-if="isDetailsVisible" class="brand-details">
+            <div v-if="isDetailsVisible" class="shoppingmall-details">
               <p class="about-title">About</p>
-              <p class="about-description">{{ brand.description }}</p>
+              <p class="about-description">{{ shoppingmall.description }}</p>
             </div>
             
           </div>
@@ -322,7 +322,7 @@ onUnmounted(() => {
 
          <!-- 필터 태그 -->
          <section
-          v-if="selectedFilters.category.length || selectedFilters.sub.length || selectedFilters.brand.length"
+          v-if="selectedFilters.category.length || selectedFilters.sub.length || selectedFilters.shoppingmall.length"
           class="filter-tags"
         >
           <div v-for="category in selectedFilters.category" :key="`category-${category.id}`" class="filter-tag">
@@ -404,7 +404,7 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.brand-profile {
+.shoppingmall-profile {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
@@ -412,7 +412,7 @@ onUnmounted(() => {
   color: var(--color-text-default);
 }
 
-.brand-background {
+.shoppingmall-background {
   width: 100%;
   height: 200px;
   margin-top: 24px;
@@ -424,7 +424,7 @@ onUnmounted(() => {
   position: relative; /* 자식 요소의 절대 위치 기준점 */
 }
 
-.brand-background-img {
+.shoppingmall-background-img {
   position: absolute; /* 부모 요소 기준으로 절대 위치 */
   top: 0;
   left: 0;
@@ -433,7 +433,7 @@ onUnmounted(() => {
   object-fit: cover; /* 이미지 비율을 유지하면서 영역 채우기 */
 }
 
-.brand-header,
+.shoppingmall-header,
 .tabs {
   display: flex;
   align-items: center;
@@ -441,7 +441,7 @@ onUnmounted(() => {
   border-bottom: 1px solid var(--color-ui-backgroundb);
 }
 
-.brand-image {
+.shoppingmall-image {
     width: 70px;
     height: 70px;
     border-radius: 50%;        /* 원형으로 만들기 */
@@ -450,20 +450,20 @@ onUnmounted(() => {
     background-color: var(--color-ui-white)
 }
 
-.brand-info {
+.shoppingmall-info {
   flex: 1;
   margin-left: 10px;
 }
 
-.brand-name {
+.shoppingmall-name {
   color: var(--color-ui-black);
   font-size: var(--font-bold-h3);
   font-weight: var(--font-bold);
   margin: 0;
 }
 
-.brand-subtitle,
-.brand-stats,
+.shoppingmall-subtitle,
+.shoppingmall-stats,
 .about-description {
   font-size: var(--font-regular-caption);
   color: var(--color-text-caption);
@@ -495,7 +495,7 @@ onUnmounted(() => {
   border-bottom: 2px solid var(--color-main-deep);
 }
 
-.brand-details {
+.shoppingmall-details {
   padding: 20px;
 }
 

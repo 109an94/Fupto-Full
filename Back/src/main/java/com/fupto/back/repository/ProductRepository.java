@@ -60,11 +60,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     SELECT DISTINCT p FROM Product p
     LEFT JOIN FETCH p.brand b
     LEFT JOIN FETCH p.category c
+    LEFT JOIN FETCH p.shoppingMall sm
     WHERE (:gender IS NULL OR c.parent.parent.id = :gender)
     AND (((:category IS NOT NULL AND :sub IS NULL) AND c.parent.id IN :category)
         OR (:sub IS NOT NULL AND c.id IN :sub)
         OR (:category IS NULL AND :sub IS NULL))
     AND (:brand IS NULL OR b.id IN :brand)
+    AND (:shoppingmall IS NULL OR sm.id IN :shoppingmall)
     AND (:min IS NULL OR EXISTS (
         SELECT 1 FROM PriceHistory ph 
         WHERE ph.product.mappingId = p.mappingId
@@ -121,6 +123,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             @Param("category") List<Long> category,
             @Param("sub") List<Long> sub,
             @Param("brand") List<Long> brand,
+            @Param("shoppingmall") List<Long> shoppingmall, //쇼핑몰 추가(쿼리도)
             @Param("min") Integer min,
             @Param("max") Integer max,
             @Param("cursor") Long cursor,

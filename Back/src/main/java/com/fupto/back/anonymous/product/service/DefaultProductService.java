@@ -67,6 +67,7 @@ public class DefaultProductService implements ProductService {
                 searchDto.getCategory(),
                 searchDto.getSub(),
                 searchDto.getBrand(),
+                searchDto.getShoppingmall(), //쇼핑몰 추가
                 searchDto.getMin(),
                 searchDto.getMax(),
                 searchDto.getCursor(),
