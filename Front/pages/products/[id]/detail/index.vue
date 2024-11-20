@@ -241,7 +241,9 @@ onUnmounted(() => {
             <ul class="vendor-list">
               <li v-for="shop in product?.shops" :key="shop.id" class="vendor-card">
                 <div class="background-area" @click="navigateToRoute(`/products/${shop.productId}/single`)"></div>
-                <div class="vendor-logo" @click.stop>로고</div>
+                <div class="vendor-logo" @click.stop>
+                  <img :src="`${config.public.apiBase}/${shop.logoUrl}`" :alt="shop.shopName" />
+                </div>
                 <div class="name-wrapper" @click.stop>
                   <span class="vendor-name">{{ shop.shopName }}</span>
                 </div>

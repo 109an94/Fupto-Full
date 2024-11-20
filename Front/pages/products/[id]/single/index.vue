@@ -21,9 +21,14 @@ useHead(() => ({
   },
 }));
 
-const { data: product } = await useFetch(`${config.public.apiBase}/products/${productId}/single`, {
+const { data: product, error } = await useFetch(`${config.public.apiBase}/products/${productId}/single`, {
   key: `product-${productId}`,
 });
+
+if (error.value) {
+  // 에러 처리
+  console.error("Failed to fetch product:", error.value);
+}
 
 const prevModalSlide = () => {
   if (modalCurrentSlide.value > 0) {
@@ -211,8 +216,8 @@ onUnmounted(() => {
             <span class="sale-price">{{ product?.priceInfo.salePrice?.toLocaleString() }} ￦</span>
           </p>
           <div class="additional-costs">
-            <span>+ 관부가세 19%</span>
-            <span>+ 배송비 27000￦</span>
+            <span v-if="product?.shops?.[0]?.taxes">+ 관부가세 {{ product.shops[0].taxes }}%</span>
+            <span v-if="product?.shops?.[0]?.deliveryFee">+ 배송비 {{ product.shops[0].deliveryFee.toLocaleString() }}￦</span>
           </div>
         </section>
 
@@ -220,7 +225,9 @@ onUnmounted(() => {
           <ul class="vendor-list">
             <li v-for="shop in product?.shops" :key="shop.id" class="vendor-card">
               <div class="background-area" @click="navigateToRoute(`/products/${shop.productId}/single`)"></div>
-              <div class="vendor-logo" @click.stop>로고</div>
+              <div class="vendor-logo" @click.stop>
+                <img :src="`${config.public.apiBase}/${shop.logoUrl}`" :alt="shop.shopName" />
+              </div>
               <div class="name-wrapper" @click.stop>
                 <span class="vendor-name">{{ shop.shopName }}</span>
               </div>

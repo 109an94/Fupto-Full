@@ -3,6 +3,7 @@ package com.fupto.back.anonymous.product.service;
 import com.fupto.back.anonymous.product.dto.*;
 import com.fupto.back.entity.Category;
 import com.fupto.back.entity.ProductImage;
+import com.fupto.back.entity.ShoppingMall;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -223,14 +224,17 @@ public class DefaultProductService implements ProductService {
         List<ProductShopListDto> shops = relatedProducts.stream()
                 .map(p -> {
                     Integer latestPrice = priceHistoryRepository.findLatestPriceByProductId(p.getId());
+                    ShoppingMall mall = p.getShoppingMall();
 
-                    return ProductShopListDto
-                            .builder()
-                            .id(p.getShoppingMall().getId())
+                    return ProductShopListDto.builder()
+                            .id(mall.getId())
                             .productId(p.getId())
-                            .shopName(p.getShoppingMall().getEngName())
+                            .shopName(mall.getEngName())
                             .price(latestPrice)
                             .productUrl(p.getUrl())
+                            .logoUrl(mall.getImg())
+                            .deliveryFee(mall.getDeliveryfee())
+                            .taxes(mall.getTaxes())
                             .build();
                 })
                 .filter(shop -> shop.getPrice() != null)
@@ -244,7 +248,6 @@ public class DefaultProductService implements ProductService {
                 .discountRate(calculateDiscountRate(product.getRetailPrice(), lowestPrice))
                 .build();
 
-        // 7. 최종 DTO 구성
         return ProductDetailDto.builder()
                 .id(product.getId())
                 .productName(product.getProductName())
@@ -287,13 +290,17 @@ public class DefaultProductService implements ProductService {
 
         Integer latestPrice = priceHistoryRepository.findLatestPriceByProductId(product.getId());
 
+        ShoppingMall mall = product.getShoppingMall();
         List<ProductShopListDto> shops = List.of(
                 ProductShopListDto.builder()
-                        .id(product.getShoppingMall().getId())
+                        .id(mall.getId())
                         .productId(product.getId())
-                        .shopName(product.getShoppingMall().getEngName())
+                        .shopName(mall.getEngName())
                         .price(latestPrice)
                         .productUrl(product.getUrl())
+                        .logoUrl(mall.getImg())
+                        .deliveryFee(mall.getDeliveryfee())
+                        .taxes(mall.getTaxes())
                         .build()
         );
 

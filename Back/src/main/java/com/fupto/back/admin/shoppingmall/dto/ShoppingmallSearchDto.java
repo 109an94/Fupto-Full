@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class ShoppingmallSearchDto {
 
     private Integer page = 1;                    // 페이지 번호 (기본값 1)
-    private Integer size = 3;                    // 페이지 크기 (기본값 10)
+    private Integer size = 10;                    // 페이지 크기 (기본값 10)
     private String nameType;                 // 이름 종류 (korName, engName 선택)
     private String name;                     // 쇼핑몰명
     private Boolean active;                  // 진열 상태 (진열, 미진열)

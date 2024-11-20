@@ -296,7 +296,7 @@ const unformatNumber = (value) => {
                         </div>
 
                         <div class="button-group">
-                            <button type="submit" class="submit-btn">등록</button>
+                            <button type="submit" class="submit-btn">수정</button>
                             <button type="button" class="cancel-btn" @click="handleCancel">취소</button>
                         </div>
                     </form>

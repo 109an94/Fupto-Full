@@ -207,6 +207,8 @@ public class DefaultShoppingmallSerivce implements ShoppingmallSerivce {
         shoppingmall.setUrl(shoppingmallUpdateDto.getUrl());
         shoppingmall.setActive(shoppingmallUpdateDto.getActive());
         shoppingmall.setDescription(shoppingmallUpdateDto.getDescription());
+        shoppingmall.setDeliveryfee((shoppingmallUpdateDto.getDeliveryfee()));
+        shoppingmall.setTaxes((shoppingmallUpdateDto.getTaxes()));
 
         // 파일 처리
         if (file != null && !file.isEmpty()) {
