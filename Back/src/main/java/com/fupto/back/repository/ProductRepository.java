@@ -89,7 +89,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     ))
     AND p.active = true
     AND p.presentId = true
-    AND (:cursor IS NULL OR p.id < :cursor)
+    AND (:cursor IS NULL OR p.id > :cursor)
     ORDER BY
     CASE :sort
         WHEN 'recent' THEN p.createDate END DESC,
@@ -117,6 +117,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         ) END DESC,
     CASE WHEN :sort = 'popular' THEN COALESCE(p.viewCount, 0) END DESC,
     p.id DESC
+    LIMIT :#{#pageable.pageSize}
     """)
     List<Product> searchProducts(
             @Param("gender") Long gender,
