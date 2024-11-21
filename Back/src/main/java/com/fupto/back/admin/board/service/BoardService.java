@@ -29,7 +29,11 @@ public interface BoardService {
     BoardListDto createPost(BoardListDto boardListDto, MultipartFile file) throws IOException;
 
     // 수정
-    BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception;
+//    BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception;
+      BoardListDto show(Long id);
+
+      BoardListDto update(Long id, BoardUpdateDto boardUpdateDto, MultipartFile file) throws IOException;
+
 
     // 삭제
 //    SuccessResponseDto deletePost(Long id, BoardRequestsDto requestsDto) throws Exception;
@@ -39,5 +43,5 @@ public interface BoardService {
     // 엑티브 수정
     BoardListDto updateActive(Long id, Boolean active);
 
-    //
+
 }

@@ -46,5 +46,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
             @Param("dateType") String dateType,
             Pageable pageable);
 
+    List<Board> findByBoardCategoryId(Long boardCategoryId);
+
 }
 

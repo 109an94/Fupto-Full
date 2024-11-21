@@ -79,10 +79,37 @@ public class BoardController {
 //    }
 
     // 선택한 게시글 수정
-    @PutMapping("/{id}")
-    public BoardResponseDto updatePost(@PathVariable Long id, @RequestBody BoardRequestsDto requestsDto) throws Exception {
-        return boardService.updatePost(id, requestsDto);
+    @GetMapping("{id}/edit")
+    public ResponseEntity<BoardListDto> show(@PathVariable Long id) {
+        return ResponseEntity.ok(boardService.show(id));
     }
+
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BoardListDto> updateBoard(
+            @PathVariable Long id,
+            @RequestPart("boardData") String boardDtaJson,
+            @RequestPart(value = "file",required = false) MultipartFile file) {
+        try{
+            ObjectMapper objectMapper = new ObjectMapper();
+            BoardUpdateDto boardUpdateDto = objectMapper.readValue(boardDtaJson, BoardUpdateDto.class);
+
+            BoardListDto updateBoard = boardService.update(id,boardUpdateDto, file);
+            return ResponseEntity.ok(updateBoard);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+
+
+
+//    @PutMapping("/{id}")
+//    public BoardResponseDto updatePost(@PathVariable Long id, @RequestBody BoardRequestsDto requestsDto) throws Exception {
+//        return boardService.updatePost(id, requestsDto);
+//    }
+
+
 
     // 게시글 삭제
 

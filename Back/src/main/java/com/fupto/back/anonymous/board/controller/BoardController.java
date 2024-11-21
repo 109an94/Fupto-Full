@@ -1,15 +1,12 @@
 package com.fupto.back.anonymous.board.controller;
 
+import com.fupto.back.anonymous.board.dto.BoardDefaultDto;
+import com.fupto.back.anonymous.board.dto.BoardListDto;
+import com.fupto.back.anonymous.board.dto.BoardSearchDto;
 
-import com.fupto.back.anonymous.board.dto.NoticeDefaultDto;
-import com.fupto.back.anonymous.board.dto.NoticeListDto;
-import com.fupto.back.anonymous.board.dto.NoticeSearchDto;
 import com.fupto.back.anonymous.board.service.BoardService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,15 +20,19 @@ public class BoardController {
         this.boardService = boardService;
     }
 
-    @GetMapping("/notice")
-    public List<NoticeListDto> getNotice() {
-        return boardService.getNotice();
+    @GetMapping("/all")
+    public List<BoardListDto> getAllList() {
+        return boardService.getAllList();
     }
 
-//    @GetMapping
-//    public ResponseEntity<NoticeDefaultDto> searchBoard(
-//            @ModelAttribute NoticeSearchDto noticeSearchDto
-//    ){
-//        return ResponseEntity.ok(boardService.getSearch(noticeSearchDto));
-//    }
+    @GetMapping
+    public ResponseEntity<BoardDefaultDto> searchBoard(
+            @ModelAttribute BoardSearchDto boardSearchDto
+    ) {
+        return ResponseEntity.ok(boardService.getSearch(boardSearchDto));
+    }
+
+
+
+
 }

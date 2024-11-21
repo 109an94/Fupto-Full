@@ -1,6 +1,5 @@
 package com.fupto.back.anonymous.board.dto;
 
-import com.fupto.back.entity.Board;
 import lombok.*;
 
 import java.time.Instant;
@@ -12,7 +11,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class NoticeListDto {
+public class BoardListDto {
     private Long id;
     private String title;
     private String contents;
@@ -23,6 +22,4 @@ public class NoticeListDto {
     private Instant modifiedAt;
     private Long boardCategoryId;
     private String boardCategoryName;
-    private Boolean active;
-
 }

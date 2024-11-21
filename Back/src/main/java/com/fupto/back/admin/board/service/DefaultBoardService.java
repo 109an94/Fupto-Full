@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -217,37 +218,96 @@ public class DefaultBoardService implements BoardService {
         return savedBoardDto;
     }
 
+//    private String saveFile(MultipartFile file, Long id) throws IOException {
+//        // 파일 이름에 UUID 추가
+//        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+//
+//        // 브랜드 ID를 포함한 디렉토리 생성
+//        Path boardUploadDir = Paths.get("uploads", "boards", id.toString());
+//        if (!Files.exists(boardUploadDir)) {
+//            Files.createDirectories(boardUploadDir);
+//        }
+//
+//        // 최종 파일 경로 설정
+//        Path filePath = boardUploadDir.resolve(fileName);
+//        Files.copy(file.getInputStream(), filePath);
+//
+//        // 경로가 포함된 파일명을 반환 (백슬래시를 포워드 슬래시로 변경)
+////        return fileName;
+//        return filePath.toString().replace("\\", "/");
+//    }
+
+    // ========== 수정 =========================================================================
+
+//    @Override
+//    public BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception {
+//        Board board = boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("아이디가 존재하지 않습니다."));
+////        if (!requestsDto.getPassword().equals(board.getPassword()))
+////            throw new Exception("비밀번호가 일치하지 않습니다.");
+//
+//        board.update(requestsDto);
+//        boardRepository.save(board);
+//
+//        return new BoardResponseDto(board);
+//    }
+
+    @Override
+    public BoardListDto show(Long id) {
+        Board board = boardRepository.findById(id).orElse(null);
+         return BoardListDto.builder()
+                 .title(board.getTitle())
+                 .contents(board.getContents())
+                 .active(board.getActive())
+                 .boardCategoryId(board.getBoardCategory().getId())
+                 .regMemberId(board.getRegMember().getId())
+                 .img(board.getImg())
+                 .build();
+        }
+
+    @Override
+    public BoardListDto update(Long id, BoardUpdateDto boardUpdateDto, MultipartFile file) throws IOException{
+        Board board = boardRepository.findById(id).orElse(null);
+        board.setTitle(boardUpdateDto.getTitle());
+        board.setContents(boardUpdateDto.getContents());
+        board.setImg(boardUpdateDto.getImg());
+        board.setActive(boardUpdateDto.getActive());
+
+        BoardCategory boardCategory = boardCategoryRepository.findById(boardUpdateDto.getBoardCategoryId())
+                .orElseThrow(() -> new RuntimeException("BoardCategory not found"));
+        board.setBoardCategory(boardCategory);
+
+        Member member = memberRepository.findById(boardUpdateDto.getRegMemberId())
+                .orElseThrow(() -> new RuntimeException("RegMember not found"));
+        board.setRegMember(member);
+
+        if (file != null && !file.isEmpty()) {
+            String fileName = saveFile(file, id);
+            board.setImg(fileName);
+        }
+
+        board.setModifiedAt(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+
+        Board updatedBoard = boardRepository.save(board);
+
+        return modelMapper.map(updatedBoard, BoardListDto.class);
+    }
+
     private String saveFile(MultipartFile file, Long id) throws IOException {
         // 파일 이름에 UUID 추가
         String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
 
-        // 브랜드 ID를 포함한 디렉토리 생성
-        Path boardUploadDir = Paths.get("uploads", "boards", id.toString());
+        Path boardUploadDir = Paths.get(uploadPath, "boards", id.toString());
         if (!Files.exists(boardUploadDir)) {
             Files.createDirectories(boardUploadDir);
         }
 
         // 최종 파일 경로 설정
         Path filePath = boardUploadDir.resolve(fileName);
-        Files.copy(file.getInputStream(), filePath);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
         // 경로가 포함된 파일명을 반환 (백슬래시를 포워드 슬래시로 변경)
-//        return fileName;
         return filePath.toString().replace("\\", "/");
-    }
 
-    // ========== 수정 =========================================================================
-
-    @Override
-    public BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception {
-        Board board = boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("아이디가 존재하지 않습니다."));
-//        if (!requestsDto.getPassword().equals(board.getPassword()))
-//            throw new Exception("비밀번호가 일치하지 않습니다.");
-
-        board.update(requestsDto);
-        boardRepository.save(board);
-
-        return new BoardResponseDto(board);
     }
 
 

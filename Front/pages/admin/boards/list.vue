@@ -492,7 +492,7 @@ onMounted(() => {
                   <button class="btn btn-outline-third btn-sm toggle-brands" @click="openModal(board)">
                     <i class="mdi mdi-chevron-down"></i>
                   </button>
-                  <nuxt-link :to="`/admin/bords/${ board.id }/edit`">
+                  <nuxt-link :to="`/admin/boards/${ board.id }/edit`">
                     <button class="btn btn-outline-secondary btn-sm">
                       <i class="bx bxs-pencil"></i>
                     </button>
