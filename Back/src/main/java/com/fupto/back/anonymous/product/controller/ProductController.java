@@ -64,4 +64,22 @@ public class ProductController {
                 .contentType(MediaType.parseMediaType(contentType))
                 .body(imageResource);
     }
+
+    //브랜드별 상품 가져오기
+    @GetMapping("/brand/{brandId}")
+    public ResponseEntity<ProductResponseDto> getProductsByBrand(
+            @PathVariable Long brandId,
+            @ModelAttribute ProductSearchDto searchDto) {
+        searchDto.setBrand(List.of(brandId));
+        return ResponseEntity.ok(productService.searchProducts(searchDto));
+    }
+
+    //쇼핑몰별 상품 가져오기
+    @GetMapping("/shoppingmall/{shoppingmallId}")
+    public ResponseEntity<ProductResponseDto> getProductsByShoppingMall(
+            @PathVariable Long shoppingmallId,
+            @ModelAttribute ProductSearchDto searchDto) {
+        searchDto.setShoppingmall(List.of(shoppingmallId));
+        return ResponseEntity.ok(productService.searchProducts(searchDto));
+    }
 }

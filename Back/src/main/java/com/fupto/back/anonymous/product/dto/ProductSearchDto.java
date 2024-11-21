@@ -16,6 +16,7 @@ public class ProductSearchDto {
     private List<Long> category;
     private List<Long> sub;
     private List<Long> brand;
+    private List<Long> shoppingmall; //쇼핑몰 추가
     private Integer min;
     private Integer max;
 

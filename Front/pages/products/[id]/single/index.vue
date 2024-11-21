@@ -2,7 +2,6 @@
 import { ref, onMounted, onUnmounted } from "vue";
 
 const currentSlide = ref(0);
-const isVendorListOpen = ref(true);
 const isDescriptionOpen = ref(true);
 const isFooterVisible = ref(false);
 const isModalOpen = ref(false);
@@ -26,7 +25,6 @@ const { data: product, error } = await useFetch(`${config.public.apiBase}/produc
 });
 
 if (error.value) {
-  // 에러 처리
   console.error("Failed to fetch product:", error.value);
 }
 
@@ -131,12 +129,10 @@ const getQueryString = (clickedIndex) => {
 
   if (clickedIndex >= 1) {
     query.category = product.value.categories[1].id;
-    query.categoryName = product.value.categories[1].name;
   }
 
   if (clickedIndex >= 2) {
     query.sub = product.value.categories[2].id;
-    query.subName = product.value.categories[2].name;
   }
 
   return query;

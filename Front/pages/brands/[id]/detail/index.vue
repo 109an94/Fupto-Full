@@ -8,20 +8,16 @@ useHead({
 const route = useRoute();
 const router = useRouter();
 const config = useRuntimeConfig();
-
-const gender = ref(route.query.gender); // URL에서 gender 파라미터 가져오기
+const gender = ref(route.query.gender);
 const asideRef = ref(null);
 const selectedFilters = ref({
   category: [],
   sub: [],
   brand: [],
 });
-
 const brandId = route.params.id;
 
-// 필터 드롭다운
 const isActive = ref(false);
-
 const selectedSort = ref("popular");
 const sortOptions = [
   { label: "인기순", value: "popular" },
@@ -40,57 +36,16 @@ const { data: brand } = await useFetch(`${config.public.apiBase}/brands/${brandI
   key: `brand-${brandId}`,
 });
 
-const { data: initialData } = await useFetch("/products", {
-  baseURL: config.public.apiBase,
-  params: {
-    gender: route.query.gender,
-    category: route.query.category ? route.query.category.split(",") : undefined,
-    sub: route.query.sub ? route.query.sub.split(",") : undefined,
-    brand: route.query.brand ? route.query.brand.split(",") : undefined,
-    min: route.query.min || undefined,
-    max: route.query.max || undefined,
-    sort: selectedSort.value,
-    cursor: null,
-    limit: 20,
-  },
-});
-
-if (initialData.value) {
-  products.value = initialData.value.products;
-  cursor.value = initialData.value.nextCursor;
-  hasMore.value = initialData.value.hasMore;
-
-  if (route.query.category && route.query.categoryName) {
-    selectedFilters.value.category = [
-      {
-        id: route.query.category,
-        name: route.query.categoryName,
-      },
-    ];
-  }
-
-  if (route.query.sub && route.query.subName) {
-    selectedFilters.value.sub = [
-      {
-        id: route.query.sub,
-        name: route.query.subName,
-      },
-    ];
-  }
-}
-////////////////////////////////////////////////////////////////////////////////
 const loadProducts = async (reset = false) => {
   if (loading.value || (!hasMore.value && !reset)) return;
   loading.value = true;
-
   try {
-    const data = await $fetch("/products", {
+    const data = await $fetch(`/products/brand/${brandId}`, {
       baseURL: config.public.apiBase,
       params: {
         gender: route.query.gender,
         category: route.query.category ? route.query.category.split(",") : undefined,
         sub: route.query.sub ? route.query.sub.split(",") : undefined,
-        brand: route.query.brand ? route.query.brand.split(",") : undefined,
         min: route.query.min || undefined,
         max: route.query.max || undefined,
         sort: selectedSort.value,
@@ -98,12 +53,10 @@ const loadProducts = async (reset = false) => {
         limit: 20,
       },
     });
-
     if (reset) {
       products.value = [];
       cursor.value = null;
     }
-
     if (data) {
       products.value.push(...data.products);
       cursor.value = data.nextCursor;
@@ -116,6 +69,42 @@ const loadProducts = async (reset = false) => {
   }
 };
 
+const { data: initialData } = await useFetch(`/products/brand/${brandId}`, {
+  baseURL: config.public.apiBase,
+  params: {
+    gender: route.query.gender,
+    category: route.query.category ? route.query.category.split(",") : undefined,
+    sub: route.query.sub ? route.query.sub.split(",") : undefined,
+    min: route.query.min || undefined,
+    max: route.query.max || undefined,
+    sort: selectedSort.value,
+    cursor: null,
+    limit: 20,
+  },
+});
+
+if (initialData.value) {
+  products.value = initialData.value.products;
+  cursor.value = initialData.value.nextCursor;
+  hasMore.value = initialData.value.hasMore;
+  if (route.query.category && route.query.categoryName) {
+    selectedFilters.value.category = [
+      {
+        id: route.query.category,
+        name: route.query.categoryName,
+      },
+    ];
+  }
+  if (route.query.sub && route.query.subName) {
+    selectedFilters.value.sub = [
+      {
+        id: route.query.sub,
+        name: route.query.subName,
+      },
+    ];
+  }
+}
+
 const toggleDropdown = () => {
   isActive.value = !isActive.value;
 };
@@ -123,14 +112,12 @@ const toggleDropdown = () => {
 const selectOption = async (option) => {
   selectedSort.value = option.value;
   isActive.value = false;
-
   try {
-    const response = await $fetch(`${config.public.apiBase}/products`, {
+    const response = await $fetch(`${config.public.apiBase}/products/brand/${brandId}`, {
       params: {
         gender: route.query.gender,
-        category: route.query.category ? route.query.category.split(",") : undefined, // 수정
-        sub: route.query.sub ? route.query.sub.split(",") : undefined, // 수정
-        brand: route.query.brand ? route.query.brand.split(",") : undefined,
+        category: route.query.category ? route.query.category.split(",") : undefined,
+        sub: route.query.sub ? route.query.sub.split(",") : undefined,
         min: route.query.min || undefined,
         max: route.query.max || undefined,
         sort: option.value,
@@ -138,129 +125,93 @@ const selectOption = async (option) => {
         limit: 20,
       },
     });
-
     if (response) {
       products.value = response.products;
       cursor.value = response.nextCursor;
       hasMore.value = response.hasMore;
     }
-
     await router.replace({
-      query: {
-        ...route.query,
-        sort: option.value,
-      },
+      query: { ...route.query, sort: option.value },
     });
   } catch (error) {
     console.error("Failed to sort products:", error);
   }
 };
 
-const isDetailsVisible = ref(true); // 상세 내용 보이기 상태
+const isDetailsVisible = ref(true);
 
 const toggleDetails = () => {
   isDetailsVisible.value = !isDetailsVisible.value;
 };
 
-// URL 쿼리 파라미터 업데이트
 const updateQueryParams = async (newParams) => {
   const updatedQuery = { ...route.query };
-
   if (newParams.gender) {
     updatedQuery.gender = newParams.gender;
     delete updatedQuery.sort;
   }
-
   if (newParams.category?.length) {
     updatedQuery.category = newParams.category.map((c) => c.id).join(",");
   } else {
     delete updatedQuery.category;
   }
-
   if (newParams.sub?.length) {
     updatedQuery.sub = newParams.sub.map((c) => c.id).join(",");
   } else {
     delete updatedQuery.sub;
   }
-
-  if (newParams.brand?.length) {
-    updatedQuery.brand = newParams.brand.map((b) => b.id).join(",");
-  } else {
-    delete updatedQuery.brand;
-  }
-
   if (newParams.min) updatedQuery.min = newParams.min;
   else delete updatedQuery.min;
-
   if (newParams.max) updatedQuery.max = newParams.max;
   else delete updatedQuery.max;
-
   await router.replace({
     path: route.path,
     query: updatedQuery,
   });
 };
 
-// FuptoAside의 필터 변경 처리
 const handleFilterChange = (filterData) => {
   updateQueryParams(filterData);
 };
 
 const removeFilter = async (type, id) => {
   selectedFilters.value[type] = selectedFilters.value[type].filter((item) => item.id !== id);
-
   await asideRef.value?.updateFilterState({ type, id, checked: false });
-
   const filterData = {
     gender: route.query.gender,
     category: selectedFilters.value.category,
     sub: selectedFilters.value.sub,
-    brand: selectedFilters.value.brand,
     min: route.query.min,
     max: route.query.max,
   };
-
   const updatedQuery = { ...route.query };
-
   if (filterData.category?.length) {
     updatedQuery.category = filterData.category.map((c) => c.id).join(",");
   } else {
     delete updatedQuery.category;
   }
-
   if (filterData.sub?.length) {
     updatedQuery.sub = filterData.sub.map((c) => c.id).join(",");
   } else {
     delete updatedQuery.sub;
   }
-
-  if (filterData.brand?.length) {
-    updatedQuery.brand = filterData.brand.map((b) => b.id).join(",");
-  } else {
-    delete updatedQuery.brand;
-  }
-
   await router.replace({
     path: route.path,
     query: updatedQuery,
   });
-
   loadProducts(true);
 };
 
-// 검색 버튼 클릭
 const handleSearch = async (searchParams) => {
   selectedFilters.value = {
     category: searchParams.category || [],
     sub: searchParams.sub || [],
     brand: searchParams.brand || [],
   };
-
   if (searchParams.min || searchParams.max) {
     selectedFilters.value.min = searchParams.min;
     selectedFilters.value.max = searchParams.max;
   }
-
   const queryParams = {
     ...searchParams,
     category: selectedFilters.value.category,
@@ -269,12 +220,10 @@ const handleSearch = async (searchParams) => {
     min: searchParams.min || undefined,
     max: searchParams.max || undefined,
   };
-
   await updateQueryParams(queryParams);
   await loadProducts(true);
 };
 
-// 무한 스크롤
 let observer;
 const lastProductRef = ref(null);
 
@@ -299,7 +248,6 @@ const updateObserver = () => {
 
 watch(() => products.value.length, updateObserver);
 
-// URL 파라미터 변경 감지
 watch(
   () => route.query.gender,
   async (newGender) => {
@@ -329,7 +277,7 @@ onUnmounted(() => {
     observer.disconnect();
   }
   document.removeEventListener("click", handleClickOutside);
-});;
+});
 </script>
 
 <template>

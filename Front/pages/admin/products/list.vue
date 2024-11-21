@@ -14,10 +14,8 @@ const currentPage = ref(0);
 const pageSize = ref(10);
 const sortField = ref("id");
 
-const showConfirmModal = ref(false);
 const showMappingModal = ref(false);
 const showCompleteModal = ref(false);
-const selectedMainProducts = ref([]);
 const mappingMainProduct = ref(null);
 
 const mappedProducts = ref({});
@@ -98,21 +96,6 @@ const fetchProducts = async () => {
 };
 
 // 매핑 모달 관련
-const handleMappingManagement = () => {
-  if (selectedItems.value.size < 2) {
-    alert("매핑할 상품을 2개 이상 선택해주세요.");
-    return;
-  }
-
-  selectedMainProducts.value = products.value.filter((p) => selectedItems.value.has(p.id) && p.presentId);
-
-  if (selectedMainProducts.value.length > 0) {
-    showConfirmModal.value = true;
-  } else {
-    showMappingModal.value = true;
-  }
-};
-
 const getProductName = (id) => {
   const mainProduct = products.value.find((p) => p.id === id);
   if (mainProduct) return mainProduct.productName;
@@ -143,14 +126,12 @@ const getProductDetails = (id) => {
   return "";
 };
 
-const handleConfirmMapping = () => {
-  showConfirmModal.value = false;
+const handleMappingManagement = () => {
+  if (selectedItems.value.size !== 2) {
+    alert("매핑할 상품을 2개 선택해주세요.");
+    return;
+  }
   showMappingModal.value = true;
-};
-
-const handleCloseConfirmModal = () => {
-  showConfirmModal.value = false;
-  selectedMainProducts.value = [];
 };
 
 const handleMapping = async () => {
@@ -472,25 +453,6 @@ onMounted(() => {
 
 <template>
   <main>
-    <!-- 매핑 관리 전 확인 -->
-    <div v-if="showConfirmModal" class="confirm-modal">
-      <div class="modal-content">
-        <h3>매핑 관리</h3>
-        <p v-if="selectedMainProducts.length > 0">
-          <br />선택한 상품 중 다음 상품(들)은 대표상품입니다:<br /><br />
-          <template v-for="product in selectedMainProducts" :key="product.id">
-            <strong>NO.{{ product.id }}</strong> : {{ product.productName }} ({{ product.brandEngName }})<br />
-          </template>
-          <br />
-          매핑 설정을 진행하시겠습니까?
-        </p>
-        <div class="modal-actions">
-          <button class="btn btn-primary" @click="handleConfirmMapping">확인</button>
-          <button class="btn btn-secondary" @click="handleCloseConfirmModal">취소</button>
-        </div>
-      </div>
-    </div>
-
     <!-- 매핑 선택 모달 -->
     <div v-if="showMappingModal" class="mapping-modal">
       <div class="modal-content">
