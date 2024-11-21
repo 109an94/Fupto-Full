@@ -18,7 +18,7 @@ const selectedFilters = ref({
 });
 
 const isActive = ref(false);
-const selectedSort = ref("popular");
+const selectedSort = ref(route.query.sort || "popular");
 const sortOptions = [
   { label: "인기순", value: "popular" },
   { label: "최근 등록순", value: "recent" },
@@ -41,7 +41,7 @@ const { data: initialData } = await useFetch("/products", {
     brand: route.query.brand ? route.query.brand.split(",") : undefined,
     min: route.query.min || undefined,
     max: route.query.max || undefined,
-    sort: selectedSort.value,
+    sort: route.query.sort || "popular",
     cursor: null,
     limit: 10,
   },
@@ -320,10 +320,18 @@ watch(
 // URL 파라미터 변경 감지
 watch(
   () => route.query.gender,
-  async (newGender) => {
-    if (newGender) {
+  async (newGender, oldGender) => {
+    if (newGender && newGender !== oldGender) {
       gender.value = newGender;
       selectedSort.value = "popular";
+
+      await router.replace({
+        query: {
+          ...route.query,
+          sort: undefined,
+        },
+      });
+
       onNuxtReady(async () => {
         await loadProducts(true);
       });
