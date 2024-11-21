@@ -89,7 +89,89 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     ))
     AND p.active = true
     AND p.presentId = true
-    AND (:cursor IS NULL OR p.id > :cursor)
+        AND (:cursor IS NULL OR\s
+        (:sort = 'recent' AND\s
+            (p.createDate < (SELECT p2.createDate FROM Product p2 WHERE p2.id = :cursor) OR\s
+            (p.createDate = (SELECT p2.createDate FROM Product p2 WHERE p2.id = :cursor) AND p.id < :cursor))
+        ) OR
+        (:sort = 'priceAsc' AND\s
+            ((SELECT MIN(ph.salePrice)
+              FROM PriceHistory ph
+              WHERE ph.product.mappingId = p.mappingId
+              AND ph.createDate = (
+                  SELECT MAX(ph2.createDate)
+                  FROM PriceHistory ph2
+                  WHERE ph2.product.mappingId = p.mappingId
+              )) > (
+                  SELECT MIN(ph.salePrice)
+                  FROM PriceHistory ph
+                  WHERE ph.product.mappingId = (SELECT p2.mappingId FROM Product p2 WHERE p2.id = :cursor)
+                  AND ph.createDate = (
+                      SELECT MAX(ph2.createDate)
+                      FROM PriceHistory ph2
+                      WHERE ph2.product.mappingId = (SELECT p2.mappingId FROM Product p2 WHERE p2.id = :cursor)
+                  )
+              ) OR
+              ((SELECT MIN(ph.salePrice)
+                FROM PriceHistory ph
+                WHERE ph.product.mappingId = p.mappingId
+                AND ph.createDate = (
+                    SELECT MAX(ph2.createDate)
+                    FROM PriceHistory ph2
+                    WHERE ph2.product.mappingId = p.mappingId
+                )) = (
+                    SELECT MIN(ph.salePrice)
+                    FROM PriceHistory ph
+                    WHERE ph.product.mappingId = (SELECT p2.mappingId FROM Product p2 WHERE p2.id = :cursor)
+                    AND ph.createDate = (
+                        SELECT MAX(ph2.createDate)
+                        FROM PriceHistory ph2
+                        WHERE ph2.product.mappingId = (SELECT p2.mappingId FROM Product p2 WHERE p2.id = :cursor)
+                    )
+                ) AND p.id < :cursor))
+        ) OR
+        (:sort = 'priceDesc' AND\s
+            ((SELECT MIN(ph.salePrice)
+              FROM PriceHistory ph
+              WHERE ph.product.mappingId = p.mappingId
+              AND ph.createDate = (
+                  SELECT MAX(ph2.createDate)
+                  FROM PriceHistory ph2
+                  WHERE ph2.product.mappingId = p.mappingId
+              )) < (
+                  SELECT MIN(ph.salePrice)
+                  FROM PriceHistory ph
+                  WHERE ph.product.mappingId = (SELECT p2.mappingId FROM Product p2 WHERE p2.id = :cursor)
+                  AND ph.createDate = (
+                      SELECT MAX(ph2.createDate)
+                      FROM PriceHistory ph2
+                      WHERE ph2.product.mappingId = (SELECT p2.mappingId FROM Product p2 WHERE p2.id = :cursor)
+                  )
+              ) OR
+              ((SELECT MIN(ph.salePrice)
+                FROM PriceHistory ph
+                WHERE ph.product.mappingId = p.mappingId
+                AND ph.createDate = (
+                    SELECT MAX(ph2.createDate)
+                    FROM PriceHistory ph2
+                    WHERE ph2.product.mappingId = p.mappingId
+                )) = (
+                    SELECT MIN(ph.salePrice)
+                    FROM PriceHistory ph
+                    WHERE ph.product.mappingId = (SELECT p2.mappingId FROM Product p2 WHERE p2.id = :cursor)
+                    AND ph.createDate = (
+                        SELECT MAX(ph2.createDate)
+                        FROM PriceHistory ph2
+                        WHERE ph2.product.mappingId = (SELECT p2.mappingId FROM Product p2 WHERE p2.id = :cursor)
+                    )
+                ) AND p.id < :cursor))
+        ) OR
+        (:sort = 'popular' AND\s
+            (COALESCE(p.viewCount, 0) < (SELECT COALESCE(p2.viewCount, 0) FROM Product p2 WHERE p2.id = :cursor) OR
+            (COALESCE(p.viewCount, 0) = (SELECT COALESCE(p2.viewCount, 0) FROM Product p2 WHERE p2.id = :cursor) AND p.id < :cursor))
+        ) OR
+        (:sort NOT IN ('recent', 'priceAsc', 'priceDesc') AND p.id < :cursor)
+    )
     ORDER BY
     CASE :sort
         WHEN 'recent' THEN p.createDate END DESC,

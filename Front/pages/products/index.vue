@@ -72,7 +72,9 @@ if (initialData.value) {
 }
 ////////////////////////////////////////////////////////////////////////////////
 const loadProducts = async (reset = false) => {
-  if (loading.value || (!hasMore.value && !reset)) return;
+  if (loading.value) return;
+  if (!reset && !hasMore.value) return;
+
   loading.value = true;
 
   try {
@@ -99,12 +101,21 @@ const loadProducts = async (reset = false) => {
     }
 
     if (data?.products?.length) {
-      products.value.push(...data.products);
+      if (reset) {
+        products.value = data.products;
+      } else {
+        const existingIds = new Set(products.value.map((p) => p.id));
+        const newProducts = data.products.filter((p) => !existingIds.has(p.id));
+        products.value = [...products.value, ...newProducts];
+      }
       cursor.value = data.nextCursor;
       hasMore.value = data.hasMore;
+    } else {
+      hasMore.value = false;
     }
   } catch (error) {
     console.error("Failed to load products:", error);
+    hasMore.value = false;
   } finally {
     loading.value = false;
   }
@@ -131,6 +142,7 @@ const toggleDropdown = () => {
   isActive.value = !isActive.value;
 };
 
+// Sort 선택시
 const selectOption = async (option) => {
   selectedSort.value = option.value;
   isActive.value = false;
@@ -287,22 +299,33 @@ let observer;
 const lastProductRef = ref(null);
 
 const setupIntersectionObserver = () => {
+  if (observer) {
+    observer.disconnect();
+  }
+
   observer = new IntersectionObserver(
-    (entries) => {
-      if (entries[0].isIntersecting && hasMore.value) {
-        loadProducts();
+    async (entries) => {
+      const entry = entries[0];
+
+      // 로딩 중이 아니고, 더 불러올 데이터가 있을 때만 실행
+      if (entry.isIntersecting && !loading.value && hasMore.value) {
+        await loadProducts();
       }
     },
     {
-      rootMargin: "100px",
+      rootMargin: "150px",
+      threshold: 0.1,
     }
   );
 };
 
 const updateObserver = () => {
+  if (!observer) return;
+
+  observer.disconnect();
+
   const lastProduct = document.querySelector(".product-c-frame:last-child");
-  if (lastProduct) {
-    observer.disconnect();
+  if (lastProduct && hasMore.value) {
     observer.observe(lastProduct);
   }
 };
@@ -311,7 +334,9 @@ watch(
   () => products.value,
   () => {
     nextTick(() => {
-      updateObserver();
+      if (!loading.value) {
+        updateObserver();
+      }
     });
   },
   { deep: true }
@@ -347,13 +372,17 @@ const handleClickOutside = (e) => {
 
 onMounted(() => {
   setupIntersectionObserver();
-  updateObserver();
+  nextTick(() => {
+    updateObserver();
+  });
   document.addEventListener("click", handleClickOutside);
 });
 
 onUnmounted(() => {
+  console.log("Component unmounting");
   if (observer) {
     observer.disconnect();
+    observer = null;
   }
   document.removeEventListener("click", handleClickOutside);
 });
