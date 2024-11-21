@@ -379,7 +379,6 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  console.log("Component unmounting");
   if (observer) {
     observer.disconnect();
     observer = null;
