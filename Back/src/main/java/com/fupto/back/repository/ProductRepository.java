@@ -148,4 +148,72 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 //            @Param("min") Integer min,
 //            @Param("max") Integer max
 //    );
+@Query("""
+        SELECT p FROM Product p
+        LEFT JOIN FETCH p.shoppingMall sm
+        WHERE sm.id = :shoppingmallId
+        AND (:gender IS NULL OR p.category.parent.parent.id = :gender)
+        AND (:category IS NULL OR p.category.parent.id IN :category)
+        AND (:sub IS NULL OR p.category.id IN :sub)
+        AND (:min IS NULL OR EXISTS (
+            SELECT 1 FROM PriceHistory ph 
+            WHERE ph.product.id = p.id
+            AND ph.createDate = (
+                SELECT MAX(ph2.createDate)
+                FROM PriceHistory ph2
+                WHERE ph2.product.id = p.id
+            )
+            AND ph.salePrice >= :min
+        ))
+        AND (:max IS NULL OR EXISTS (
+            SELECT 1 FROM PriceHistory ph
+            WHERE ph.product.id = p.id
+            AND ph.createDate = (
+                SELECT MAX(ph2.createDate)
+                FROM PriceHistory ph2
+                WHERE ph2.product.id = p.id
+            )
+            AND ph.salePrice <= :max
+        ))
+        AND p.active = true
+        AND (:cursor IS NULL OR p.id < :cursor)
+        ORDER BY
+        CASE :sort
+            WHEN 'recent' THEN p.createDate END DESC,
+        CASE :sort
+            WHEN 'priceAsc' THEN (
+                SELECT MIN(ph.salePrice)
+                FROM PriceHistory ph
+                WHERE ph.product.id = p.id
+                AND ph.createDate = (
+                    SELECT MAX(ph2.createDate)
+                    FROM PriceHistory ph2
+                    WHERE ph2.product.id = p.id
+                )
+            ) END ASC,
+        CASE :sort
+            WHEN 'priceDesc' THEN (
+                SELECT MIN(ph.salePrice)
+                FROM PriceHistory ph
+                WHERE ph.product.id = p.id
+                AND ph.createDate = (
+                    SELECT MAX(ph2.createDate)
+                    FROM PriceHistory ph2
+                    WHERE ph2.product.id = p.id
+                )
+            ) END DESC,
+        CASE WHEN :sort = 'popular' THEN COALESCE(p.viewCount, 0) END DESC,
+        p.id DESC
+    """)
+List<Product> findAllByShoppingmall(
+        @Param("shoppingmallId") Long shoppingmallId,
+        @Param("gender") Long gender,
+        @Param("category") List<Long> category,
+        @Param("sub") List<Long> sub,
+        @Param("min") Integer min,
+        @Param("max") Integer max,
+        @Param("cursor") Long cursor,
+        @Param("sort") String sort,
+        Pageable pageable
+);
 }

@@ -324,6 +324,39 @@ public class DefaultProductService implements ProductService {
                 .build();
     }
 
+    //쇼핑몰별 상품 가져오기
+    @Override
+    public ProductResponseDto getAllProductsByShoppingmall(ProductSearchDto searchDto) {
+        List<Product> products = productRepository.findAllByShoppingmall(
+                searchDto.getShoppingmall().get(0), // 쇼핑몰 ID는 리스트의 첫 번째 요소로 가정합니다.
+                searchDto.getGender(),
+                searchDto.getCategory(),
+                searchDto.getSub(),
+                searchDto.getMin(),
+                searchDto.getMax(),
+                searchDto.getCursor(),
+                "discountDesc".equals(searchDto.getSort()) ? "popular" : searchDto.getSort(),
+                PageRequest.of(0, searchDto.getLimit() + 1)
+        );
+
+        boolean hasMore = products.size() > searchDto.getLimit();
+        if (hasMore) {
+            products.remove(products.size() - 1);
+        }
+
+        Long nextCursor = hasMore ? products.get(products.size() - 1).getId() : null;
+
+        List<ProductListDto> productDtos = products.stream()
+                .map(this::convertToProductListDto)
+                .toList();
+
+        return ProductResponseDto.builder()
+                .products(productDtos)
+                .nextCursor(nextCursor)
+                .hasMore(hasMore)
+                .build();
+    }
+
     private Integer calculateDiscountRate(Integer retailPrice, Integer salePrice) {
         if (retailPrice == null || salePrice == null || retailPrice == 0) {
             return 0;

@@ -80,6 +80,6 @@ public class ProductController {
             @PathVariable Long shoppingmallId,
             @ModelAttribute ProductSearchDto searchDto) {
         searchDto.setShoppingmall(List.of(shoppingmallId));
-        return ResponseEntity.ok(productService.searchProducts(searchDto));
+        return ResponseEntity.ok(productService.getAllProductsByShoppingmall(searchDto));
     }
 }

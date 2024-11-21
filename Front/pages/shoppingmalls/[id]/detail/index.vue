@@ -105,6 +105,23 @@ if (initialData.value) {
   }
 }
 
+const toggleFavorite = (event) => {
+  event.preventDefault();
+  const button = event.currentTarget;
+  const isFavorite = button.getAttribute("data-favorite") === "true";
+  const img = button.querySelector("img");
+
+  if (isFavorite) {
+    button.setAttribute("data-favorite", "false");
+    img.src = "/imgs/icon/favorite.svg";
+    img.alt = "즐겨찾기 추가";
+  } else {
+    button.setAttribute("data-favorite", "true");
+    img.src = "/imgs/icon/favorite-fill.svg";
+    img.alt = "즐겨찾기 제거";
+  }
+};
+
 const toggleDropdown = () => {
   isActive.value = !isActive.value;
 };
@@ -300,6 +317,9 @@ onUnmounted(() => {
                 <h1 class="shoppingmall-name">{{ shoppingmall.engName }}</h1>
                 <p class="shoppingmall-subtitle">{{ shoppingmall.korName }}</p>
               </div>
+              <button data-favorite="false" @click="toggleFavorite" class="favorite-btn1">
+                <img class="favorite1" src="/imgs/icon/favorite.svg" alt="찜" />
+              </button>
             </div>
 
             <div class="tabs">
@@ -374,6 +394,9 @@ onUnmounted(() => {
                         <img class="product-images primary-img" :src="product.mainImageUrl" alt="product-img" />
                         <img class="product-images secondary-img" :src="product.hoverImageUrl" alt="product-img-hover" />
                       </div>
+                      <button data-favorite="false" @click="toggleFavorite">
+                        <img class="favorite" src="/imgs/icon/favorite.svg" alt="찜" />
+                      </button>
                     </div>
                     <div class="product-info">
                       <span class="product-brand">{{ product.brandEngName }}</span>
@@ -404,6 +427,10 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.product-content {
+  width: 100%;
+}
+
 .shoppingmall-profile {
   width: 100%;
   max-width: 1200px;
@@ -468,6 +495,21 @@ onUnmounted(() => {
   font-size: var(--font-regular-caption);
   color: var(--color-text-caption);
   margin-top: 5px;
+}
+
+.favorite1 {
+    bottom: 10px;
+    right: 10px;
+    z-index: 2;
+    width: 28.42px;
+    height: 25px;
+}
+
+.favorite-btn1 {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
 }
 
 .button {
