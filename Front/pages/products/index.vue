@@ -43,7 +43,7 @@ const { data: initialData } = await useFetch("/products", {
     max: route.query.max || undefined,
     sort: route.query.sort || "popular",
     cursor: null,
-    limit: 10,
+    limit: 20,
   },
 });
 
@@ -87,7 +87,7 @@ const loadProducts = async (reset = false) => {
       max: route.query.max || undefined,
       sort: selectedSort.value,
       cursor: reset ? null : cursor.value,
-      limit: 10,
+      limit: 20,
     };
 
     const data = await $fetch("/products", {
@@ -158,7 +158,7 @@ const selectOption = async (option) => {
         max: route.query.max || undefined,
         sort: option.value,
         cursor: null,
-        limit: 10,
+        limit: 20,
       },
     });
 
@@ -306,7 +306,6 @@ const setupIntersectionObserver = () => {
   observer = new IntersectionObserver(
     async (entries) => {
       const entry = entries[0];
-
       // 로딩 중이 아니고, 더 불러올 데이터가 있을 때만 실행
       if (entry.isIntersecting && !loading.value && hasMore.value) {
         await loadProducts();

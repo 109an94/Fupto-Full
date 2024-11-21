@@ -53,8 +53,10 @@ const toggleDropdown = () => {
 
 const selectOption = (option) => {
   selectedOption.value = option;
-  emit("update:modelValue", option.id);
-  isOpen.value = false;
+  setTimeout(() => {
+    emit("update:modelValue", option.id);
+    isOpen.value = false;
+  }, 0);
 };
 
 const handleClickOutside = (event) => {
