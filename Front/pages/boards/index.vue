@@ -1,7 +1,7 @@
 <script setup>
-useHead({
-  link: [{ rel: "stylesheet", href: "/css/board-index.css" }],
-});
+// useHead({
+//   link: [{ rel: "stylesheet", href: "/css/board-index.css" }],
+// });
 
 </script>
 

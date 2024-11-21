@@ -46,5 +46,20 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
             @Param("dateType") String dateType,
             Pageable pageable);
 
+    List<Board> findByBoardCategoryId(Long boardCategoryId);
+
+
+    @Query("SELECT b FROM Board b WHERE " +
+            "(:searchType IS NULL OR " +
+            "(:searchKeyWord IS NULL OR " +
+            "(:searchType = 'title' AND b.title LIKE %:searchKeyWord%) OR " +
+            "(:searchType = 'regMemberNickName' AND b.regMember.nickname LIKE %:searchKeyWord%) OR " +
+            "(:searchType = 'contents' AND b.contents LIKE %:searchKeyWord%))) " +
+            "AND (:boardCategory IS NULL OR b.boardCategory.name = :boardCategory) ")
+    Page<Board> userSearchBoards(
+            @Param("searchKeyWord") String searchKeyWord,
+            @Param("searchType") String searchType,
+            @Param("boardCategory") String boardCategory,
+            Pageable pageable);
 }
 

@@ -65,14 +65,14 @@ public class Board {
         this.modifiedAt = nowInKST.toInstant();
     }
 
-    public void update(BoardRequestsDto requestsDto) {
-
-        this.title = requestsDto.getTitle();
-        this.contents = requestsDto.getContents();
-//        this.password = requestsDto.getPassword();
-        this.modifiedAt = Instant.now().plusSeconds(9 * 3600);
-
-    }
+//    public void update(BoardRequestsDto requestsDto) {
+//
+//        this.title = requestsDto.getTitle();
+//        this.contents = requestsDto.getContents();
+////        this.password = requestsDto.getPassword();
+//        this.modifiedAt = Instant.now().plusSeconds(9 * 3600);
+//
+//    }
 
 }
 

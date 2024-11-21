@@ -10,6 +10,7 @@ useHead({
 const board = ref({
   title: '',
   contents: '',
+  regMemberId: 7,
   boardCategoryId: 1,
   active: true,
   fileUpload: null,
@@ -43,6 +44,12 @@ const previewImage = (event) => {
   }
 };
 
+// 이미지를 삭제
+const removeImage = () => {
+  imageUrl.value = '';  // 미리보기 이미지 초기화
+  board.value.fileUpload = null;  // 파일 데이터 초기화
+};
+
 // 제출 처리
 const handleSubmit = async() => {
   try{
@@ -51,17 +58,17 @@ const handleSubmit = async() => {
     formData.append('boardData', JSON.stringify({
     title: board.value.title,
     contents: board.value.contents,
-    // regMemberId: board.value.regMemberId,
+    regMemberId: board.value.regMemberId,
     boardCategoryId: board.value.boardCategoryId,
     active: board.value.active,
   }));
   
-  // 이미지 파일도 추가 (파일이 있으면)
+  // 이미지 파일 추가
   if (board.value.fileUpload) {
     formData.append('file', board.value.fileUpload);
   }
 
-  const response = await fetch('http://localhost:8080/api/v1/admin/boards/reg', {
+  const response = await fetch('http://localhost:8080/api/v1/admin/boards/post', {
         method: 'POST',
         body: formData,
       });
@@ -71,7 +78,7 @@ const handleSubmit = async() => {
     console.log('게시글 등록 성공:',result);
     alert('게시글이 등록되었습니다.');
     resetForm();
-    window.location.href = 'http://localhost:3000/admin/boards';
+    window.location.href = 'http://localhost:3000/admin/boards/list';
   } else {
     const errorData = await response.json();
     console.error('게시글 등록 실패:', errorData);
@@ -87,6 +94,7 @@ const handleSubmit = async() => {
     board.value = {
       title: '',
       contents: '',
+      regMemberId: 7,
       boardCategoryId: 1,
       active: true,
       fileUpload: null,
@@ -124,15 +132,15 @@ const handleSubmit = async() => {
                   <!-- <input type="checkbox" class="important" v-model="board.important" /> -->
                 </td>
               </tr>
-
+              
               <tr>
                 <th>게시판</th>
                 <td>
                   <select v-model="board.boardCategoryId" class="select">
-                    <option value="1" selected>공지사항</option>
-                    <option value="2">커뮤니티</option>
-                    <option value="3">FAQ</option>
-                    <option value="4">고객센터</option>
+                    <option :value="1" selected>공지사항</option>
+                    <option :value="2">커뮤니티</option>
+                    <option :value="3">FAQ</option>
+                    <option :value="4">고객센터</option>
                   </select>
                 </td>
               </tr>
@@ -158,8 +166,9 @@ const handleSubmit = async() => {
                 <th>이미지</th>
                 <td>
                   <input type="file" id="fileUpload" @change="previewImage" accept="image/*">
-                  <div class="image-preview">
-                    <img v-if="imageUrl" :src="imageUrl" alt="미리보기 이미지"/>
+                  <div class="image-preview" style="position: relative;">
+                    <img v-if="imageUrl" :src="imageUrl" alt="미리보기 이미지" />
+                    <button v-if="imageUrl" type="button" @click="removeImage" class="remove-img-btn">X</button>
                   </div>
                 </td>
               </tr>

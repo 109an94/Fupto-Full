@@ -18,7 +18,7 @@ const selectedFilters = ref({
 });
 
 const isActive = ref(false);
-const selectedSort = ref("popular");
+const selectedSort = ref(route.query.sort || "popular");
 const sortOptions = [
   { label: "인기순", value: "popular" },
   { label: "최근 등록순", value: "recent" },
@@ -41,9 +41,9 @@ const { data: initialData } = await useFetch("/products", {
     brand: route.query.brand ? route.query.brand.split(",") : undefined,
     min: route.query.min || undefined,
     max: route.query.max || undefined,
-    sort: selectedSort.value,
+    sort: route.query.sort || "popular",
     cursor: null,
-    limit: 20,
+    limit: 10,
   },
 });
 
@@ -72,23 +72,27 @@ if (initialData.value) {
 }
 ////////////////////////////////////////////////////////////////////////////////
 const loadProducts = async (reset = false) => {
-  if (loading.value || (!hasMore.value && !reset)) return;
+  if (loading.value) return;
+  if (!reset && !hasMore.value) return;
+
   loading.value = true;
 
   try {
+    const params = {
+      gender: route.query.gender,
+      category: route.query.category ? route.query.category.split(",") : undefined,
+      sub: route.query.sub ? route.query.sub.split(",") : undefined,
+      brand: route.query.brand ? route.query.brand.split(",") : undefined,
+      min: route.query.min || undefined,
+      max: route.query.max || undefined,
+      sort: selectedSort.value,
+      cursor: reset ? null : cursor.value,
+      limit: 10,
+    };
+
     const data = await $fetch("/products", {
       baseURL: config.public.apiBase,
-      params: {
-        gender: route.query.gender,
-        category: route.query.category ? route.query.category.split(",") : undefined,
-        sub: route.query.sub ? route.query.sub.split(",") : undefined,
-        brand: route.query.brand ? route.query.brand.split(",") : undefined,
-        min: route.query.min || undefined,
-        max: route.query.max || undefined,
-        sort: selectedSort.value,
-        cursor: reset ? null : cursor.value,
-        limit: 20,
-      },
+      params,
     });
 
     if (reset) {
@@ -96,13 +100,22 @@ const loadProducts = async (reset = false) => {
       cursor.value = null;
     }
 
-    if (data) {
-      products.value.push(...data.products);
+    if (data?.products?.length) {
+      if (reset) {
+        products.value = data.products;
+      } else {
+        const existingIds = new Set(products.value.map((p) => p.id));
+        const newProducts = data.products.filter((p) => !existingIds.has(p.id));
+        products.value = [...products.value, ...newProducts];
+      }
       cursor.value = data.nextCursor;
       hasMore.value = data.hasMore;
+    } else {
+      hasMore.value = false;
     }
   } catch (error) {
     console.error("Failed to load products:", error);
+    hasMore.value = false;
   } finally {
     loading.value = false;
   }
@@ -117,11 +130,11 @@ const toggleFavorite = (event) => {
   if (isFavorite) {
     button.setAttribute("data-favorite", "false");
     img.src = "/imgs/icon/favorite.svg";
-    img.alt = "즐겨찾기 추가";
+    img.alt = "찜 추가";
   } else {
     button.setAttribute("data-favorite", "true");
     img.src = "/imgs/icon/favorite-fill.svg";
-    img.alt = "즐겨찾기 제거";
+    img.alt = "찜 제거";
   }
 };
 
@@ -129,6 +142,7 @@ const toggleDropdown = () => {
   isActive.value = !isActive.value;
 };
 
+// Sort 선택시
 const selectOption = async (option) => {
   selectedSort.value = option.value;
   isActive.value = false;
@@ -137,14 +151,14 @@ const selectOption = async (option) => {
     const response = await $fetch(`${config.public.apiBase}/products`, {
       params: {
         gender: route.query.gender,
-        category: route.query.category ? route.query.category.split(",") : undefined, // 수정
-        sub: route.query.sub ? route.query.sub.split(",") : undefined, // 수정
+        category: route.query.category ? route.query.category.split(",") : undefined,
+        sub: route.query.sub ? route.query.sub.split(",") : undefined,
         brand: route.query.brand ? route.query.brand.split(",") : undefined,
         min: route.query.min || undefined,
         max: route.query.max || undefined,
         sort: option.value,
         cursor: null,
-        limit: 20,
+        limit: 10,
       },
     });
 
@@ -285,33 +299,64 @@ let observer;
 const lastProductRef = ref(null);
 
 const setupIntersectionObserver = () => {
+  if (observer) {
+    observer.disconnect();
+  }
+
   observer = new IntersectionObserver(
-    (entries) => {
-      const firstEntry = entries[0];
-      if (firstEntry.isIntersecting && hasMore.value) {
-        loadProducts();
+    async (entries) => {
+      const entry = entries[0];
+
+      // 로딩 중이 아니고, 더 불러올 데이터가 있을 때만 실행
+      if (entry.isIntersecting && !loading.value && hasMore.value) {
+        await loadProducts();
       }
     },
-    { threshold: 0.1 }
+    {
+      rootMargin: "150px",
+      threshold: 0.1,
+    }
   );
 };
 
 const updateObserver = () => {
-  if (observer && lastProductRef.value) {
-    observer.disconnect();
-    observer.observe(lastProductRef.value);
+  if (!observer) return;
+
+  observer.disconnect();
+
+  const lastProduct = document.querySelector(".product-c-frame:last-child");
+  if (lastProduct && hasMore.value) {
+    observer.observe(lastProduct);
   }
 };
 
-watch(() => products.value.length, updateObserver);
+watch(
+  () => products.value,
+  () => {
+    nextTick(() => {
+      if (!loading.value) {
+        updateObserver();
+      }
+    });
+  },
+  { deep: true }
+);
 
 // URL 파라미터 변경 감지
 watch(
   () => route.query.gender,
-  async (newGender) => {
-    if (newGender) {
+  async (newGender, oldGender) => {
+    if (newGender && newGender !== oldGender) {
       gender.value = newGender;
       selectedSort.value = "popular";
+
+      await router.replace({
+        query: {
+          ...route.query,
+          sort: undefined,
+        },
+      });
+
       onNuxtReady(async () => {
         await loadProducts(true);
       });
@@ -327,12 +372,17 @@ const handleClickOutside = (e) => {
 
 onMounted(() => {
   setupIntersectionObserver();
+  nextTick(() => {
+    updateObserver();
+  });
   document.addEventListener("click", handleClickOutside);
 });
 
 onUnmounted(() => {
+  console.log("Component unmounting");
   if (observer) {
     observer.disconnect();
+    observer = null;
   }
   document.removeEventListener("click", handleClickOutside);
 });
@@ -387,13 +437,7 @@ onUnmounted(() => {
                   v-for="(product, index) in products"
                   :key="product.id"
                   class="product-c-frame"
-                  :ref="
-                    index === products.length - 1
-                      ? (el) => {
-                          lastProductRef = el;
-                        }
-                      : undefined
-                  "
+                  :ref="index === products.length - 1 ? lastProductRef : undefined"
                 >
                   <nuxt-link :to="`/products/${product.id}/detail`">
                     <div class="product-img-frame">
