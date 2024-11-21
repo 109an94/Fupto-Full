@@ -18,7 +18,7 @@ const selectedFilters = ref({
 });
 
 const isActive = ref(false);
-const selectedSort = ref("popular");
+const selectedSort = ref(route.query.sort || "popular");
 const sortOptions = [
   { label: "인기순", value: "popular" },
   { label: "최근 등록순", value: "recent" },
@@ -41,9 +41,9 @@ const { data: initialData } = await useFetch("/products", {
     brand: route.query.brand ? route.query.brand.split(",") : undefined,
     min: route.query.min || undefined,
     max: route.query.max || undefined,
-    sort: selectedSort.value,
+    sort: route.query.sort || "popular",
     cursor: null,
-    limit: 20,
+    limit: 10,
   },
 });
 
@@ -76,19 +76,21 @@ const loadProducts = async (reset = false) => {
   loading.value = true;
 
   try {
+    const params = {
+      gender: route.query.gender,
+      category: route.query.category ? route.query.category.split(",") : undefined,
+      sub: route.query.sub ? route.query.sub.split(",") : undefined,
+      brand: route.query.brand ? route.query.brand.split(",") : undefined,
+      min: route.query.min || undefined,
+      max: route.query.max || undefined,
+      sort: selectedSort.value,
+      cursor: reset ? null : cursor.value,
+      limit: 10,
+    };
+
     const data = await $fetch("/products", {
       baseURL: config.public.apiBase,
-      params: {
-        gender: route.query.gender,
-        category: route.query.category ? route.query.category.split(",") : undefined,
-        sub: route.query.sub ? route.query.sub.split(",") : undefined,
-        brand: route.query.brand ? route.query.brand.split(",") : undefined,
-        min: route.query.min || undefined,
-        max: route.query.max || undefined,
-        sort: selectedSort.value,
-        cursor: reset ? null : cursor.value,
-        limit: 20,
-      },
+      params,
     });
 
     if (reset) {
@@ -96,7 +98,7 @@ const loadProducts = async (reset = false) => {
       cursor.value = null;
     }
 
-    if (data) {
+    if (data?.products?.length) {
       products.value.push(...data.products);
       cursor.value = data.nextCursor;
       hasMore.value = data.hasMore;
@@ -117,11 +119,11 @@ const toggleFavorite = (event) => {
   if (isFavorite) {
     button.setAttribute("data-favorite", "false");
     img.src = "/imgs/icon/favorite.svg";
-    img.alt = "즐겨찾기 추가";
+    img.alt = "찜 추가";
   } else {
     button.setAttribute("data-favorite", "true");
     img.src = "/imgs/icon/favorite-fill.svg";
-    img.alt = "즐겨찾기 제거";
+    img.alt = "찜 제거";
   }
 };
 
@@ -137,14 +139,14 @@ const selectOption = async (option) => {
     const response = await $fetch(`${config.public.apiBase}/products`, {
       params: {
         gender: route.query.gender,
-        category: route.query.category ? route.query.category.split(",") : undefined, // 수정
-        sub: route.query.sub ? route.query.sub.split(",") : undefined, // 수정
+        category: route.query.category ? route.query.category.split(",") : undefined,
+        sub: route.query.sub ? route.query.sub.split(",") : undefined,
         brand: route.query.brand ? route.query.brand.split(",") : undefined,
         min: route.query.min || undefined,
         max: route.query.max || undefined,
         sort: option.value,
         cursor: null,
-        limit: 20,
+        limit: 10,
       },
     });
 
@@ -287,31 +289,49 @@ const lastProductRef = ref(null);
 const setupIntersectionObserver = () => {
   observer = new IntersectionObserver(
     (entries) => {
-      const firstEntry = entries[0];
-      if (firstEntry.isIntersecting && hasMore.value) {
+      if (entries[0].isIntersecting && hasMore.value) {
         loadProducts();
       }
     },
-    { threshold: 0.1 }
+    {
+      rootMargin: "100px",
+    }
   );
 };
 
 const updateObserver = () => {
-  if (observer && lastProductRef.value) {
+  const lastProduct = document.querySelector(".product-c-frame:last-child");
+  if (lastProduct) {
     observer.disconnect();
-    observer.observe(lastProductRef.value);
+    observer.observe(lastProduct);
   }
 };
 
-watch(() => products.value.length, updateObserver);
+watch(
+  () => products.value,
+  () => {
+    nextTick(() => {
+      updateObserver();
+    });
+  },
+  { deep: true }
+);
 
 // URL 파라미터 변경 감지
 watch(
   () => route.query.gender,
-  async (newGender) => {
-    if (newGender) {
+  async (newGender, oldGender) => {
+    if (newGender && newGender !== oldGender) {
       gender.value = newGender;
       selectedSort.value = "popular";
+
+      await router.replace({
+        query: {
+          ...route.query,
+          sort: undefined,
+        },
+      });
+
       onNuxtReady(async () => {
         await loadProducts(true);
       });
@@ -327,6 +347,7 @@ const handleClickOutside = (e) => {
 
 onMounted(() => {
   setupIntersectionObserver();
+  updateObserver();
   document.addEventListener("click", handleClickOutside);
 });
 
@@ -387,13 +408,7 @@ onUnmounted(() => {
                   v-for="(product, index) in products"
                   :key="product.id"
                   class="product-c-frame"
-                  :ref="
-                    index === products.length - 1
-                      ? (el) => {
-                          lastProductRef = el;
-                        }
-                      : undefined
-                  "
+                  :ref="index === products.length - 1 ? lastProductRef : undefined"
                 >
                   <nuxt-link :to="`/products/${product.id}/detail`">
                     <div class="product-img-frame">
