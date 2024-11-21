@@ -1,4 +1,4 @@
-package com.fupto.back.anonymous.member.dto;
+package com.fupto.back.user.member.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,18 +7,17 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Data
-public class SignUpRequestDto {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class MemberResponseDto {
     private Long id;
-    private String userId;
-    private String nickname;
+    private String username; //userId에 해당하는 격
     private String password;
+
+    private String nickname;
     private Instant birthDate;
-    private String gender;
-    private String tel;
     private String email;
-    private String role = "ROLE_USER";
+
 }

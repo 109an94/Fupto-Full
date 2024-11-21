@@ -7,14 +7,19 @@ import com.fupto.back.admin.member.dto.MemberSearchDto;
 import com.fupto.back.admin.member.service.MemberService;
 import com.fupto.back.entity.Member;
 import com.fupto.back.repository.MemberRepository;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController("adminMemberController")
 @RequestMapping("admin/members")
-public class MemberController{
+public class MemberController {
     private final MemberService memberService;
     private final MemberRepository memberRepository;
 
@@ -41,6 +46,23 @@ public class MemberController{
     @GetMapping("/search")
     public ResponseEntity<MemberResponseDto> getMembers(@ModelAttribute MemberSearchDto memberSearchDto){
         return ResponseEntity.ok(memberService.getMemberList(memberSearchDto));
+    }
+
+    @GetMapping("fav/{id}/image")
+    public ResponseEntity<Resource> getMembersFavImg(@PathVariable Long id) throws IOException {
+        Resource resource = memberService.getProductImage(id);
+        System.out.println("------------이미지 요청 결과---------------");
+        System.out.println(resource.getURI());
+        System.out.println(resource.getFilename());
+        String contentType = Files.probeContentType(Paths.get(resource.getURI()));
+
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(resource);
     }
 
 }

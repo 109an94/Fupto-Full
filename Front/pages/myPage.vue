@@ -16,7 +16,7 @@ useHead({
         <ul class="info">
           <li class="info-name">닉네임</li>
           <li class="info-email">****@naver.com</li>
-          <li><button>프로필관리</button></li>
+          <li><nuxt-link to="/myPage/setting/account"><button>프로필관리</button></nuxt-link></li>
         </ul>
         <div class="icon">
           <span>알림</span>

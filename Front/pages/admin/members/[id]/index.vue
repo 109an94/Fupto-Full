@@ -1,4 +1,7 @@
 <script setup>
+import {useAuthFetch} from "~/composables/useAuthFetch.js";
+import {use$Fetch} from "~/composables/use$Fetch.js";
+
 useHead({
   link: [{ rel: "stylesheet", href: "/css/admin/report.css" }],
 });
@@ -7,16 +10,57 @@ useHead({
 const route = useRoute();
 const member = ref([]);
 const gender = computed(()=>(member.value.gender));
+const favorites = ref([]);
+const favimgs = ref([]);
 
 //--------methods----------
-const fetchMember = async () =>{
+const fetchMember = async () => {
   const id = route.params.id
-  const response = await fetch(`http://localhost:8080/api/v1/admin/members/${id}`)
-  const data = await response.json();
+  console.log(id);
+  const {data, error} = await useAuthFetch(`/admin/members/${id}`, {
+    method: 'GET'
+  })
 
-  member.value = data;
+  if (error.value) {
+    throw new Error('데이터 조회 실패');
+  }
+  if (data.value) {
+    console.log(data.value)
+
+    member.value = data.value;
+    // members.value = data; //아직 data 자체가 배열이여서 직접 할당
+    favorites.value = data.value.favoriteList || [];
+
+    if (favorites.value != null && favorites.value.length>0){
+      console.log('이미지 조회시작')
+      console.log(favorites.value)
+      await fetchFavImgs();
+    }
+    console.log(favorites)
+  }
 }
 
+const fetchFavImgs = async () =>{
+  const imagePromiess = favorites.value.map(async (favorites) => {
+    const imageUrl = `http://localhost:8080/api/v1/admin/members/fav/${imagePromiess}/image`
+    console.log(imageUrl)
+    try {
+      const response = await use$Fetch(imageUrl, {
+        method : 'GET'
+      })
+      const blob = new Blob([response],{
+        type: 'image/jpeg'
+      })
+      const imgObjectUrl = URL.createObjectURL(blob);
+      return {...favorites, imageUrl: imgObjectUrl};
+    } catch (error) {
+      console.error(`이미지 패치 실패 ${favorites.productId}:`,error)
+      return favorites;
+    }
+  })
+  const favoritesWithImages = await Promise.all(imagePromiess);
+  favorites.value = favoritesWithImages;
+}
 
 //나이 계산하는 매서드
 const calculateAge = (birthDate) => {
@@ -47,10 +91,7 @@ const delectTime = (createDate) => {
 //-------lifecycle hooks--------
 onMounted(() => {
   fetchMember()
-})
-
-
-
+});
 </script>
 
 <template>
@@ -149,6 +190,9 @@ onMounted(() => {
                 <td> 문의 :<span> 0개</span> </td>
               </tr>
               <tr>
+                <td> 찜 :<span>&#160; {{member.favoriteCount}}</span> </td>
+              </tr>
+              <tr>
                 <th colspan="2">-</th>
               </tr>
               <tr>
@@ -174,19 +218,22 @@ onMounted(() => {
       <div class="card">
         <div style="text-align: center">
           <h1 class="form-title" style="font-size: large">관심 목록</h1>
-          <table class="report member">
+          <table class="report fav">
             <tbody>
             <tr>
-              <th>찜</th>
-              <td>목록들 </td>
+              <th>이미지</th>
+              <th colspan="3">상품명</th>
+              <th>등록일</th>
             </tr>
-            <tr>
-              <th>알림</th>
-              <td></td>
+            <tr v-for="f in favorites" :key="f.id">
+              <td><img class="image-preview"
+                       :src="f.imageUrl || 'https://via.placeholder.com/80'"
+                       :alt="f.productName"> </td>
+              <td colspan="3">{{f.productBrandName }} <br> {{ f.productName }}</td>
+              <td>{{ delectTime(f.createDate) }}</td>
             </tr>
             </tbody>
             </table>
-
         </div>
       </div>
     </div>

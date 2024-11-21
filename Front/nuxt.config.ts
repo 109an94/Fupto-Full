@@ -7,4 +7,13 @@ export default defineNuxtConfig({
       apiBase: "http://localhost:8080/api/v1",
     },
   },
+  // nitro:{
+  //   devProxy:{
+  //     '/api/v1':{
+  //       target:'http://localhost:8080/api/v1',
+  //       changeOrigin:true,
+  //       prependPath:true
+  //     }
+  //   }
+  // }
 });

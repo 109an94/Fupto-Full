@@ -1,4 +1,8 @@
 <script setup>
+  useHead({
+  link: [{ rel: "stylesheet", href: "/css/admin/report.css" }],
+});
+
 import { ref, reactive } from 'vue';
 import vueApexCharts from 'vue3-apexcharts';
 
@@ -209,7 +213,6 @@ const toggleSubProducts = (index) => {
     </template>
 <!-- <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script> -->
 <style scoped>
-@import '@/assets/css/admin/report.css';
 .sub-product {
   background-color: #f0f0f0;
 }

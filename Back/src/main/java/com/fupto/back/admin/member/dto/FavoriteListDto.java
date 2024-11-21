@@ -21,4 +21,6 @@ public class FavoriteListDto {
     private String memberName;
 
     private Instant createDate;
+
+    private String productBrandName;
 }

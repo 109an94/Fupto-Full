@@ -21,5 +21,5 @@ export default {
 </script>
 
 <style scoped>
-@import url("@/assets/css/user-joinComplete.css");
+@import url("@/public/css/user-joinComplete.css");
 </style>
