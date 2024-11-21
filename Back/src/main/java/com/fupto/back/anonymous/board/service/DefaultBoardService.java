@@ -1,11 +1,9 @@
 package com.fupto.back.anonymous.board.service;
 
-import com.fupto.back.anonymous.board.dto.BoardDefaultDto;
-import com.fupto.back.anonymous.board.dto.BoardListDto;
-import com.fupto.back.anonymous.board.dto.BoardSearchDto;
-
+import com.fupto.back.anonymous.board.dto.BoardDto;
+import com.fupto.back.anonymous.board.dto.DefaultDto;
+import com.fupto.back.anonymous.board.dto.SearchDto;
 import com.fupto.back.entity.Board;
-
 import com.fupto.back.repository.BoardCategoryRepository;
 import com.fupto.back.repository.BoardRepository;
 import com.fupto.back.repository.MemberRepository;
@@ -23,75 +21,104 @@ import java.util.List;
 @Service
 public class DefaultBoardService implements BoardService{
 
-    private final BoardRepository boardRepository;
-    private final ModelMapper modelMapper;
-    private final MemberRepository memberRepository;
-    private final BoardCategoryRepository boardCategoryRepository;
+    private BoardRepository boardRepository;
+    private ModelMapper modelMapper;
+    private BoardCategoryRepository boardCategoryRepository;
+    private MemberRepository memberRepository;
 
     public DefaultBoardService(BoardRepository boardRepository,
-                               BoardCategoryRepository boardCategoryRepository,
                                ModelMapper modelMapper,
+                               BoardCategoryRepository boardCategoryRepository,
                                MemberRepository memberRepository) {
-
         this.boardRepository = boardRepository;
         this.modelMapper = modelMapper;
         this.boardCategoryRepository = boardCategoryRepository;
         this.memberRepository = memberRepository;
     }
-
     @Override
-    public List<BoardListDto> getAllList() {
+    public List<BoardDto> findAll() {
         List<Board> boards = boardRepository.findAll();
-        List<BoardListDto> boardListDtos = boards.stream()
+        List<BoardDto> boardDtos = boards.stream()
+                .filter(board -> board.getActive() != null && board.getActive())
                 .map(board -> {
-                    BoardListDto boardListDto = modelMapper.map(board, BoardListDto.class);
-                    return boardListDto;
+                    BoardDto boardDto = modelMapper.map(board, BoardDto.class);
+                    return boardDto;
                 })
                 .toList();
-        return boardListDtos;
+        return boardDtos;
     }
 
     @Override
-    public BoardDefaultDto getSearch(BoardSearchDto boardSearchDto) {
+    public DefaultDto userSearch(SearchDto searchDto) {
         Sort sort = Sort.by(
-                boardSearchDto.getSortOrder().equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
-                boardSearchDto.getSortBy() != null ? boardSearchDto.getSortBy() : "createDate"
+                searchDto.getSortOrder().equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
+                searchDto.getSortBy() != null ? searchDto.getSortBy() : "createDate"
         );
-        Pageable pageable = PageRequest.of(boardSearchDto.getPage() - 1, boardSearchDto.getSize(), sort);
+        Pageable pageable = PageRequest.of(searchDto.getPage()-1, searchDto.getSize(), sort);
 
-        Page<Board> boardPage = boardRepository.searchBoards(
-                boardSearchDto.getSearchKeyWord(),
-                boardSearchDto.getSearchType(),
-                boardSearchDto.getBoardCategory(),
-                boardSearchDto.getActive(),
+        Page<Board> boards = boardRepository.userSearchBoards(
+                searchDto.getSearchKeyWord(),
+                searchDto.getSearchType(),
+                searchDto.getBoardCategory(),
                 pageable
         );
 
-        List<BoardListDto> boardListDtos = boardPage
+        List<BoardDto> boardDtos = boards
                 .getContent()
                 .stream()
-                .map(board -> {
-                    BoardListDto boardListDto = modelMapper.map(board, BoardListDto.class);
-                    return boardListDto;
+                .filter(board -> board.getActive() != null && board.getActive())
+                .map(board -> {BoardDto boardDto = modelMapper.map(board, BoardDto.class);
+                return boardDto;
                 })
                 .toList();
 
-        long totalElements = boardPage.getTotalElements();
-        long totalPages = boardPage.getTotalPages();
+        long totalElements = boards.getTotalElements();
+        long totalPages = boards.getTotalPages();
 
         List<Long> pages = new ArrayList<>();
         for (long i = 1; i <= totalPages; i++) {
             pages.add(i);
         }
 
-        return BoardDefaultDto
+        return DefaultDto
                 .builder()
                 .totalElements(totalElements)
                 .totalPages(totalPages)
-                .hasNextPage(boardPage.hasNext())
-                .hasPreviousPage(boardPage.hasPrevious())
+                .hasNextPage(boards.hasNext())
+                .hasPreviousPage(boards.hasPrevious())
                 .pages(pages)
-                .boards(boardListDtos)
+                .boards(boardDtos)
                 .build();
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

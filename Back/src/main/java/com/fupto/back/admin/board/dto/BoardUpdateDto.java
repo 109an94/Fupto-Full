@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class BoardUpdateDto {
+
     private Long id;
     private String title;
     private String contents;

@@ -1,11 +1,6 @@
 package com.fupto.back.admin.board.service;
 
 import com.fupto.back.admin.board.dto.*;
-import com.fupto.back.admin.brand.dto.BrandCreateDto;
-import com.fupto.back.admin.brand.dto.BrandListDto;
-import com.fupto.back.anonymous.board.dto.NoticeListDto;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;

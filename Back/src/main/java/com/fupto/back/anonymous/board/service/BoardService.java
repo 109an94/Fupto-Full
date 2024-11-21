@@ -1,16 +1,14 @@
 package com.fupto.back.anonymous.board.service;
 
-import com.fupto.back.anonymous.board.dto.BoardDefaultDto;
-import com.fupto.back.anonymous.board.dto.BoardListDto;
-import com.fupto.back.anonymous.board.dto.BoardSearchDto;
+import com.fupto.back.anonymous.board.dto.BoardDto;
+import com.fupto.back.anonymous.board.dto.DefaultDto;
+import com.fupto.back.anonymous.board.dto.SearchDto;
 
 import java.util.List;
 
-
 public interface BoardService {
 
-    List<BoardListDto> getAllList();
+    List<BoardDto> findAll();
 
-    BoardDefaultDto getSearch(BoardSearchDto boardSearchDto);
-
+    DefaultDto userSearch(SearchDto searchDto);
 }

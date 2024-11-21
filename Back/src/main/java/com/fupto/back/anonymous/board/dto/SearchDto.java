@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BoardSearchDto {
+public class SearchDto {
 
     private int page = 1;
-    private int size = 10;
+    private int size = 15;
     private String sortBy = "createdAt";
     private String sortOrder = "desc";
     private String searchType;

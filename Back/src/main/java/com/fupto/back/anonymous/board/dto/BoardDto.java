@@ -1,23 +1,28 @@
 package com.fupto.back.anonymous.board.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.Instant;
 
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
+@ToString
 @Data
-public class NoticeDetailDto {
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class BoardDto {
+
     private Long id;
     private String title;
     private String contents;
+    private String img;
+    private Long regMemberId;
     private String regMemberNickName;
     private Instant createdAt;
     private Instant modifiedAt;
+    private Long boardCategoryId;
     private String boardCategoryName;
     private Boolean active;
+
 }

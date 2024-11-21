@@ -2,7 +2,7 @@
 import { onMounted,ref } from 'vue';
 
 useHead({
-  link: [{ rel: "stylesheet", href: "/css/board-notice.css" }],
+  link: [{ rel: "stylesheet", href: "/css/board-index.css" }],
 });
 
 const notice = ref([]);
@@ -85,7 +85,6 @@ onMounted(() => {
 
     </tbody>
   </table>
-  <button class="notice-btn">글쓰기</button>
     </div>
   </main>
 </template>

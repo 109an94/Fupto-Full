@@ -1,5 +1,6 @@
 package com.fupto.back.anonymous.board.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,11 +12,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class NoticeDefaultDto {
+public class DefaultDto {
+
     private Long totalElements;
     private Long totalPages;
     private Boolean hasNextPage;
     private Boolean hasPreviousPage;
     private List<Long> pages;
-    private List<NoticeListDto> notices;
+    private List<BoardDto> boards;
 }
