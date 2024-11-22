@@ -477,7 +477,9 @@ onMounted(() => {
                   />
                 </td>
                 <td>{{ board.id }}</td>
-                <td class="product-cell"><a href="#">{{ board.title }}</a></td>
+                
+                <td class="product-cell"><nuxt-link :to="`/boards/${ board.id }/detail`">{{ board.title }}</nuxt-link></td>
+                
                 <td class="text-md">{{ board.boardCategoryName }}</td>
                 <td class="text-md">{{ board.regMemberNickName }}</td>
                 <td>

@@ -29,7 +29,7 @@ const isActiveLink = (path, gender) => {
           <NuxtLink to="/shoppingmalls" :class="{ 'active-link': isActiveLink('shoppingmalls') }">쇼핑몰</NuxtLink>
         </li>
         <li class="main-nav_link">
-          <NuxtLink to="/boards" :class="{ 'active-link': isActiveLink('boards') }">게시글</NuxtLink>
+          <NuxtLink to="/boards/list" :class="{ 'active-link': isActiveLink('boards') }">게시글</NuxtLink>
         </li>
         <li class="utility-nav-list">
           <nuxt-link v-if="isAnonymous()==false" to="/myPage"
