@@ -5,14 +5,13 @@
   overflow-y: auto;
   max-width: 1400px;
   padding: 0 20px;
-  min-height: 1200px;
+  min-height: 1100px;
 }
 
 .board_ul{
   display: flex;
   justify-content: center;
   margin-top: 10px;
-  /* border-bottom: solid 1px var(--color-text-unselected); */
 }
 
 .board_ul li{
@@ -31,8 +30,9 @@
 
 button:hover,
 button.active{
-  background-color: var(--color-ui-backgroundb);
-  color: black;
+  border: solid 1px #007bff;
+  /* background-color: var(--color-ui-backgroundb); */
+  color: #007bff;
 }
 
 /* 검색창 */
@@ -42,6 +42,7 @@ button.active{
 }
 
 .type {
+  border-radius: 10px;
   width: 80px;
   height: 25px;
   border: 1px solid var(--color-ui-backgroundb);
@@ -52,13 +53,15 @@ button.active{
 } 
 
 .keyword {
-  padding-left: 3px;
+  border-radius: 10px;
+  padding-left: 5px;
   height: 23px;
   width: 300px;
   border: 1px solid var(--color-ui-backgroundb);
 }
 
 .searchBtn {
+  border-radius: 10px;
   width: 50px;
   height: 25px;
   border: 1px solid var(--color-ui-backgroundb);
@@ -113,12 +116,12 @@ small {
 
 /* 글쓰기 */
 .write-btn {
-  width: 80px;
+  width: 70px;
   height: 30px;
   align-self: flex-end;
+  border-radius: 5px;
   background-color: white;
   border: 1px solid var(--color-ui-backgroundb);
-  border-radius: 8px;
   margin-top: 10px;
   margin-bottom: 10px;
   margin-right: 50px;
@@ -126,8 +129,9 @@ small {
 
 .write-btn:hover,
 .write-btn.active{
-  background-color: var(--color-text-caption);
-  color: black;
+  border: solid 1px #007bff;
+  background-color: white;
+  color: #007bff;
 }
 
 /* 페이징네이션 */
@@ -157,7 +161,7 @@ small {
 }
 
 .page-link:hover {
-  border-bottom: solid 1px var(--color-text-caption);
+  border-bottom: solid 1px #007bff;
 }
 
 .page-item.disabled .page-link {
@@ -168,7 +172,7 @@ small {
 }
 
 .page-item.active .page-link {
-  border-bottom: solid 1px var(--color-text-caption); /* 활성화된 페이지의 배경색 */
+  border-bottom: solid 1px #007bff; /* 활성화된 페이지의 배경색 */
   color: black; /* 활성화된 페이지의 텍스트 색상 */
 }
 
@@ -184,6 +188,7 @@ small {
     flex: 1 1 auto; 
     max-width: 120px;
   }
+
 
 }
 

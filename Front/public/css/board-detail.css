@@ -1,0 +1,102 @@
+.boardcategory{
+  margin-top: 10px;
+  margin-left: 20px;
+  border: solid 1px black;
+  border-radius: 10px;
+  padding: 4px;
+
+}
+
+.user {
+  display: flex; /* userimg와 userinfo를 가로로 나열 */
+  align-items: center; /* 수직 가운데 정렬 */
+  margin: 20px;
+}
+
+.userimg {
+  width: 50px;
+  height: 50px;
+  background-color: #ddd;
+  border-radius: 50%;
+  margin-right: 10px; /* userimg와 username 사이의 간격 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.username {
+  font-weight: bold;
+}
+
+.date {
+  font-size: 0.9rem;
+  color: #666;
+  display: block; /* 새로운 줄로 내려놓기 */
+  margin-top: 5px; /* date와 username 사이의 간격 */
+}
+
+.body {
+  margin-left: 20px;
+}
+
+.edit{
+  padding: 0px;
+  height: 24px;
+  width: 24px;
+  border: 0px;
+  background-color: black;
+}
+
+.title{
+  
+  font-size: 30px;
+}
+
+.boardcategory{
+  
+  font-size: 15px;
+}
+
+.contents{
+  margin: 0 20px ;
+  font-size: 15px;
+}
+
+.comments{
+  margin: 0 20px;
+  padding: 10px;
+}
+
+.commentsbox {
+  margin: 0 20px;
+  padding: 10px;
+  width: 100%;
+  max-width: 500px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+ .dropdown-menu {
+  /* position: absolute; */
+  background-color: white;
+  border: 1px solid #ddd;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  top: 50px;
+  right: 10px;
+  width: 150px;
+  z-index: 10;
+}
+
+.dropdown-menu button {
+  width: 100%;
+  padding: 10px;
+  text-align: left;
+  border: none;
+  background: none;
+  /* cursor: pointer; */
+}
+
+.dropdown-menu button:hover {
+  background-color: #f0f0f0;
+} 

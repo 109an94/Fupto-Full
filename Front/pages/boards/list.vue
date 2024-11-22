@@ -14,11 +14,18 @@ const pageSize = ref(10);
 const searchForm = ref(null);
 const noDataMessage = ref('');
 
+
 const formData = ref({
   searchType: 'title', // 제목, 작성자, 내용(?)
   searchKeyWord: '',
   boardCategoryName: '',
 })
+
+const handleCategoryClick = (categoryName) => {
+  formData.value.boardCategoryName = categoryName;
+  currentPage.value = 1; 
+  fetchBoards(); 
+};
 
 const fetchBoards = async () => {
   try{
@@ -30,7 +37,7 @@ const fetchBoards = async () => {
     if (formData.value.searchKeyWord) params.append("searchKeyWord", formData.value.searchKeyWord);
     if (formData.value.boardCategoryName) params.append("boardCategory", formData.value.boardCategoryName);
     
-    const response = await fetch(`http://localhost:8080/api/v1/boards?${params.toString()}`);
+    const response = await fetch(`http://localhost:8080/api/v1/boards/list?${params.toString()}`);
     const data = await response.json();
     boards.value = data.boards;
     totalElements.value = data.totalElements;
@@ -43,6 +50,15 @@ const fetchBoards = async () => {
   } catch (error) {
     console.error('게시판 데이터를 가져오는 중 오류 발생:', error);
   } 
+};
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
+  const day = String(date.getDate()).padStart(2, '0'); // 날짜가 한 자리 수일 경우 0을 추가
+
+  return `${year}-${month}-${day}`;
 };
 
 const handleSearch = (event) => {
@@ -73,31 +89,40 @@ onMounted(() => {
 <nav>
 <ul class="board_ul">
   <li>
-    <nuxt-link to="/boards/notice">
-          <button>공지사항</button>
-        </nuxt-link>
-  </li>
-  <li>
-    <nuxt-link to="/boards/community">
-          <button>커뮤니티</button>
-        </nuxt-link>
-  </li>
-  <li>
-    <nuxt-link to="/boards/show">
-          <button>자랑하기</button>
-        </nuxt-link>
-  </li>
-  <li>
-    <nuxt-link to="/boards/faq">
-          <button>FAQ</button>
-        </nuxt-link>
-  </li>
-  <li>
-    <nuxt-link to="/boards/center">
-          <button>고객센터</button>
-        </nuxt-link>
-  </li>
-  
+        <button 
+          @click="handleCategoryClick('공지사항')" 
+          :class="{ active: formData.boardCategoryName === '공지사항' }">
+          공지사항
+        </button>
+      </li>
+      <li>
+        <button 
+          @click="handleCategoryClick('커뮤니티')" 
+          :class="{ active: formData.boardCategoryName === '커뮤니티' }">
+          커뮤니티
+        </button>
+      </li>
+      <li>
+        <button 
+          @click="handleCategoryClick('자랑하기')" 
+          :class="{ active: formData.boardCategoryName === '자랑하기' }">
+          자랑하기
+        </button>
+      </li>
+      <li>
+        <button 
+          @click="handleCategoryClick('FAQ')" 
+          :class="{ active: formData.boardCategoryName === 'FAQ' }">
+          FAQ
+        </button>
+      </li>
+      <li>
+        <button 
+          @click="handleCategoryClick('고객센터')" 
+          :class="{ active: formData.boardCategoryName === '고객센터' }">
+          고객센터
+        </button>
+      </li>
 </ul>
 </nav>
 <div class="board">
@@ -109,10 +134,10 @@ onMounted(() => {
         </td>
         <td>
           <div>
-              <span clss="title">{{ board.title }}[댓글 수]</span>
+              <span clss="title"><nuxt-link :to="`/boards/${ board.id }/detail`">{{ board.title }}[댓글 수]</nuxt-link></span>
               <div class="smalls">
               <small class="wirter">{{ board.regMemberNickName }}</small>
-              <small class="date">10.25</small>
+              <small class="date">{{ formatDate(board.createdAt) }}</small>
               <small class="hits">조회 4</small>
             </div>
           </div>
@@ -127,8 +152,8 @@ onMounted(() => {
     </tbody>
   </table>
 
-  <button class="write-btn">글쓰기</button>
 
+  <button class="write-btn">글쓰기</button>
 
   <form ref ="searchForm" @submit="handleSearch" class="searchBox">
     <select v-model="formData.searchType" name="sc" class="type">
@@ -159,7 +184,6 @@ onMounted(() => {
     </nav>
   </div>
 </div>
-<nuxt-page/>
     
 </main>
 </template>
