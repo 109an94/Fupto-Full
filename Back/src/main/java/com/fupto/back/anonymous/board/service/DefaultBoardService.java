@@ -8,6 +8,7 @@ import com.fupto.back.entity.Board;
 import com.fupto.back.repository.BoardCategoryRepository;
 import com.fupto.back.repository.BoardRepository;
 import com.fupto.back.repository.MemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,8 +106,20 @@ public class DefaultBoardService implements BoardService{
                 .contents(board.getContents())
                 .boardCategoryName(board.getBoardCategory().getName())
                 .regMemberNickName(board.getRegMember().getNickname())
+                .img(board.getImg())
                 .build();
     }
 
+    @Override
+    public BoardDto userDelete(Long id, Boolean active) {
 
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
+
+        board.setActive(active);
+        board.setModifiedAt(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
+
+        boardRepository.save(board);
+        return modelMapper.map(board, BoardDto.class);
+    }
 }

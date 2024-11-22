@@ -135,24 +135,24 @@ small {
 }
 
 /* 페이징네이션 */
-.pagination-container {
+.Pagination-container {
   margin-top: 1rem;
   display: flex; /* Flexbox를 사용하여 정렬 */
   justify-content: center; /* 중앙 정렬 */
 }
 
-.pagination {
+.Pagination {
   display: flex;
   justify-content: center; /* 기존 중앙 정렬 유지 */
   list-style: none;
   padding: 0;
 }
 
-.page-item {
+.Page-item {
   margin: 0 0.25rem;
 }
 
-.page-link {
+.Page-link {
   margin: 0 5px;
   padding: 0.5rem 1rem;
   color: black; /* 기본 텍스트 색상 */
@@ -160,19 +160,20 @@ small {
   transition: background-color 0.3s ease, color 0.3s ease; /* 전환 효과 추가 */
 }
 
-.page-link:hover {
+.Page-link:hover {
   border-bottom: solid 1px #007bff;
 }
 
-.page-item.disabled .page-link {
+.Page-item.disabled .Page-link {
   pointer-events: none;
   opacity: 0.5;
   background-color: #f8f9fa; /* 비활성화된 링크의 배경색 */
   color: #6c757d; /* 비활성화된 링크의 텍스트 색상 */
 }
 
-.page-item.active .page-link {
-  border-bottom: solid 1px #007bff; /* 활성화된 페이지의 배경색 */
+.Page-item.active .Page-link {
+  border-bottom: solid 1px #007bff; 
+  /* 활성화된 페이지의 배경색 */
   color: black; /* 활성화된 페이지의 텍스트 색상 */
 }
 
