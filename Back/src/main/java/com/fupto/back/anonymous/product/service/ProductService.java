@@ -14,4 +14,6 @@ public interface ProductService {
     Resource getProductImages(Long id, Integer displayOrder) throws IOException;
     ProductDetailDto getById(Long id);
     ProductDetailDto getSingleById(Long id);
+
+    ProductResponseDto getAllProductsByShoppingmall(ProductSearchDto searchDto);
 }

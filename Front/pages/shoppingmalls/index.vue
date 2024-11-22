@@ -11,7 +11,7 @@
     </div>
     <div class="alphabet-links">
       <span 
-        v-for="letter in alphabet" 
+        v-for="letter in alphabetWithNumbers" 
         :key="letter"
         @click="toggleLetter(letter)"
         :class="{ 'selected': selectedLetter === letter }"
@@ -24,7 +24,7 @@
     </div>
     <div v-else class="shoppingmall-groups">
       <div 
-        v-for="(shoppingmalls, letter) in filteredShoppingmalls" 
+        v-for="(shoppingmalls, letter) in sortedFilteredShoppingmalls" 
         :key="letter" 
         class="shoppingmall-group"
         :class="{ 'faded': selectedLetter && selectedLetter !== letter }"
@@ -49,6 +49,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 const searchQuery = ref("");
 const alphabet = ref(Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+const alphabetWithNumbers = ref([...alphabet.value, "0~9"]);
 const selectedLetter = ref(null);
 const shoppingmalls = ref({});
 const route = useRoute();
@@ -72,8 +73,15 @@ const fetchShoppingmalls = async () => {
 const groupShoppingmallsByFirstLetter = (shoppingmalls) => {
   return shoppingmalls.reduce((acc, shoppingmall) => {
     const firstLetter = shoppingmall.engName.charAt(0).toUpperCase();
-    if (!acc[firstLetter]) acc[firstLetter] = [];
-    acc[firstLetter].push(shoppingmall);
+    if (/[0-9]/.test(firstLetter)) {
+      // 숫자는 "0~9" 그룹으로
+      if (!acc["0~9"]) acc["0~9"] = [];
+      acc["0~9"].push(shoppingmall);
+    } else {
+      // 알파벳 그룹
+      if (!acc[firstLetter]) acc[firstLetter] = [];
+      acc[firstLetter].push(shoppingmall);
+    }
     return acc;
   }, {});
 };
@@ -86,7 +94,7 @@ const filteredShoppingmalls = computed(() => {
     const search = searchQuery.value.toLowerCase();
     Object.keys(filtered).forEach(letter => {
       filtered[letter] = filtered[letter].filter(shoppingmall => 
-      shoppingmall.engName.toLowerCase().includes(search)
+        shoppingmall.engName.toLowerCase().includes(search)
       );
     });
   }
@@ -102,6 +110,14 @@ const filteredShoppingmalls = computed(() => {
   return Object.fromEntries(
     Object.entries(filtered).filter(([_, names]) => names.length > 0)
   );
+});
+
+// 정렬: 0~9 그룹을 마지막으로
+const sortedFilteredShoppingmalls = computed(() => {
+  const entries = Object.entries(filteredShoppingmalls.value);
+  const alphabetEntries = entries.filter(([key]) => key !== "0~9").sort(([a], [b]) => a.localeCompare(b));
+  const numberEntries = entries.filter(([key]) => key === "0~9");
+  return Object.fromEntries([...alphabetEntries, ...numberEntries]);
 });
 
 const toggleLetter = (letter) => {
@@ -148,7 +164,7 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 1.5rem;
+  gap: 1.3rem;
   margin: 1rem 0;
   font-size: 1.2rem;
   color: var(--color-text-unselected);

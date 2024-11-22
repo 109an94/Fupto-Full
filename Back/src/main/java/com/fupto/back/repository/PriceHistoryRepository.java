@@ -26,4 +26,38 @@ public interface PriceHistoryRepository extends JpaRepository<PriceHistory, Long
     )
 """)
     Integer findLowestCurrentPrice(@Param("mappingId") Long mappingId);
+
+    @Query("""
+        SELECT p.retailPrice
+        FROM Product p
+        WHERE p.id = (
+            SELECT ph.product.id
+            FROM PriceHistory ph
+            WHERE ph.createDate = (
+                SELECT MAX(ph2.createDate)
+                FROM PriceHistory ph2 
+                WHERE ph2.product.id = ph.product.id
+            )
+            AND ph.product.id IN (
+                SELECT p2.id
+                FROM Product p2
+                WHERE p2.mappingId = :mappingId
+            )
+            AND ph.salePrice = (
+                SELECT MIN(ph3.salePrice)
+                FROM PriceHistory ph3
+                WHERE ph3.createDate = (
+                    SELECT MAX(ph4.createDate)
+                    FROM PriceHistory ph4 
+                    WHERE ph4.product.id = ph3.product.id
+                )
+                AND ph3.product.id IN (
+                    SELECT p3.id
+                    FROM Product p3
+                    WHERE p3.mappingId = :mappingId
+                )
+            )
+        )
+    """)
+    Integer findRetailPriceOfLowestPriceProduct(@Param("mappingId") Long mappingId);
 }

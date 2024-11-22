@@ -171,34 +171,52 @@ const updateQueryParams = async (newParams) => {
 };
 
 const handleFilterChange = (filterData) => {
+  selectedFilters.value = {
+    category: filterData.category || [],
+    sub: filterData.sub || [],
+    brand: filterData.brand || [],
+  };
   updateQueryParams(filterData);
 };
 
 const removeFilter = async (type, id) => {
-  selectedFilters.value[type] = selectedFilters.value[type].filter((item) => item.id !== id);
-  await asideRef.value?.updateFilterState({ type, id, checked: false });
-  const filterData = {
-    gender: route.query.gender,
-    category: selectedFilters.value.category,
-    sub: selectedFilters.value.sub,
-    min: route.query.min,
-    max: route.query.max,
-  };
+  if (type === "category") {
+    selectedFilters.value.category = selectedFilters.value.category.filter((item) => item.id !== id);
+    selectedFilters.value.sub = [];
+  } else {
+    selectedFilters.value[type] = selectedFilters.value[type].filter((item) => item.id !== id);
+  }
+
+  await asideRef.value?.updateFilterState({
+    type: type,
+    id: id,
+    checked: false,
+  });
+
+  // URL 쿼리 파라미터 업데이트
   const updatedQuery = { ...route.query };
-  if (filterData.category?.length) {
-    updatedQuery.category = filterData.category.map((c) => c.id).join(",");
-  } else {
+
+  if (type === "category") {
     delete updatedQuery.category;
-  }
-  if (filterData.sub?.length) {
-    updatedQuery.sub = filterData.sub.map((c) => c.id).join(",");
-  } else {
+    delete updatedQuery.categoryName;
     delete updatedQuery.sub;
+    delete updatedQuery.subName;
+  } else if (type === "sub") {
+    delete updatedQuery.sub;
+    delete updatedQuery.subName;
+  } else if (type === "brand") {
+    if (selectedFilters.value.brand.length === 0) {
+      delete updatedQuery.brand;
+    } else {
+      updatedQuery.brand = selectedFilters.value.brand.map((b) => b.id).join(",");
+    }
   }
+
   await router.replace({
     path: route.path,
     query: updatedQuery,
   });
+
   loadProducts(true);
 };
 
@@ -404,6 +422,10 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.product-content {
+  width: 100%;
+}
+
 .brand-profile {
   width: 100%;
   max-width: 1200px;

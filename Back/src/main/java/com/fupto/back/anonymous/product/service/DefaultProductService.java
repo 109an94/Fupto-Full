@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -80,14 +81,16 @@ public class DefaultProductService implements ProductService {
             products = products.stream()
                     .map(product -> {
                         Integer lowestPrice = priceHistoryRepository.findLowestCurrentPrice(product.getMappingId());
+                        Integer retailPriceOfLowestPrice = priceHistoryRepository.findRetailPriceOfLowestPriceProduct(product.getMappingId());
+
                         double discountRate = lowestPrice != null ?
-                                ((product.getRetailPrice() - lowestPrice) * 100.0) / product.getRetailPrice() : 0.0;
+                                ((retailPriceOfLowestPrice - lowestPrice) * 100.0) / retailPriceOfLowestPrice : 0.0;
                         return new ProductWithDiscountDto(product, discountRate);
                     })
                     .sorted(Comparator.comparing(ProductWithDiscountDto::getDiscountRate).reversed())
                     .map(ProductWithDiscountDto::getProduct)
                     .limit(searchDto.getLimit() + 1)
-                    .toList();
+                    .collect(Collectors.toList());
         }
 
         // 전체 결과 수 조회
@@ -217,6 +220,9 @@ public class DefaultProductService implements ProductService {
 
         // 4. 최저가 계산 (mapping_id가 같은 모든 상품 중 최신 날짜의 최저가)
         Integer lowestPrice = priceHistoryRepository.findLowestCurrentPrice(product.getMappingId());
+        // 4-1. 최저가 상품의 retailPrice
+        Integer retailPriceOfLowestPrice = priceHistoryRepository.findRetailPriceOfLowestPriceProduct(product.getMappingId());
+
 
         // 5. 판매처별 최신 가격 정보를 포함한 ShopDto 리스트 생성
         List<Product> relatedProducts = productRepository
@@ -244,15 +250,14 @@ public class DefaultProductService implements ProductService {
 
         // 6. 가격 정보 구성
         ProductPriceInfoDto priceInfo = ProductPriceInfoDto.builder()
-                .retailPrice(product.getRetailPrice())
+                .retailPrice(retailPriceOfLowestPrice)
                 .salePrice(lowestPrice)
-                .discountRate(calculateDiscountRate(product.getRetailPrice(), lowestPrice))
+                .discountRate(calculateDiscountRate(retailPriceOfLowestPrice, lowestPrice))
                 .build();
 
         return ProductDetailDto.builder()
                 .id(product.getId())
                 .productName(product.getProductName())
-                .retailPrice(product.getRetailPrice())
                 .description(product.getDescription())
                 .categories(categoryPath)
                 .images(images)
@@ -314,13 +319,45 @@ public class DefaultProductService implements ProductService {
         return ProductDetailDto.builder()
                 .id(product.getId())
                 .productName(product.getProductName())
-                .retailPrice(product.getRetailPrice())
                 .description(product.getDescription())
                 .categories(categoryPath)
                 .images(images)
                 .brandEngName(product.getBrand().getEngName())
                 .priceInfo(priceInfo)
                 .shops(shops)
+                .build();
+    }
+
+    //쇼핑몰별 상품 가져오기
+    @Override
+    public ProductResponseDto getAllProductsByShoppingmall(ProductSearchDto searchDto) {
+        List<Product> products = productRepository.findAllByShoppingmall(
+                searchDto.getShoppingmall().get(0), // 쇼핑몰 ID는 리스트의 첫 번째 요소로 가정합니다.
+                searchDto.getGender(),
+                searchDto.getCategory(),
+                searchDto.getSub(),
+                searchDto.getMin(),
+                searchDto.getMax(),
+                searchDto.getCursor(),
+                "discountDesc".equals(searchDto.getSort()) ? "popular" : searchDto.getSort(),
+                PageRequest.of(0, searchDto.getLimit() + 1)
+        );
+
+        boolean hasMore = products.size() > searchDto.getLimit();
+        if (hasMore) {
+            products.remove(products.size() - 1);
+        }
+
+        Long nextCursor = hasMore ? products.get(products.size() - 1).getId() : null;
+
+        List<ProductListDto> productDtos = products.stream()
+                .map(this::convertToProductListDto)
+                .toList();
+
+        return ProductResponseDto.builder()
+                .products(productDtos)
+                .nextCursor(nextCursor)
+                .hasMore(hasMore)
                 .build();
     }
 

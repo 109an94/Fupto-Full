@@ -205,6 +205,8 @@ const submitForm = async () => {
       imageFileNames: product.fileList?.map((file) => file.name) || [],
     }));
 
+    console.log("productsData:", productsData);
+
     const formData = new FormData();
     formData.append(
       "data",
