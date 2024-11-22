@@ -50,6 +50,7 @@ public class MemberController {
 
     @GetMapping("fav/{id}/image")
     public ResponseEntity<Resource> getMembersFavImg(@PathVariable Long id) throws IOException {
+        System.out.println("------------요청 확인-------"+id);
         Resource resource = memberService.getProductImage(id);
         System.out.println("------------이미지 요청 결과---------------");
         System.out.println(resource.getURI());

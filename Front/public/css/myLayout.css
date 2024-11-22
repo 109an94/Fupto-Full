@@ -162,7 +162,7 @@ button.icon\:close {
 
     .mainLayout {
         display: flex;
-        background-color: #58ccff;
+        /*background-color: #58ccff;*/
     }
     aside.profileContainer {
         min-width: 300px;

@@ -197,11 +197,6 @@ watch(
               고객 관리
             </NuxtLink>
           </li>
-          <li>
-            <NuxtLink to="/admin/users/update" :class="{ 'sub-menu-active': isSubMenuActive('/admin/users/update') }">
-              회원 정보#
-            </NuxtLink>
-          </li>
         </ul>
       </li>
       <li>

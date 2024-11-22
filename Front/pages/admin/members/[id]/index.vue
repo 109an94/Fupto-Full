@@ -15,34 +15,35 @@ const favimgs = ref([]);
 
 //--------methods----------
 const fetchMember = async () => {
-  const id = route.params.id
-  console.log(id);
-  const {data, error} = await useAuthFetch(`/admin/members/${id}`, {
-    method: 'GET'
-  })
+  try {
+    const id = route.params.id
+    console.log(id);
+    const response = await use$Fetch(`/admin/members/${id}`, {
+      method: 'GET'
+    })
+    if (!response) {
+      throw new Error('데이터 조회 실패');
+    }
 
-  if (error.value) {
-    throw new Error('데이터 조회 실패');
-  }
-  if (data.value) {
-    console.log(data.value)
+    console.log(response);
 
-    member.value = data.value;
-    // members.value = data; //아직 data 자체가 배열이여서 직접 할당
-    favorites.value = data.value.favoriteList || [];
+    member.value = response;
+    favorites.value = response.favoriteList || [];
 
-    if (favorites.value != null && favorites.value.length>0){
+    if (favorites.value != null && favorites.value.length > 0) {
       console.log('이미지 조회시작')
       console.log(favorites.value)
       await fetchFavImgs();
     }
     console.log(favorites)
+  } catch (error) {
+    console.error("데이터 조회 오류:", error);
   }
 }
 
 const fetchFavImgs = async () =>{
-  const imagePromiess = favorites.value.map(async (favorites) => {
-    const imageUrl = `http://localhost:8080/api/v1/admin/members/fav/${imagePromiess}/image`
+  const imagePromies = favorites.value.map(async (favorites) => {
+    const imageUrl = `/admin/members/fav/${favorites.productId}/image`
     console.log(imageUrl)
     try {
       const response = await use$Fetch(imageUrl, {
@@ -58,7 +59,7 @@ const fetchFavImgs = async () =>{
       return favorites;
     }
   })
-  const favoritesWithImages = await Promise.all(imagePromiess);
+  const favoritesWithImages = await Promise.all(imagePromies);
   favorites.value = favoritesWithImages;
 }
 
@@ -228,7 +229,8 @@ onMounted(() => {
             <tr v-for="f in favorites" :key="f.id">
               <td><img class="image-preview"
                        :src="f.imageUrl || 'https://via.placeholder.com/80'"
-                       :alt="f.productName"> </td>
+                       :alt="f.productName"
+                       style="width: 80px; height: 80px; object-fit: cover;"> </td>
               <td colspan="3">{{f.productBrandName }} <br> {{ f.productName }}</td>
               <td>{{ delectTime(f.createDate) }}</td>
             </tr>
@@ -241,7 +243,7 @@ onMounted(() => {
   </main>
 </template>
 
-<!--<style scoped>-->
-<!--  @import url("@/assets/css/admin/report.css");-->
+<style scoped>
 
-<!--</style>-->
+
+</style>

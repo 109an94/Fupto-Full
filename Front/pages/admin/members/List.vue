@@ -13,7 +13,8 @@ const router = useRouter()
 const members = ref([]);
 const isLoading = ref(false);
 const totalPages = ref(0);
-const currentPage = ref(0);
+const totalCount = ref(0);
+const currentPage = ref(1);
 const page = ref(10);
 const size = ref(10);
 const filterData = ref({
@@ -46,28 +47,46 @@ const fetchMembers = async (page = 1) => {
       ...(filterData.value.startDate && {startDate: filterData.value.startDate}),
       ...(filterData.value.endDate && {endDate: filterData.value.endDate})
     };
-    const {data, error} = await useAuthFetch(`/admin/members/search?`, {
+    const response = await use$Fetch('/admin/members/search', {
       method: 'GET',
       params: queryParams
     });
-    if (error.value) {
-      throw new Error('데이터 조회 실패');
-    }
-    if (data.value) {
-      // const data = await response.json();
-      console.log(data.value)
 
-
-      members.value = data.value.members;
-      // members.value = data; //아직 data 자체가 배열이여서 직접 할당
-      console.log(members.value);
+    if (!response || !response.members) {
+      throw new Error('유효한 데이터가 없습니다.');
     }
+
+    console.log(response);
+    members.value = response.members;
+    totalPages.value = response.totalPages;
+    currentPage.value = page;
+    totalCount.value = response.totalCount;
   } catch (error) {
-    console.log("데이터 입력 오류 : ", error);
+    console.error("데이터 조회 오류:", error);
+    // 오류 처리 로직 (예: 사용자에게 오류 메시지 표시)
   } finally {
     isLoading.value = false;
   }
 }
+
+// 페이지네이션 관련 함수
+const pageChange = (newPage) => {
+  fetchMembers(newPage);
+}
+
+const getPageNumbers = computed(() => {
+  const pageCount = Math.min(10, totalPages.value);
+  let start = Math.max(1, currentPage.value - Math.floor(pageCount / 2));
+  let end = Math.min(start + pageCount - 1, totalPages.value);
+
+  if (end - start + 1 < pageCount) {
+    start = Math.max(1, end - pageCount + 1);
+  }
+
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+});
+
+
 
 //나이 계산하는 매서드
 const calculateAge = (birthDate) => {
@@ -88,6 +107,7 @@ const delectTime = (createDate) => {
   const date = new Date(createDate);
   return date.toISOString().split('T')[0];
 }
+
 
 //--------------lifecycle hooks
 onMounted(() => {
@@ -231,15 +251,133 @@ members.value.forEach(members => {
             </tr>
             </tbody>
           </table>
-        </div>
+          <!-- 페이지네이션 -->
+
+          <div class="pagination-container mt-4">
+            <ul class="pagination justify-content-center">
+              <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                <button class="page-link" @click="pageChange(1)">&lt;&lt;</button>
+              </li>
+              <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                <button class="page-link" @click="pageChange(currentPage - 1)">이전</button>
+              </li>
+              <li v-for="pageNum in getPageNumbers" :key="pageNum" class="page-item" :class="{ active: pageNum === currentPage }">
+                <button class="page-link" @click="pageChange(pageNum)">
+                  {{ pageNum }}
+                </button>
+              </li>
+              <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                <button class="page-link" @click="pageChange(currentPage + 1)">다음</button>
+              </li>
+              <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                <button class="page-link" @click="pageChange(totalPages)">&gt;&gt;</button>
+              </li>
+            </ul>
+          </div>
       </div>
+    </div>
     </div>
   </main>
 </template>
 
-<!--<style scoped>-->
-<!--@import '@/public/css/admin/report.css';-->
-<!--.sub-product {-->
-<!--  background-color: #f0f0f0;-->
-<!--}-->
-<!--</style>-->
+<style scoped>
+.sub-product {
+  background-color: #f0f0f0;
+}
+
+/*페이지네이션*/
+.pagination-container {
+  margin-top: 1rem;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+}
+
+.page-item {
+  margin: 0 0.25rem;
+}
+
+.page-link {
+  padding: 0.5rem 1rem;
+  border: 1px solid #dee2e6;
+  background-color: #fff;
+  color: #007bff;
+  cursor: pointer;
+}
+
+.page-item.active .page-link {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: #fff;
+}
+
+.page-item.disabled .page-link {
+  color: #6c757d;
+  pointer-events: none;
+  background-color: #fff;
+  border-color: #dee2e6;
+}
+
+.date-cell {
+  text-align: center;
+  vertical-align: middle;
+  padding: 8px;
+}
+
+.pl-switch {
+  position: relative;
+  display: inline-block;
+  width: 35px;
+  height: 20px;
+}
+
+.pl-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.pl-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.pl-slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+.pl-slider.round {
+  border-radius: 34px;
+}
+
+.pl-slider.round:before {
+  border-radius: 50%;
+}
+
+input:checked + .pl-slider {
+  background-color: #2196f3;
+}
+
+input:checked + .pl-slider:before {
+  transform: translateX(15px);
+}
+
+</style>

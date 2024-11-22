@@ -24,8 +24,6 @@ public class MemberController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<MemberResponseDto> signUp(@AuthenticationPrincipal FuptoUserDetails userDetails,
                                                     @RequestBody MemberEditDto requestDto) {
-        System.out.println("dto 확인용 : "+requestDto);
-        System.out.println("details 확인용 : "+userDetails);
         try {
             MemberResponseDto editMember = memberService.editMember(userDetails.getUsername(), requestDto);
             System.out.println(editMember);

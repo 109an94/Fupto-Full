@@ -5,7 +5,7 @@
       <li><a href="#" class="m-icon:search m-icon-size:4">검색</a></li>
       <li><a href="#" class="m-icon:home m-icon-size:4">홈</a></li>
       <li><a href="#" class="m-icon:zzim m-icon-size:4">찜</a></li>
-      <li><NuxtLink to="/my" class="m-icon:account m-icon-size:4">마이페이지</NuxtLink></li>
+      <li><NuxtLink to="/myPage" class="m-icon:account m-icon-size:4">마이페이지</NuxtLink></li>
     </ul>
   </nav>
 </template>
