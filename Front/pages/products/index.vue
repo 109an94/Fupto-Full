@@ -43,7 +43,7 @@ const { data: initialData } = await useFetch("/products", {
     max: route.query.max || undefined,
     sort: route.query.sort || "popular",
     cursor: null,
-    limit: 20,
+    limit: 100,
   },
 });
 
@@ -87,7 +87,7 @@ const loadProducts = async (reset = false) => {
       max: route.query.max || undefined,
       sort: selectedSort.value,
       cursor: reset ? null : cursor.value,
-      limit: 20,
+      limit: 100,
     };
 
     const data = await $fetch("/products", {
@@ -158,7 +158,7 @@ const selectOption = async (option) => {
         max: route.query.max || undefined,
         sort: option.value,
         cursor: null,
-        limit: 20,
+        limit: 100,
       },
     });
 

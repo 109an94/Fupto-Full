@@ -89,7 +89,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     ))
     AND p.active = true
     AND p.presentId = true
-        AND (:cursor IS NULL OR\s
+    AND (:cursor IS NULL OR\s
         (:sort = 'recent' AND\s
             (p.createDate < (SELECT p2.createDate FROM Product p2 WHERE p2.id = :cursor) OR\s
             (p.createDate = (SELECT p2.createDate FROM Product p2 WHERE p2.id = :cursor) AND p.id < :cursor))
