@@ -2,6 +2,7 @@ package com.fupto.back.anonymous.board.service;
 
 import com.fupto.back.anonymous.board.dto.BoardDto;
 import com.fupto.back.anonymous.board.dto.DefaultDto;
+import com.fupto.back.anonymous.board.dto.DetailDto;
 import com.fupto.back.anonymous.board.dto.SearchDto;
 import com.fupto.back.entity.Board;
 import com.fupto.back.repository.BoardCategoryRepository;
@@ -52,7 +53,7 @@ public class DefaultBoardService implements BoardService{
     public DefaultDto userSearch(SearchDto searchDto) {
         Sort sort = Sort.by(
                 searchDto.getSortOrder().equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
-                searchDto.getSortBy() != null ? searchDto.getSortBy() : "createDate"
+                searchDto.getSortBy() != null ? searchDto.getSortBy() : "createdAt"
         );
         Pageable pageable = PageRequest.of(searchDto.getPage()-1, searchDto.getSize(), sort);
 
@@ -91,34 +92,18 @@ public class DefaultBoardService implements BoardService{
                 .build();
     }
 
+    @Override
+    public DetailDto getById(Long id) {
+        Board board = boardRepository.findById(id).orElse(null);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        return DetailDto.builder()
+                .id(board.getId())
+                .title(board.getTitle())
+                .contents(board.getContents())
+                .boardCategoryName(board.getBoardCategory().getName())
+                .regMemberNickName(board.getRegMember().getNickname())
+                .build();
+    }
 
 
 }

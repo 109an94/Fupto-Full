@@ -48,7 +48,6 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 
     List<Board> findByBoardCategoryId(Long boardCategoryId);
 
-
     @Query("SELECT b FROM Board b WHERE " +
             "(:searchType IS NULL OR " +
             "(:searchKeyWord IS NULL OR " +

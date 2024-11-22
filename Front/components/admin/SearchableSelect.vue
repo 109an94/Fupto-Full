@@ -25,9 +25,12 @@ const emit = defineEmits(["update:modelValue"]);
 const isOpen = ref(false);
 const searchQuery = ref("");
 const selectedOption = ref(null);
+const searchInputRef = ref(null);
+const highlightedIndex = ref(-1);
 
 const updateSearchQuery = (e) => {
   searchQuery.value = e.target.value;
+  highlightedIndex.value = -1;
 };
 
 const filteredOptions = computed(() => {
@@ -44,10 +47,43 @@ const filteredOptions = computed(() => {
   });
 });
 
+const handleKeyDown = (e) => {
+  if (!isOpen.value) return;
+
+  switch (e.key) {
+    case "ArrowDown":
+      e.preventDefault();
+      if (highlightedIndex.value < filteredOptions.value.length - 1) {
+        highlightedIndex.value++;
+      }
+      break;
+    case "ArrowUp":
+      e.preventDefault();
+      if (highlightedIndex.value > 0) {
+        highlightedIndex.value--;
+      }
+      break;
+    case "Enter":
+      e.preventDefault();
+      if (highlightedIndex.value >= 0 && filteredOptions.value[highlightedIndex.value]) {
+        selectOption(filteredOptions.value[highlightedIndex.value]);
+      }
+      break;
+  }
+};
+
 const toggleDropdown = () => {
+  if (!isOpen.value) {
+    document.dispatchEvent(
+      new CustomEvent("closeOtherSelects", {
+        detail: { currentSelect: searchInputRef.value },
+      })
+    );
+  }
   isOpen.value = !isOpen.value;
   if (isOpen.value) {
     searchQuery.value = "";
+    highlightedIndex.value = -1;
   }
 };
 
@@ -57,6 +93,12 @@ const selectOption = (option) => {
     emit("update:modelValue", option.id);
     isOpen.value = false;
   }, 0);
+};
+
+const closeOtherSelectHandler = (e) => {
+  if (e.detail.currentSelect !== searchInputRef.value) {
+    isOpen.value = false;
+  }
 };
 
 const handleClickOutside = (event) => {
@@ -75,15 +117,17 @@ const displayValue = computed(() => {
 
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
+  document.addEventListener("closeOtherSelects", closeOtherSelectHandler);
 });
 
 onUnmounted(() => {
   document.removeEventListener("click", handleClickOutside);
+  document.removeEventListener("closeOtherSelects", closeOtherSelectHandler);
 });
 </script>
 
 <template>
-  <div class="searchable-select" :class="{ 'is-open': isOpen }">
+  <div class="searchable-select" :class="{ 'is-open': isOpen }" @keydown="handleKeyDown">
     <div class="select-trigger" @click="toggleDropdown" :class="{ required: required }">
       {{ displayValue }}
       <span class="arrow" :class="{ up: isOpen }">▼</span>
@@ -92,6 +136,7 @@ onUnmounted(() => {
     <div v-if="isOpen" class="select-dropdown">
       <div class="search-container">
         <input
+          ref="searchInputRef"
           type="text"
           :value="searchQuery"
           placeholder="검색어를 입력하세요"
@@ -103,11 +148,15 @@ onUnmounted(() => {
 
       <div class="options-container">
         <div
-          v-for="option in filteredOptions"
+          v-for="(option, index) in filteredOptions"
           :key="option.id"
           class="option"
-          :class="{ selected: option.id === modelValue }"
+          :class="{
+            selected: option.id === modelValue,
+            highlighted: index === highlightedIndex,
+          }"
           @click="selectOption(option)"
+          @mouseover="highlightedIndex = index"
         >
           {{ option.name }}
         </div>
@@ -197,12 +246,16 @@ onUnmounted(() => {
 }
 
 .option:hover {
-  background-color: #f5f5f5;
+  background-color: #e0e0e0;
 }
 
 .option.selected {
   background-color: #e6f3ff;
-  color: #3c91e6;
+  color: #328be4;
+}
+
+.option.highlighted {
+  background-color: #e0e0e0;
 }
 
 .no-results {
