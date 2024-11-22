@@ -328,20 +328,40 @@ public class DefaultProductService implements ProductService {
                 .build();
     }
 
-    //쇼핑몰별 상품 가져오기
     @Override
     public ProductResponseDto getAllProductsByShoppingmall(ProductSearchDto searchDto) {
+        // 정렬 값 검증
+        validateSort(searchDto.getSort());
+
         List<Product> products = productRepository.findAllByShoppingmall(
                 searchDto.getShoppingmall().get(0), // 쇼핑몰 ID는 리스트의 첫 번째 요소로 가정합니다.
                 searchDto.getGender(),
                 searchDto.getCategory(),
                 searchDto.getSub(),
+                searchDto.getBrand(),
                 searchDto.getMin(),
                 searchDto.getMax(),
                 searchDto.getCursor(),
                 "discountDesc".equals(searchDto.getSort()) ? "popular" : searchDto.getSort(),
                 PageRequest.of(0, searchDto.getLimit() + 1)
         );
+
+        // 할인율 정렬이 필요한 경우
+        if ("discountDesc".equals(searchDto.getSort())) {
+            products = products.stream()
+                    .map(product -> {
+                        Integer lowestPrice = priceHistoryRepository.findLowestCurrentPrice(product.getMappingId());
+                        Integer retailPriceOfLowestPrice = priceHistoryRepository.findRetailPriceOfLowestPriceProduct(product.getMappingId());
+
+                        double discountRate = lowestPrice != null ?
+                                ((retailPriceOfLowestPrice - lowestPrice) * 100.0) / retailPriceOfLowestPrice : 0.0;
+                        return new ProductWithDiscountDto(product, discountRate);
+                    })
+                    .sorted(Comparator.comparing(ProductWithDiscountDto::getDiscountRate).reversed())
+                    .map(ProductWithDiscountDto::getProduct)
+                    .limit(searchDto.getLimit() + 1)
+                    .collect(Collectors.toList());
+        }
 
         boolean hasMore = products.size() > searchDto.getLimit();
         if (hasMore) {
