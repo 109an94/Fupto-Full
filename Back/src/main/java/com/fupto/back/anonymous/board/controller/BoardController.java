@@ -38,4 +38,12 @@ public class BoardController {
         return ResponseEntity.ok(boardService.getById(id));
     }
 
+    @PatchMapping("{id}/active")
+    public ResponseEntity<BoardDto> userDelete(
+            @PathVariable Long id,
+            @RequestParam Boolean active) throws Exception
+    {
+        return ResponseEntity.ok(boardService.userDelete(id, active));
+    }
+
 }

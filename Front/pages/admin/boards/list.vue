@@ -209,7 +209,7 @@ const initializeFlatpickr = () => {
     static: true,
     monthSelectorType: "static",
   };
-
+  
   // 시작일 Picker 초기화
   startDatePicker.value = window.flatpickr(startDateInput.value, {
     ...config,

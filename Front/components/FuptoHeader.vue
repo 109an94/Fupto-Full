@@ -13,6 +13,11 @@ const isActiveLink = (path, gender) => {
   }
   return route.path.startsWith(`/${path}`);
 };
+
+const redirect = () => {
+  window.location.href = "http://localhost:3000/boards/list";
+  // router.go(-1);
+}
 </script>
 
 <template>
@@ -29,7 +34,7 @@ const isActiveLink = (path, gender) => {
           <NuxtLink to="/shoppingmalls" :class="{ 'active-link': isActiveLink('shoppingmalls') }">쇼핑몰</NuxtLink>
         </li>
         <li class="main-nav_link">
-          <NuxtLink to="/boards/list" :class="{ 'active-link': isActiveLink('boards') }">게시글</NuxtLink>
+          <NuxtLink to="/boards/list" :class="{ 'active-link': isActiveLink('boards') }" @click="redirect">게시글</NuxtLink>
         </li>
         <li class="utility-nav-list">
           <nuxt-link v-if="isAnonymous()==false" to="/myPage"

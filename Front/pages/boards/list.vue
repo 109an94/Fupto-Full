@@ -152,7 +152,6 @@ onMounted(() => {
     </tbody>
   </table>
 
-
   <button class="write-btn">글쓰기</button>
 
   <form ref ="searchForm" @submit="handleSearch" class="searchBox">
@@ -168,17 +167,17 @@ onMounted(() => {
     </form>
 
 
-  <div class="pagination-container">
+  <div class="Pagination-container">
     <nav aria-label="Page navigation">
-      <ul class="pagination justify-content-center">
-        <li class="page-item" :class="{ disabled: currentPage === 1 }">
-          <a class="page-link" href="#" @click.prevent="pageChange(currentPage - 1)"><</a>
+      <ul class="Pagination justify-content-center">
+        <li class="Page-item" :class="{ disabled: currentPage === 1 }">
+          <a class="Page-link" href="#" @click.prevent="pageChange(currentPage - 1)"><</a>
         </li>
-        <li class="page-item" v-for="page in visiblePages" :key="page" :class="{ active: currentPage === page }">
-          <a class="page-link" href="#" @click.prevent="pageChange(page)">{{ page }}</a>
+        <li class="Page-item" v-for="page in visiblePages" :key="page" :class="{ active: currentPage === page }">
+          <a class="Page-link" href="#" @click.prevent="pageChange(page)">{{ page }}</a>
         </li>
-        <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-          <a class="page-link" href="#" @click.prevent="pageChange(currentPage + 1)">></a>
+        <li class="Page-item" :class="{ disabled: currentPage === totalPages }">
+          <a class="Page-link" href="#" @click.prevent="pageChange(currentPage + 1)">></a>
         </li>
       </ul>
     </nav>
