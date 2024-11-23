@@ -149,7 +149,7 @@ public class DefaultProductService implements ProductService {
     }
 
     private String getImageUrl(Long productId, Integer displayOrder) {
-        return String.format("http://localhost:8080/api/v1/products/%d/image/%d", productId, displayOrder);
+        return String.format("http://localhost:8085/api/v1/products/%d/image/%d", productId, displayOrder);
     }
 
     public List<ProductCateDto> getCategories(Long parentId) {
