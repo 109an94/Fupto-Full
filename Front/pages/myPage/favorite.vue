@@ -12,7 +12,7 @@ const favorites = ref([
     brand: 'Thom Browne',
     name: '4-Bar cotton cropped trousers',
     price: 370000,
-    alertPrice: '',
+    alertPrice: '300000',
     showAlert: false,
     image: 'https://img.ssensemedia.com/images/b_white,c_lpad,g_south,h_1086,w_724/c_scale,h_480,f_auto,q_auto/222495F070000_1/navy-stand-collar-jumpsuit.jpg'
   },
@@ -20,8 +20,8 @@ const favorites = ref([
     id: 2,
     brand: 'Thom Browne',
     name: '4-Bar cotton cropped trousers 만약 이름이 길어지면?',
-    price: 370000,
-    alertPrice: '',
+    price: 300000,
+    alertPrice: '390000',
     showAlert: false,
     image: 'https://img.ssensemedia.com/images/b_white,c_lpad,g_south,h_1086,w_724/c_scale,h_480,f_auto,q_auto/222495F070000_1/navy-stand-collar-jumpsuit.jpg'
   },
@@ -52,6 +52,13 @@ const toggleAlert = (id) => {
     item.showAlert = !item.showAlert
   }
 }
+
+const getTrendingIcon = (item) => {
+  return item.price < item.alertPrice
+      ? '/imgs/icon/fallchart.svg'
+      : '/imgs/icon/basicchart.svg'
+}
+
 </script>
 
 <!-- templates -->
@@ -70,13 +77,15 @@ const toggleAlert = (id) => {
           <h3>{{ item.brand }}</h3>
             <p>{{ item.name }}</p>
           <div class="price-info">
-            <span class="price-icon">*</span>
-            <span>{{ item.price }}₩</span>
+            <span class="price-icon">
+              <img :src="getTrendingIcon(item)" alt="price trend">
+            </span>
+            <span>{{ item.price }} ₩</span>
           </div>
           <div class="web-only">
             <input type="number"
                    v-model="item.alertPrice"
-                   placeholder="알림 설정 가격">
+                   placeholder="알림 받을 가격">
           </div>
 
         </div>
@@ -88,11 +97,12 @@ const toggleAlert = (id) => {
       <!-- 모바일 알림 설정 -->
       <div class="alert-section mobile-only" v-show="item.showAlert">
         <div class="alert-input mobile-only">
-          <div class="width80px"></div>
-          <div>알림</div>
+          <div class="width80px">
+            <div>알림</div>
+          </div>
           <input type="number"
                  v-model="item.alertPrice"
-                 placeholder="알림 받을 가격 입력">
+                 placeholder="알림 받을 가격">
           <button class="save-btn">변경</button>
         </div>
       </div>

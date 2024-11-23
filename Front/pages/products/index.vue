@@ -90,7 +90,7 @@ const loadProducts = async (reset = false) => {
       limit: 100,
     };
 
-    const data = await $fetch("/products", {
+    const data = await g$fetch("/products", {
       baseURL: config.public.apiBase,
       params,
     });
