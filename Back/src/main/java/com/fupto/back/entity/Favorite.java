@@ -2,15 +2,18 @@ package com.fupto.back.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 
 @Getter
 @Setter
+@ToString
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "favorite")
 public class Favorite {
     @Id
@@ -19,7 +22,7 @@ public class Favorite {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "product_mapping_id", nullable = false)
+    @JoinColumn(name = "product_mapping_id", referencedColumnName = "mapping_id", nullable = false)
     @JsonBackReference
     private Product product;
 
