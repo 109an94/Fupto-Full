@@ -1,5 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { useAuthFetch } from "~/composables/useAuthFetch";
+import { use$Fetch } from "~/composables/use$Fetch";
 
 useHead({
   link: [{ rel: "stylesheet", href: "/css/admin/product-list.css" }],
@@ -167,7 +169,6 @@ const handleCloseCompleteModal = async () => {
 const fetchMappingProducts = async (productId) => {
   try {
     const data = await use$Fetch(`/admin/products/${productId}/mapping`);
-
     mappedProducts.value[productId] = data;
   } catch (error) {
     console.error("Error fetching mapping products:", error);
@@ -184,11 +185,11 @@ const fetchCategories = async (level, parentId = null) => {
     const data = await use$Fetch(`/admin/products/categories?${params.toString()}`);
 
     if (level === 1) {
-      categories.value.level1 = data;
+      categories.value.level1 = data.value;
     } else if (level === 2) {
-      categories.value.level2 = data;
+      categories.value.level2 = data.value;
     } else if (level === 3) {
-      categories.value.level3 = data;
+      categories.value.level3 = data.value;
     }
   } catch (error) {
     console.error("Error fetching categories:", error);

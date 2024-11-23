@@ -18,7 +18,7 @@ const selectedFilters = ref({
 const brandId = route.params.id;
 
 const isActive = ref(false);
-const selectedSort = ref("popular");
+const selectedSort = ref(route.query.sort || "popular");
 const sortOptions = [
   { label: "인기순", value: "popular" },
   { label: "최근 등록순", value: "recent" },
@@ -36,39 +36,6 @@ const { data: brand } = await useFetch(`${config.public.apiBase}/brands/${brandI
   key: `brand-${brandId}`,
 });
 
-const loadProducts = async (reset = false) => {
-  if (loading.value || (!hasMore.value && !reset)) return;
-  loading.value = true;
-  try {
-    const data = await $fetch(`/products/brand/${brandId}`, {
-      baseURL: config.public.apiBase,
-      params: {
-        gender: route.query.gender,
-        category: route.query.category ? route.query.category.split(",") : undefined,
-        sub: route.query.sub ? route.query.sub.split(",") : undefined,
-        min: route.query.min || undefined,
-        max: route.query.max || undefined,
-        sort: selectedSort.value,
-        cursor: reset ? null : cursor.value,
-        limit: 20,
-      },
-    });
-    if (reset) {
-      products.value = [];
-      cursor.value = null;
-    }
-    if (data) {
-      products.value.push(...data.products);
-      cursor.value = data.nextCursor;
-      hasMore.value = data.hasMore;
-    }
-  } catch (error) {
-    console.error("Failed to load products:", error);
-  } finally {
-    loading.value = false;
-  }
-};
-
 const { data: initialData } = await useFetch(`/products/brand/${brandId}`, {
   baseURL: config.public.apiBase,
   params: {
@@ -77,9 +44,9 @@ const { data: initialData } = await useFetch(`/products/brand/${brandId}`, {
     sub: route.query.sub ? route.query.sub.split(",") : undefined,
     min: route.query.min || undefined,
     max: route.query.max || undefined,
-    sort: selectedSort.value,
+    sort: route.query.sort || "popular",
     cursor: null,
-    limit: 20,
+    limit: 100,
   },
 });
 
@@ -105,6 +72,73 @@ if (initialData.value) {
   }
 }
 
+const loadProducts = async (reset = false) => {
+  if (loading.value) return;
+  if (!reset && !hasMore.value) return;
+
+  loading.value = true;
+
+  try {
+    const params = {
+      gender: route.query.gender,
+      category: route.query.category ? route.query.category.split(",") : undefined,
+      sub: route.query.sub ? route.query.sub.split(",") : undefined,
+      brand: route.query.brand ? route.query.brand.split(",") : undefined,
+      min: route.query.min || undefined,
+      max: route.query.max || undefined,
+      sort: selectedSort.value,
+      cursor: reset ? null : cursor.value,
+      limit: 100,
+    };
+
+    const data = await $fetch(`/products/brand/${brandId}`, {
+      baseURL: config.public.apiBase,
+      params,
+    });
+
+    if (reset) {
+      products.value = [];
+      cursor.value = null;
+    }
+
+    if (data?.products?.length) {
+      if (reset) {
+        products.value = data.products;
+      } else {
+        const existingIds = new Set(products.value.map((p) => p.id));
+        const newProducts = data.products.filter((p) => !existingIds.has(p.id));
+        products.value = [...products.value, ...newProducts];
+      }
+      cursor.value = data.nextCursor;
+      hasMore.value = data.hasMore;
+    } else {
+      hasMore.value = false;
+    }
+  } catch (error) {
+    console.error("Failed to load products:", error);
+    hasMore.value = false;
+  } finally {
+    loading.value = false;
+  }
+};
+
+const toggleFavorite = (event) => {
+  event.preventDefault();
+  const button = event.currentTarget;
+  const isFavorite = button.getAttribute("data-favorite") === "true";
+  const img = button.querySelector("img");
+
+  if (isFavorite) {
+    button.setAttribute("data-favorite", "false");
+    img.src = "/imgs/icon/favorite.svg";
+    img.alt = "찜 추가";
+  } else {
+    button.setAttribute("data-favorite", "true");
+    img.src = "/imgs/icon/favorite-fill.svg";
+    img.alt = "찜 제거";
+  }
+};
+
 const toggleDropdown = () => {
   isActive.value = !isActive.value;
 };
@@ -122,7 +156,7 @@ const selectOption = async (option) => {
         max: route.query.max || undefined,
         sort: option.value,
         cursor: null,
-        limit: 20,
+        limit: 100,
       },
     });
     if (response) {
@@ -144,26 +178,39 @@ const toggleDetails = () => {
   isDetailsVisible.value = !isDetailsVisible.value;
 };
 
+// URL 쿼리 파라미터 업데이트
 const updateQueryParams = async (newParams) => {
   const updatedQuery = { ...route.query };
+
   if (newParams.gender) {
     updatedQuery.gender = newParams.gender;
     delete updatedQuery.sort;
   }
+
   if (newParams.category?.length) {
     updatedQuery.category = newParams.category.map((c) => c.id).join(",");
   } else {
     delete updatedQuery.category;
   }
+
   if (newParams.sub?.length) {
     updatedQuery.sub = newParams.sub.map((c) => c.id).join(",");
   } else {
     delete updatedQuery.sub;
   }
+
+  if (newParams.brand?.length) {
+    updatedQuery.brand = newParams.brand.map((b) => b.id).join(",");
+  } else {
+    delete updatedQuery.brand;
+  }
+
   if (newParams.min) updatedQuery.min = newParams.min;
   else delete updatedQuery.min;
+
   if (newParams.max) updatedQuery.max = newParams.max;
   else delete updatedQuery.max;
+
   await router.replace({
     path: route.path,
     query: updatedQuery,
@@ -220,16 +267,19 @@ const removeFilter = async (type, id) => {
   loadProducts(true);
 };
 
+// 검색 버튼 클릭
 const handleSearch = async (searchParams) => {
   selectedFilters.value = {
     category: searchParams.category || [],
     sub: searchParams.sub || [],
     brand: searchParams.brand || [],
   };
+
   if (searchParams.min || searchParams.max) {
     selectedFilters.value.min = searchParams.min;
     selectedFilters.value.max = searchParams.max;
   }
+
   const queryParams = {
     ...searchParams,
     category: selectedFilters.value.category,
@@ -238,40 +288,73 @@ const handleSearch = async (searchParams) => {
     min: searchParams.min || undefined,
     max: searchParams.max || undefined,
   };
+
   await updateQueryParams(queryParams);
   await loadProducts(true);
 };
 
+// 무한 스크롤
 let observer;
 const lastProductRef = ref(null);
 
 const setupIntersectionObserver = () => {
+  if (observer) {
+    observer.disconnect();
+  }
+
   observer = new IntersectionObserver(
-    (entries) => {
-      const firstEntry = entries[0];
-      if (firstEntry.isIntersecting && hasMore.value) {
-        loadProducts();
+    async (entries) => {
+      const entry = entries[0];
+      // 로딩 중이 아니고, 더 불러올 데이터가 있을 때만 실행
+      if (entry.isIntersecting && !loading.value && hasMore.value) {
+        await loadProducts();
       }
     },
-    { threshold: 0.1 }
+    {
+      rootMargin: "150px",
+      threshold: 0.1,
+    }
   );
 };
 
 const updateObserver = () => {
-  if (observer && lastProductRef.value) {
-    observer.disconnect();
-    observer.observe(lastProductRef.value);
+  if (!observer) return;
+
+  observer.disconnect();
+
+  const lastProduct = document.querySelector(".product-c-frame:last-child");
+  if (lastProduct && hasMore.value) {
+    observer.observe(lastProduct);
   }
 };
 
-watch(() => products.value.length, updateObserver);
+watch(
+  () => products.value,
+  () => {
+    nextTick(() => {
+      if (!loading.value) {
+        updateObserver();
+      }
+    });
+  },
+  { deep: true }
+);
 
+// URL 파라미터 변경 감지
 watch(
   () => route.query.gender,
-  async (newGender) => {
-    if (newGender) {
+  async (newGender, oldGender) => {
+    if (newGender && newGender !== oldGender) {
       gender.value = newGender;
       selectedSort.value = "popular";
+
+      await router.replace({
+        query: {
+          ...route.query,
+          sort: undefined,
+        },
+      });
+
       onNuxtReady(async () => {
         await loadProducts(true);
       });
@@ -287,12 +370,16 @@ const handleClickOutside = (e) => {
 
 onMounted(() => {
   setupIntersectionObserver();
+  nextTick(() => {
+    updateObserver();
+  });
   document.addEventListener("click", handleClickOutside);
 });
 
 onUnmounted(() => {
   if (observer) {
     observer.disconnect();
+    observer = null;
   }
   document.removeEventListener("click", handleClickOutside);
 });
@@ -309,7 +396,7 @@ onUnmounted(() => {
           <div class="brand-profile">
 
             <div class="brand-background">
-              <img class="brand-background-img" src="/imgs/brands/lemaire-bg.jpeg" alt="Brand Background">
+              <img class="brand-background-img" src="/imgs/brand/banner.jpg" alt="Brand Background">
             </div>
 
             <div class="brand-header">
@@ -318,6 +405,9 @@ onUnmounted(() => {
                 <h1 class="brand-name">{{ brand.engName }}</h1>
                 <p class="brand-subtitle">{{ brand.korName }}</p>
               </div>
+              <button data-favorite="false" @click="toggleFavorite" class="favorite-btn1">
+                <img class="favorite1" src="/imgs/icon/favorite.svg" alt="찜" />
+              </button>
             </div>
 
             <div class="tabs">
@@ -392,6 +482,9 @@ onUnmounted(() => {
                         <img class="product-images primary-img" :src="product.mainImageUrl" alt="product-img" />
                         <img class="product-images secondary-img" :src="product.hoverImageUrl" alt="product-img-hover" />
                       </div>
+                      <button data-favorite="false" @click="toggleFavorite">
+                        <img class="favorite" src="/imgs/icon/favorite.svg" alt="찜" />
+                      </button>
                     </div>
                     <div class="product-info">
                       <span class="product-brand">{{ product.brandEngName }}</span>
@@ -490,6 +583,21 @@ onUnmounted(() => {
   font-size: var(--font-regular-caption);
   color: var(--color-text-caption);
   margin-top: 5px;
+}
+
+.favorite1 {
+    bottom: 10px;
+    right: 10px;
+    z-index: 2;
+    width: 28.42px;
+    height: 25px;
+}
+
+.favorite-btn1 {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
 }
 
 .button {

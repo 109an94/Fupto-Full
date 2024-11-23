@@ -31,7 +31,7 @@ useHead({
             </nuxt-link>
           </li>
           <li>
-            <nuxt-link to="/myPage/event">
+            <nuxt-link to="/myPage/alert">
               <span>img</span>
               <span>이벤트</span>
             </nuxt-link>

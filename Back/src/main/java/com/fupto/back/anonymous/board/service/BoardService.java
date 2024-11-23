@@ -14,4 +14,6 @@ public interface BoardService {
     DefaultDto userSearch(SearchDto searchDto);
 
     DetailDto getById(Long id);
+
+    BoardDto userDelete(Long id, Boolean active);
 }
