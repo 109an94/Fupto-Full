@@ -1,15 +1,12 @@
 package com.fupto.back.anonymous.product.service;
 
 import com.fupto.back.anonymous.product.dto.*;
-import com.fupto.back.entity.Category;
-import com.fupto.back.entity.ProductImage;
-import com.fupto.back.entity.ShoppingMall;
+import com.fupto.back.entity.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
-import com.fupto.back.entity.Product;
 import com.fupto.back.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -20,10 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -39,6 +33,7 @@ public class DefaultProductService implements ProductService {
     private PriceHistoryRepository priceHistoryRepository;
     private CategoryRepository categoryRepository;
     private BrandRepository brandRepository;
+    private FavoriteRepository favoriteRepository;
     private ModelMapper modelMapper;
 
     private final Set<String> VALID_SORT_VALUES = Set.of("popular", "recent", "priceAsc", "priceDesc", "discountDesc");
@@ -49,12 +44,14 @@ public class DefaultProductService implements ProductService {
             PriceHistoryRepository priceHistoryRepository,
             CategoryRepository categoryRepository,
             BrandRepository brandRepository,
+            FavoriteRepository favoriteRepository,
             ModelMapper modelMapper) {
         this.productRepository = productRepository;
         this.productImageRepository = productImageRepository;
         this.priceHistoryRepository = priceHistoryRepository;
         this.categoryRepository = categoryRepository;
         this.brandRepository = brandRepository;
+        this.favoriteRepository = favoriteRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -147,6 +144,16 @@ public class DefaultProductService implements ProductService {
 
         return dto;
     }
+
+//    private ProductListDto convertToProductListDto(Product product, Long memberId) {
+//        ProductListDto dto = convertToProductListDto(product);
+//
+//        if (memberId != null) {
+//            dto.setFavorite(isFavorite(product.getMappingId(), memberId));
+//        }
+//
+//        return dto;
+//    }
 
     private String getImageUrl(Long productId, Integer displayOrder) {
         return String.format("http://localhost:8085/api/v1/products/%d/image/%d", productId, displayOrder);
@@ -381,6 +388,28 @@ public class DefaultProductService implements ProductService {
                 .build();
     }
 
+//    @Transactional
+//    public boolean toggleFavorite(Long mappingId, Long memberId) {
+//        Optional<Favorite> existingFavorite = favoriteRepository.findByMemberIdAndMappingId(memberId, mappingId);
+//
+//        if (existingFavorite.isPresent()) {
+//            Favorite favorite = existingFavorite.get();
+//            favorite.setState(!favorite.getState());  // 상태 토글
+//            return favorite.getState();  // 현재 상태 반환
+//        } else {
+//            Favorite favorite = new Favorite();
+//            favorite.setMemberId(memberId);
+//            favorite.setMappingId(mappingId);
+//            favorite.setState(true);
+//            favoriteRepository.save(favorite);
+//            return true;
+//        }
+//    }
+//
+//    public boolean isFavorite(Long mappingId, Long memberId) {
+//        return favoriteRepository.existsByMemberIdAndMappingIdAndStateIsTrue(memberId, mappingId);
+//    }
+
     private Integer calculateDiscountRate(Integer retailPrice, Integer salePrice) {
         if (retailPrice == null || salePrice == null || retailPrice == 0) {
             return 0;
@@ -392,11 +421,5 @@ public class DefaultProductService implements ProductService {
         if (!VALID_SORT_VALUES.contains(sort)) {
             throw new IllegalArgumentException("Invalid sort value: " + sort);
         }
-    }
-
-    @Transactional
-    public void increaseViewCount(Long productId) {
-        productRepository.findById(productId)
-                .ifPresent(Product::increaseViewCount);
     }
 }

@@ -32,6 +32,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (request.getServletPath().startsWith("/auth/") ||
                 request.getServletPath().startsWith("/products") ||
+                request.getServletPath().startsWith("/brands") ||
+                request.getServletPath().startsWith("/shoppingmalls") ||
                 request.getServletPath().matches(".*/products/.*/image/.*") ||
                 request.getServletPath().matches("/products/.*/image/.*") ||
                 request.getServletPath().startsWith("/uploads/")) {
