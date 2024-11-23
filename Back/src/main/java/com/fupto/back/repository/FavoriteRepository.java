@@ -1,6 +1,7 @@
 package com.fupto.back.repository;
 
 import com.fupto.back.entity.Favorite;
+import com.fupto.back.user.member.dto.FavoriteListDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,6 +11,9 @@ import java.util.Optional;
 @Repository
 public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
     List<Favorite> findAllByMemberId(Long id);
+    Optional<Favorite> findByIdAndMemberId(Long id, Long memberId);
+    List<Favorite> findByMappingId(Long productId);
+
 //    Long countAllByMemberId(Long id);
 
     // 특정 사용자의 특정 상품 찜 정보 조회

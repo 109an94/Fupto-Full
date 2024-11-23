@@ -1,10 +1,11 @@
 package com.fupto.back.user.member.service;
 
-import com.fupto.back.entity.Member;
-import com.fupto.back.entity.ProductImage;
+import com.fupto.back.entity.*;
+import com.fupto.back.repository.FavoriteRepository;
 import com.fupto.back.repository.MemberRepository;
 import com.fupto.back.repository.ProductImageRepository;
 import com.fupto.back.repository.ProductRepository;
+import com.fupto.back.user.member.dto.FavoriteListDto;
 import com.fupto.back.user.member.dto.MemberEditDto;
 import com.fupto.back.user.member.dto.MemberResponseDto;
 import com.fupto.back.user.member.exception.InvalidPasswordException;
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,25 +28,36 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service("userMemberService")
 @Transactional
 public class DefualtMemberService implements MemberService {
+    private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
 
     @Value("uploads")
     private String uploadPath;
 
+    private final ProductRepository productRepository;
+    private final FavoriteRepository favoriteRepository;
     private final ProductImageRepository productImageRepository;
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
     private final ModelMapper modelMapper;
 
-    public DefualtMemberService(MemberRepository memberRepository, ModelMapper modelMapper, PasswordEncoder passwordEncoder, ProductRepository productRepository, ProductImageRepository productImageRepository) {
+    public DefualtMemberService(MemberRepository memberRepository,
+                                ModelMapper modelMapper,
+                                PasswordEncoder passwordEncoder,
+                                ProductImageRepository productImageRepository,
+                                FavoriteRepository favoriteRepository,
+                                ProductRepository productRepository) {
         this.memberRepository = memberRepository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
         this.productImageRepository = productImageRepository;
+        this.favoriteRepository = favoriteRepository;
+        this.productRepository = productRepository;
     }
 
 
@@ -121,6 +134,69 @@ public class DefualtMemberService implements MemberService {
 
 
         return resource;
+    }
+
+    @Override
+    public List<FavoriteListDto> getFavorites(Long id) {
+        List<Favorite> favorites = favoriteRepository.findAllByMemberId(id);
+        if (favorites == null || favorites.isEmpty()){
+            return Collections.emptyList();
+        }
+        List<FavoriteListDto> dtoList = new ArrayList<>();
+        for (Favorite favorite : favorites){
+            Product product = productRepository.findById(favorite.getMappingId()).orElse(null);
+            if (product == null){
+                continue;
+            }
+            Brand brand = product.getBrand();
+
+            FavoriteListDto dto = new FavoriteListDto();
+            dto.setId(favorite.getId());
+            dto.setProductId(product.getId());
+            dto.setProductName(product.getProductName());
+            dto.setMemberId(favorite.getMember().getId());
+            dto.setMemberName(favorite.getMember().getNickname());
+            dto.setCreateDate(favorite.getCreateDate());
+            dto.setProductBrandName(brand.getEngName());
+
+            dtoList.add(dto);
+        }
+        return dtoList;
+    }
+
+
+    @Override
+    public void addEmitter(Long id, SseEmitter emitter) {
+        emitters.put(id, emitter);
+    }
+
+    @Override
+    public void removeEmitter(Long id) {
+        emitters.remove(id);
+    }
+
+    @Override
+    public void sendAlert(Long memberId, String message) {
+        SseEmitter emitter = emitters.get(memberId);
+        if (emitter != null){
+            try{
+                emitter.send(SseEmitter.event().data(message));
+            }catch (IOException e){
+                emitters.remove(memberId);
+            }
+        }
+    }
+
+    @Transactional
+    @Override
+    public void updateAlertPrice(Long favoriteId, Long memberId, Integer alertPrice) {
+
+        Favorite favorite = favoriteRepository.findByIdAndMemberId(favoriteId,memberId)
+                .orElseThrow(()-> new EntityNotFoundException("Favorite not found"));
+
+        favorite.setAlertPrice(alertPrice);
+        favoriteRepository.save(favorite);
+
     }
 
 
