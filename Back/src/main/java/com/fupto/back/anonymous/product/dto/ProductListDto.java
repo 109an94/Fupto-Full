@@ -17,4 +17,5 @@ public class ProductListDto {
     private String mainImageUrl;
     private String hoverImageUrl;
     private Long viewCount;
+    private boolean isFavorite;
 }

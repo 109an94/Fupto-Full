@@ -2,9 +2,12 @@ package com.fupto.back.anonymous.product.controller;
 
 import com.fupto.back.anonymous.product.dto.*;
 import com.fupto.back.anonymous.product.service.ProductService;
+import com.fupto.back.auth.entity.FuptoUserDetails;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -82,4 +85,16 @@ public class ProductController {
         searchDto.setShoppingmall(List.of(shoppingmallId));
         return ResponseEntity.ok(productService.getAllProductsByShoppingmall(searchDto));
     }
+
+    @PatchMapping("/{mappingId}/favorite")
+    public ResponseEntity<Void> toggleFavorite(
+            @PathVariable Long mappingId,
+            @AuthenticationPrincipal FuptoUserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+//        productService.toggleFavorite(mappingId, userDetails.getId());
+        return ResponseEntity.ok().build();
+    }
+
 }

@@ -21,4 +21,5 @@ public class ProductDetailDto {
     private String brandEngName;
     private ProductPriceInfoDto priceInfo;
     private List<ProductShopListDto> shops;
+    private boolean isFavorite;
 }

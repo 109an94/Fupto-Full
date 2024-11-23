@@ -9,7 +9,6 @@ import java.time.Instant;
 
 @Getter
 @Setter
-@ToString
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,7 +21,7 @@ public class Favorite {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "product_mapping_id", referencedColumnName = "mapping_id", nullable = false)
+    @JoinColumn(name = "product_id", nullable = false)
     @JsonBackReference
     private Product product;
 
