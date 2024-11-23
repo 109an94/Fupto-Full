@@ -19,7 +19,7 @@ public class Favorite {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_mapping_id", nullable = false)
     @JsonBackReference
     private Product product;
 
@@ -34,4 +34,8 @@ public class Favorite {
     @ColumnDefault("current_timestamp()")
     @Column(name = "create_date", insertable = false, updatable = false)
     private Instant createDate;
+
+    @ColumnDefault("current_timestamp()")
+    @Column(name = "update_date", insertable = false)
+    private Instant updateDate;
 }
