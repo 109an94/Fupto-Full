@@ -20,10 +20,8 @@ public class Favorite {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    @JsonBackReference
-    private Product product;
+    @Column(name = "mapping_id", nullable = false)
+    private Long mappingId;
 
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)

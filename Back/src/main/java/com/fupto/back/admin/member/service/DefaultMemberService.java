@@ -2,10 +2,7 @@ package com.fupto.back.admin.member.service;
 
 import com.fupto.back.admin.member.dto.*;
 import com.fupto.back.entity.*;
-import com.fupto.back.repository.BoardRepository;
-import com.fupto.back.repository.FavoriteRepository;
-import com.fupto.back.repository.MemberRepository;
-import com.fupto.back.repository.ProductImageRepository;
+import com.fupto.back.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +31,7 @@ import java.util.stream.Collectors;
 @Service("adminMemberService")
 public class DefaultMemberService implements MemberService{
 
+    private final ProductRepository productRepository;
     @Value("uploads")
     private String uploadPath;
 
@@ -43,12 +41,13 @@ public class DefaultMemberService implements MemberService{
     private final FavoriteRepository favoriteRepository;
     private final ProductImageRepository productImageRepository;
 
-    public DefaultMemberService(MemberRepository memberRepository, ModelMapper modelMapper, BoardRepository boardRepository, FavoriteRepository favoriteRepository, ProductImageRepository productImageRepository) {
+    public DefaultMemberService(MemberRepository memberRepository, ModelMapper modelMapper, BoardRepository boardRepository, FavoriteRepository favoriteRepository, ProductImageRepository productImageRepository, ProductRepository productRepository) {
         this.memberRepository = memberRepository;
         this.modelMapper = modelMapper;
         this.boardRepository = boardRepository;
         this.favoriteRepository = favoriteRepository;
         this.productImageRepository = productImageRepository;
+        this.productRepository = productRepository;
     }
 
     @Override
@@ -200,14 +199,15 @@ public class DefaultMemberService implements MemberService{
         if (favorite == null){
             return null;
         }
+        Product product = productRepository.findById(favorite.getMappingId()).orElse(null);
+
 //        Long prductId = favorite.getProduct().getId();
-        Product product = favorite.getProduct();
         Brand brand = product.getBrand();
 
         FavoriteListDto dto = new FavoriteListDto();
         dto.setId(favorite.getId());
-        dto.setProductId(favorite.getProduct().getId());
-        dto.setProductName(favorite.getProduct().getProductName());
+        dto.setProductId(product.getId());
+        dto.setProductName(product.getProductName());
         dto.setMemberId(favorite.getMember().getId());
         dto.setMemberName(favorite.getMember().getNickname());
         dto.setCreateDate(favorite.getCreateDate());
