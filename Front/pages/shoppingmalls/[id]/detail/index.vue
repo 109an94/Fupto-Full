@@ -33,12 +33,11 @@ const loading = ref(false);
 const hasMore = ref(true);
 const cursor = ref(null);
 
-const { data: shoppingmall } = await useFetch(`${config.public.apiBase}/shoppingmalls/${shoppingmallId}`, {
+const { data: shoppingmall } = await useAuthFetch(`/shoppingmalls/${shoppingmallId}`, {
   key: `shoppingmall-${shoppingmallId}`,
 });
 
-const { data: initialData } = await useFetch(`/products/shoppingmall/${shoppingmallId}`, {
-  baseURL: config.public.apiBase,
+const { data: initialData } = await useAuthFetch(`/products/shoppingmall/${shoppingmallId}`, {
   params: {
     gender: route.query.gender,
     category: route.query.category ? route.query.category.split(",") : undefined,
@@ -93,8 +92,7 @@ const loadProducts = async (reset = false) => {
       limit: 100,
     };
 
-    const data = await $fetch(`/products/shoppingmall/${shoppingmallId}`, {
-      baseURL: config.public.apiBase,
+    const data = await use$Fetch(`/products/shoppingmall/${shoppingmallId}`, {
       params,
     });
 
@@ -149,7 +147,7 @@ const selectOption = async (option) => {
   selectedSort.value = option.value;
   isActive.value = false;
   try {
-    const response = await $fetch(`${config.public.apiBase}/products/shoppingmall/${shoppingmallId}`, {
+    const response = await use$Fetch(`/products/shoppingmall/${shoppingmallId}`, {
       params: {
         gender: route.query.gender,
         category: route.query.category ? route.query.category.split(",") : undefined,
@@ -403,7 +401,7 @@ onUnmounted(() => {
             </div>
 
             <div class="shoppingmall-header">
-              <img class="shoppingmall-image" :src="'http://localhost:8080/api/v1/' + shoppingmall.img" :alt="shoppingmall.korName" />
+              <img class="shoppingmall-image" :src="'http://localhost:8085/api/v1/' + shoppingmall.img" :alt="shoppingmall.korName" />
               <div class="shoppingmall-info">
                 <h1 class="shoppingmall-name">{{ shoppingmall.engName }}</h1>
                 <p class="shoppingmall-subtitle">{{ shoppingmall.korName }}</p>

@@ -32,12 +32,11 @@ const loading = ref(false);
 const hasMore = ref(true);
 const cursor = ref(null);
 
-const { data: brand } = await useFetch(`${config.public.apiBase}/brands/${brandId}`, {
+const { data: brand } = await useAuthFetch(`/brands/${brandId}`, {
   key: `brand-${brandId}`,
 });
 
-const { data: initialData } = await useFetch(`/products/brand/${brandId}`, {
-  baseURL: config.public.apiBase,
+const { data: initialData } = await useAuthFetch(`/products/brand/${brandId}`, {
   params: {
     gender: route.query.gender,
     category: route.query.category ? route.query.category.split(",") : undefined,
@@ -91,8 +90,7 @@ const loadProducts = async (reset = false) => {
       limit: 100,
     };
 
-    const data = await $fetch(`/products/brand/${brandId}`, {
-      baseURL: config.public.apiBase,
+    const data = await use$Fetch(`/products/brand/${brandId}`, {
       params,
     });
 
@@ -147,7 +145,7 @@ const selectOption = async (option) => {
   selectedSort.value = option.value;
   isActive.value = false;
   try {
-    const response = await $fetch(`${config.public.apiBase}/products/brand/${brandId}`, {
+    const response = await use$Fetch(`/products/brand/${brandId}`, {
       params: {
         gender: route.query.gender,
         category: route.query.category ? route.query.category.split(",") : undefined,
@@ -400,7 +398,7 @@ onUnmounted(() => {
             </div>
 
             <div class="brand-header">
-              <img class="brand-image" :src="'http://localhost:8080/api/v1/' + brand.img" :alt="brand.korName" />
+              <img class="brand-image" :src="'http://localhost:8085/api/v1/' + brand.img" :alt="brand.korName" />
               <div class="brand-info">
                 <h1 class="brand-name">{{ brand.engName }}</h1>
                 <p class="brand-subtitle">{{ brand.korName }}</p>
