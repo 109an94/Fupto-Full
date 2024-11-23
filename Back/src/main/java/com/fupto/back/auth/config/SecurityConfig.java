@@ -51,6 +51,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize-> authorize
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/products/**").permitAll()
+                        .requestMatchers("/admin/products/*/image/*").permitAll()
+                        .requestMatchers("/products/*/image/*").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/member/**").hasRole("USER")
                         .anyRequest().authenticated())

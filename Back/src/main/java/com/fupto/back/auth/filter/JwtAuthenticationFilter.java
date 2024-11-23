@@ -29,57 +29,56 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-        if (request.getServletPath().startsWith("/auth/")){
+
+        if (request.getServletPath().startsWith("/auth/") ||
+                request.getServletPath().startsWith("/products") ||
+                request.getServletPath().matches(".*/products/.*/image/.*") ||
+                request.getServletPath().matches("/products/.*/image/.*") ||
+                request.getServletPath().startsWith("/uploads/")) {
             filterChain.doFilter(request, response);
-//            return;
         }
         else {
+            String authHeader = request.getHeader("Authorization");
+
+            System.out.println("authHeader : "+ authHeader);
+            System.out.println("request : "+ request); //확인됨
+
+                if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                    String token = authHeader.substring(7);
+                    System.out.println("token : "+ token);
+
+                    if (jwtUtil.vaildateToken(token)) {
+                        String username = jwtUtil.extractUsername(token);
+                        List<String> roles = jwtUtil.extractRoles(token);
+                        System.out.println("username : "+username);
+                        System.out.println("roles : "+roles);
+
+                        if (username != null && !username.isEmpty()) {
+                            List<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
+                            authorities.add(new SimpleGrantedAuthority(username));
 
 
-        String authHeader = request.getHeader("Authorization");
+                            for (String role : roles) {
+                                authorities.add(new SimpleGrantedAuthority(role));
+                            }
+                            UserDetails userDetails = FuptoUserDetails.builder()
+                                    .username(username)
+                                    .authorities(authorities).build();
 
-        System.out.println("authHeader : "+ authHeader);
-        System.out.println("request : "+ request); //확인됨
-
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                String token = authHeader.substring(7);
-                System.out.println("token : "+ token);
-
-                if (jwtUtil.vaildateToken(token)) {
-                    String username = jwtUtil.extractUsername(token);
-                    List<String> roles = jwtUtil.extractRoles(token);
-                    System.out.println("username : "+username);
-                    System.out.println("roles : "+roles);
-
-                    if (username != null && !username.isEmpty()) {
-                        List<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
-                        authorities.add(new SimpleGrantedAuthority(username));
-
-
-                        for (String role : roles) {
-                            authorities.add(new SimpleGrantedAuthority(role));
+                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                            SecurityContextHolder.getContext().setAuthentication(authToken);
                         }
-                        UserDetails userDetails = FuptoUserDetails.builder()
-                                .username(username)
-                                .authorities(authorities).build();
-
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
                 }
-            }
-            else {
-                System.out.println("jwt 토큰 검증 실패");
-//                jwtUtil.generateToken(request);
-                return ;
-            }
-//            else {filterChain.doFilter(request, response);
-//                return;}
-            filterChain.doFilter(request, response);
-
+                else {
+                    System.out.println("jwt 토큰 검증 실패");
+    //                jwtUtil.generateToken(request);
+                    return ;
+                }
+    //            else {filterChain.doFilter(request, response);
+    //                return;}
+                filterChain.doFilter(request, response);
         }
-
-
     }
 }

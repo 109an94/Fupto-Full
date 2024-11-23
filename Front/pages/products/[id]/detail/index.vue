@@ -21,7 +21,7 @@ useHead(() => ({
   },
 }));
 
-const { data: product } = await useFetch(`${config.public.apiBase}/products/${productId}`, {
+const { data: product } = await useAuthFetch(`/products/${productId}`, {
   key: `product-${productId}`,
 });
 

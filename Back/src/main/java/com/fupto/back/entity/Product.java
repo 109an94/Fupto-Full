@@ -82,12 +82,12 @@ public class Product {
     @JsonManagedReference
     private List<ProductImage> productImages;
 
-    public void increaseViewCount() {
-        this.viewCount += 1;
-    }
-
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Favorite> favorites;
+
+    public void increaseViewCount() {
+        this.viewCount += 1;
+    }
 
 }

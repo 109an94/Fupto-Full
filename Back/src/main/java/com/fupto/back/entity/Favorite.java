@@ -1,5 +1,6 @@
 package com.fupto.back.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,16 +18,20 @@ public class Favorite {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
+    @JsonBackReference
     private Product product;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
+    @JsonBackReference
     private Member member;
 
-    @ColumnDefault("current_timestamp()")
-    @Column(name = "createDate")
-    private Instant createDate;
+    @Column(name = "state")
+    private Boolean state;
 
+    @ColumnDefault("current_timestamp()")
+    @Column(name = "create_date", insertable = false, updatable = false)
+    private Instant createDate;
 }

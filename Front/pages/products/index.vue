@@ -32,8 +32,7 @@ const loading = ref(false);
 const hasMore = ref(true);
 const cursor = ref(null);
 
-const { data: initialData } = await useFetch("/products", {
-  baseURL: config.public.apiBase,
+const { data: initialData } = await useAuthFetch("/products", {
   params: {
     gender: route.query.gender,
     category: route.query.category ? route.query.category.split(",") : undefined,
@@ -90,8 +89,7 @@ const loadProducts = async (reset = false) => {
       limit: 100,
     };
 
-    const data = await $fetch("/products", {
-      baseURL: config.public.apiBase,
+    const data = await use$Fetch("/products", {
       params,
     });
 
@@ -148,7 +146,7 @@ const selectOption = async (option) => {
   isActive.value = false;
 
   try {
-    const response = await $fetch(`${config.public.apiBase}/products`, {
+    const response = await use$Fetch("/products", {
       params: {
         gender: route.query.gender,
         category: route.query.category ? route.query.category.split(",") : undefined,
