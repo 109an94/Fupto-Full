@@ -49,21 +49,48 @@ const validateUrl = () => {
     }
 };
 
+// const validateDeliveryFee = () => {
+//     if (!shoppingmall.value.deliveryfee || isNaN(Number(unformatNumber(shoppingmall.value.deliveryfee)))) {
+//         errors.value.deliveryfee = '배송비를 숫자로 입력하세요.';
+//     } else {
+//         delete errors.value.deliveryfee;
+//     }
+// };
+
+// const validateTaxes = () => {
+//     if (!shoppingmall.value.taxes || isNaN(Number(unformatNumber(shoppingmall.value.taxes)))) {
+//         errors.value.taxes = '관부가세를 숫자로 입력하세요.';
+//     } else {
+//         delete errors.value.taxes;
+//     }
+// };
+
 const validateDeliveryFee = () => {
-    if (!shoppingmall.value.deliveryfee || isNaN(Number(unformatNumber(shoppingmall.value.deliveryfee)))) {
-        errors.value.deliveryfee = '배송비를 숫자로 입력하세요.';
+    const deliveryfee = shoppingmall.value.deliveryfee;
+
+    // null 또는 빈 문자열인 경우만 에러 처리
+    if (deliveryfee === null || deliveryfee === undefined || deliveryfee === "") {
+        errors.value.deliveryfee = "배송비를 입력하세요.";
+    } else if (isNaN(Number(unformatNumber(deliveryfee)))) {
+        errors.value.deliveryfee = "배송비를 숫자로 입력하세요.";
     } else {
-        delete errors.value.deliveryfee;
+        delete errors.value.deliveryfee; // 에러 삭제
     }
 };
 
 const validateTaxes = () => {
-    if (!shoppingmall.value.taxes || isNaN(Number(unformatNumber(shoppingmall.value.taxes)))) {
-        errors.value.taxes = '관부가세를 숫자로 입력하세요.';
+    const taxes = shoppingmall.value.taxes;
+
+    // null 또는 빈 문자열인 경우만 에러 처리
+    if (taxes === null || taxes === undefined || taxes === "") {
+        errors.value.taxes = "관부가세를 입력하세요.";
+    } else if (isNaN(Number(unformatNumber(taxes)))) {
+        errors.value.taxes = "관부가세를 숫자로 입력하세요.";
     } else {
-        delete errors.value.taxes;
+        delete errors.value.taxes; // 에러 삭제
     }
 };
+
 
 const validateFileUpload = () => {
     if (!shoppingmall.value.fileUpload && !imageUrl.value) { // 이미지가 없고 미리보기 이미지도 없는 경우
@@ -260,8 +287,9 @@ onMounted(async () => {
 });
 
 const formatNumber = (value) => {
-  if (!value) return "";
-  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    if (value === 0) return "0"; // 0은 그대로 문자열 "0"으로 반환  
+    if (!value) return "";
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
 const unformatNumber = (value) => {

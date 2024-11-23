@@ -540,7 +540,7 @@ onMounted(() => {
                   <button class="btn btn-outline-primary btn-sm"><a :href="sm.url" target="_blank">URL 이동</a></button>
                 </td>
                 <td class="text-md">￦{{ formatNumber(sm.deliveryfee) }}</td>
-                <td class="text-md">￦{{ formatNumber(sm.taxes) }}</td>
+                <td class="text-md">{{ formatNumber(sm.taxes) }}%</td>
                 <td class="text-md">{{ formatDate(sm.createDate)[0] }}<br>{{ formatDate(sm.createDate)[1] }}</td>
                 <td class="text-md">{{ formatDate(sm.updateDate)[0] }}<br>{{ formatDate(sm.updateDate)[1] }}</td>
                 <td>
