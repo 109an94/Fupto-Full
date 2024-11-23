@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import { use$Fetch } from "~/composables/use$Fetch";
 
 useHead({
     link: [{ rel: "stylesheet", href: "/css/admin/brand-reg.css"}],
@@ -85,6 +86,63 @@ const previewImage = (event) => {
     }
 };
 
+// const handleSubmit = async () => {
+//     if (!validateForm()) {
+//         alert('필수항목을 입력하세요.');
+//         return;
+//     }
+
+//     try {
+
+//         const formData = new FormData();
+
+//         // brandData 객체를 FormData에 JSON 문자열로 추가
+//         formData.append('brandData', JSON.stringify({
+//             korName: brand.value.korName,
+//             engName: brand.value.engName,
+//             url: brand.value.url,
+//             active: brand.value.active,
+//             description: brand.value.description
+//         }));
+
+//         // formData.append("korName", brand.value.korName);
+//         // formData.append("engName", brand.value.engName);
+//         // formData.append("active", brand.value.active);
+//         // formData.append("url", brand.value.url);
+//         // formData.append("description", brand.value.description);
+
+//         // 파일이 있는 경우 FormData에 추가
+//         if (brand.value.fileUpload) {
+//             formData.append('file', brand.value.fileUpload);
+//         }
+
+//         // fetch API로 FormData 전송
+//         const response = await use$Fetch(`/admin/brands/reg`, {
+//             method: 'POST',
+//             body: formData, // FormData 사용
+//         });
+
+//         // 응답 상태 코드 확인
+//         if (response.ok) {
+//             const result = await response.json();
+//             console.log('브랜드 등록 성공:', result);
+//             alert('브랜드가 성공적으로 등록되었습니다!');
+//             resetForm(); // 폼 초기화
+
+//             // 등록 후 리다이렉트
+//             window.location.href = 'http://localhost:8085/admin/brands/list';
+//         } else {
+//             const errorData = await response.json();
+//             console.error('브랜드 등록 실패:', errorData);
+//             throw new Error(errorData.message || '브랜드 등록에 실패했습니다.');
+//         }
+//     } catch (error) {
+//         // 네트워크 오류나 JSON 파싱 오류 처리
+//         console.error('Error:', error);
+//         alert(`브랜드 등록 중 오류가 발생했습니다: ${error.message}`);
+//     }
+// };
+
 const handleSubmit = async () => {
     if (!validateForm()) {
         alert('필수항목을 입력하세요.');
@@ -92,10 +150,8 @@ const handleSubmit = async () => {
     }
 
     try {
-
         const formData = new FormData();
 
-        // brandData 객체를 FormData에 JSON 문자열로 추가
         formData.append('brandData', JSON.stringify({
             korName: brand.value.korName,
             engName: brand.value.engName,
@@ -104,39 +160,25 @@ const handleSubmit = async () => {
             description: brand.value.description
         }));
 
-        // formData.append("korName", brand.value.korName);
-        // formData.append("engName", brand.value.engName);
-        // formData.append("active", brand.value.active);
-        // formData.append("url", brand.value.url);
-        // formData.append("description", brand.value.description);
-
-        // 파일이 있는 경우 FormData에 추가
         if (brand.value.fileUpload) {
             formData.append('file', brand.value.fileUpload);
         }
 
-        // fetch API로 FormData 전송
-        const response = await fetch(`http://localhost:8080/api/v1/admin/brands/reg`, {
+        const { data, error } = await use$Fetch('/admin/brands/reg', {
             method: 'POST',
-            body: formData, // FormData 사용
+            body: formData,
         });
 
-        // 응답 상태 코드 확인
-        if (response.ok) {
-            const result = await response.json();
-            console.log('브랜드 등록 성공:', result);
-            alert('브랜드가 성공적으로 등록되었습니다!');
-            resetForm(); // 폼 초기화
-
-            // 등록 후 리다이렉트
-            window.location.href = 'http://localhost:3000/admin/brands/list';
-        } else {
-            const errorData = await response.json();
-            console.error('브랜드 등록 실패:', errorData);
-            throw new Error(errorData.message || '브랜드 등록에 실패했습니다.');
+        if (error) {
+            throw new Error(error.message || '브랜드 등록에 실패했습니다.');
         }
+
+        console.log('브랜드 등록 성공:', data);
+        alert('브랜드가 성공적으로 등록되었습니다!');
+        resetForm();
+
+        window.location.href = 'http://localhost:3000/admin/brands/list';
     } catch (error) {
-        // 네트워크 오류나 JSON 파싱 오류 처리
         console.error('Error:', error);
         alert(`브랜드 등록 중 오류가 발생했습니다: ${error.message}`);
     }

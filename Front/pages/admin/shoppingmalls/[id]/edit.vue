@@ -121,13 +121,41 @@ const getImageUrl = (url) => {
   return `${config.public.apiBase}${url}`;
 };
 
+// const loadShoppingmallData = async () => {
+//   try {
+//     const response = await use$Fetch(`/admin/shoppingmalls/${shoppingmallId}/edit`);
+//     if (!response.ok) {
+//       throw new Error(`HTTP error! status: ${response.status}`);
+//     }
+//     const data = await response.json();
+//     shoppingmall.value = {
+//       korName: data.korName,
+//       engName: data.engName,
+//       url: data.url,
+//       active: data.active,
+//       description: data.description,
+//       deliveryfee: data.deliveryfee,
+//       taxes: data.taxes
+//     };
+//      // 이미지 URL 수정
+//     imageUrl.value = data.img ? (data.img.startsWith('/') ? data.img : '/' + data.img) : '';
+
+//   } catch (error) {
+//     console.error("Error loading shoppingmall:", error);
+//     alert(`브랜드 정보를 불러오는데 실패했습니다: ${error.message}`);
+//   }
+// };
+
 const loadShoppingmallData = async () => {
   try {
-    const response = await fetch(`${config.public.apiBase}/admin/shoppingmalls/${shoppingmallId}/edit`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await use$Fetch(`/admin/shoppingmalls/${shoppingmallId}/edit`);
+    
+    console.log("Received data:", data); // 디버깅을 위해 받은 데이터 로깅
+
+    if (!data) {
+      throw new Error("쇼핑몰 데이터를 받지 못했습니다.");
     }
-    const data = await response.json();
+
     shoppingmall.value = {
       korName: data.korName,
       engName: data.engName,
@@ -137,14 +165,56 @@ const loadShoppingmallData = async () => {
       deliveryfee: data.deliveryfee,
       taxes: data.taxes
     };
-     // 이미지 URL 수정
+
+    // 이미지 URL 수정
     imageUrl.value = data.img ? (data.img.startsWith('/') ? data.img : '/' + data.img) : '';
 
   } catch (error) {
     console.error("Error loading shoppingmall:", error);
-    alert(`브랜드 정보를 불러오는데 실패했습니다: ${error.message}`);
+    alert(`쇼핑몰 정보를 불러오는데 실패했습니다: ${error.message}`);
   }
 };
+
+// const handleSubmit = async () => {
+//   if (!validateForm()) {
+//     alert('필수항목을 입력하세요.');
+//     return;
+//   }
+//   try {
+//     const formData = new FormData();
+//     formData.append('shoppingmallData', JSON.stringify({
+//       korName: shoppingmall.value.korName,
+//       engName: shoppingmall.value.engName,
+//       url: shoppingmall.value.url,
+//       active: shoppingmall.value.active,
+//       description: shoppingmall.value.description,
+//       deliveryfee: shoppingmall.value.deliveryfee,
+//       taxes: shoppingmall.value.taxes
+//     }));
+
+//     if (shoppingmall.value.fileUpload) {
+//       formData.append('file', shoppingmall.value.fileUpload);
+//     }
+
+//     const response = await fetch(`${config.public.apiBase}/admin/shoppingmalls/${shoppingmallId}`, {
+//       method: 'PATCH',
+//       body: formData,
+//     });
+
+//     if (response.ok) {
+//       const result = await response.json();
+//       console.log('브랜드 수정 성공:', result);
+//       alert('브랜드가 성공적으로 수정되었습니다!');
+//       router.push('/admin/shoppingmalls/list');
+//     } else {
+//       const errorData = await response.json();
+//       throw new Error(errorData.message || '브랜드 수정에 실패했습니다.');
+//     }
+//   } catch (error) {
+//     console.error('Error:', error);
+//     alert(`브랜드 수정 중 오류가 발생했습니다: ${error.message}`);
+//   }
+// };
 
 const handleSubmit = async () => {
   if (!validateForm()) {
@@ -167,23 +237,17 @@ const handleSubmit = async () => {
       formData.append('file', shoppingmall.value.fileUpload);
     }
 
-    const response = await fetch(`${config.public.apiBase}/admin/shoppingmalls/${shoppingmallId}`, {
+    await use$Fetch(`/admin/shoppingmalls/${shoppingmallId}`, {
       method: 'PATCH',
       body: formData,
     });
 
-    if (response.ok) {
-      const result = await response.json();
-      console.log('브랜드 수정 성공:', result);
-      alert('브랜드가 성공적으로 수정되었습니다!');
-      router.push('/admin/shoppingmalls/list');
-    } else {
-      const errorData = await response.json();
-      throw new Error(errorData.message || '브랜드 수정에 실패했습니다.');
-    }
+    console.log('쇼핑몰 수정 성공');
+    alert('쇼핑몰이 성공적으로 수정되었습니다!');
+    router.push('/admin/shoppingmalls/list');
   } catch (error) {
     console.error('Error:', error);
-    alert(`브랜드 수정 중 오류가 발생했습니다: ${error.message}`);
+    alert(`쇼핑몰 수정 중 오류가 발생했습니다: ${error.message}`);
   }
 };
 

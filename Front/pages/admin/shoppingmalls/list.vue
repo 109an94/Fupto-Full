@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted} from "vue";
+import { use$Fetch } from "~/composables/use$Fetch";
 
 useHead({
     link: [{ rel: "stylesheet", href: "/css/admin/shoppingmall-list.css"}],
@@ -72,12 +73,13 @@ const fetchshoppingmalls = async () => {
     if (formData.value.startDate) params.append("startDate", formData.value.startDate);
     if (formData.value.endDate) params.append("endDate", formData.value.endDate);
 
-    const response = await fetch(`http://localhost:8080/api/v1/admin/shoppingmalls?${params.toString()}`);
-    const data = await response.json();
-    console.log(data);
+    // use$Fetch 호출
+    const data = await use$Fetch(`/admin/shoppingmalls?${params.toString()}`);
+    
     shoppingmalls.value = data.shoppingmalls;
     totalElements.value = data.totalElements;
     totalPages.value = data.totalPages;
+
     if (shoppingmalls.value.length === 0) {
       noDataMessage.value = '데이터가 없습니다.';
     } else {
@@ -113,7 +115,7 @@ const fetchshoppingmalls = async () => {
 const updateActive = async (shoppingmallId, active) => {
   try {
     console.log(`Updating active status: shoppingmallId=${shoppingmallId}, active=${active}`);
-    const response = await fetch(`http://localhost:8080/api/v1/admin/shoppingmalls/${shoppingmallId}/active?active=${active}`, {
+    const response = await use$Fetch(`/admin/shoppingmalls/${shoppingmallId}/active?active=${active}`, {
       method: "PATCH",
     });
     if (!response.ok) {
@@ -130,55 +132,94 @@ const confirmDelete = (shoppingmallId) => {
   }
 };
 
+// const handleDelete = async (shoppingmallId) => {
+//   try {
+//     const response = await use$Fetch(`/admin/shoppingmalls/${shoppingmallId}/state`, {
+//       method: "PATCH"
+//     });
+
+//     if (!response.ok) {
+//       throw new Error("쇼핑몰 삭제에 실패했습니다.");
+//     }
+
+//     // 삭제 성공
+//     alert('정상적으로 삭제되었습니다.');
+//     selectedItems.value.clear();
+//     selectAll.value = false;
+//     fetchshoppingmalls();
+
+//   } catch (error) {
+//     console.error("Error deleting shoppingmall:", error);
+//     alert(error.message);
+//   }
+// };
+
 const handleDelete = async (shoppingmallId) => {
   try {
-    const response = await fetch(`http://localhost:8080/api/v1/admin/shoppingmalls/${shoppingmallId}/state`, {
-      method: "PATCH"
+    await use$Fetch(`/admin/shoppingmalls/${shoppingmallId}/state`, {
+      method: "PATCH",
     });
 
-    if (!response.ok) {
-      throw new Error("쇼핑몰 삭제에 실패했습니다.");
-    }
-
     // 삭제 성공
-    alert('정상적으로 삭제되었습니다.');
-    selectedItems.value.clear();
-    selectAll.value = false;
-    fetchshoppingmalls();
-
+    alert("정상적으로 삭제되었습니다.");
+    await fetchshoppingmalls();
   } catch (error) {
     console.error("Error deleting shoppingmall:", error);
-    alert(error.message);
+    alert(error.message || "쇼핑몰 삭제에 실패했습니다.");
   }
 };
 
+// const handleBulkDelete = async () => {
+//   if (selectedItems.value.size === 0) {
+//     alert('삭제할 쇼핑몰을 선택해주세요.');
+//     return;
+//   }
+
+//   if (confirm('선택한 쇼핑몰을 모두 삭제하시겠습니까?')) {
+//     try {
+//       const response = await use$Fetch('/admin/shoppingmalls/bulk-update-state', {
+//         method: 'PATCH',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify(Array.from(selectedItems.value)),
+//       });
+
+//       if (!response.ok) {
+//         throw new Error('쇼핑몰 일괄 삭제에 실패했습니다.');
+//       }
+
+//       alert('선택한 쇼핑몰이 성공적으로 삭제되었습니다.');
+//       selectedItems.value.clear();
+//       selectAll.value = false;
+//       fetchshoppingmalls();
+//     } catch (error) {
+//       console.error('Error deleting shoppingmalls:', error);
+//       alert(error.message);
+//     }
+//   }
+// };
+
 const handleBulkDelete = async () => {
   if (selectedItems.value.size === 0) {
-    alert('삭제할 쇼핑몰을 선택해주세요.');
+    alert("삭제할 쇼핑몰을 선택해주세요.");
     return;
   }
 
-  if (confirm('선택한 쇼핑몰을 모두 삭제하시겠습니까?')) {
+  if (confirm("선택한 쇼핑몰을 모두 삭제하시겠습니까?")) {
     try {
-      const response = await fetch('http://localhost:8080/api/v1/admin/shoppingmalls/bulk-update-state', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(Array.from(selectedItems.value)),
+      await use$Fetch("/admin/shoppingmalls/bulk-update-state", {
+        method: "PATCH",
+        body: Array.from(selectedItems.value),
       });
 
-      if (!response.ok) {
-        throw new Error('쇼핑몰 일괄 삭제에 실패했습니다.');
-      }
-
-      alert('선택한 쇼핑몰이 성공적으로 삭제되었습니다.');
+      alert("선택한 쇼핑몰이 성공적으로 삭제되었습니다.");
       selectedItems.value.clear();
       selectAll.value = false;
-      fetchshoppingmalls();
+      await fetchshoppingmalls();
     } catch (error) {
-      console.error('Error deleting shoppingmalls:', error);
-      alert(error.message);
+      console.error("Error deleting shoppingmalls:", error);
+      alert(error.message || "쇼핑몰 일괄 삭제에 실패했습니다.");
     }
   }
 };
@@ -490,7 +531,7 @@ onMounted(() => {
                 <td>{{ sm.id }}</td>
                 <td class="shoppingmall-cell">
                   <div class="d-flex align-items-center">
-                    <img :src="'http://localhost:8080/api/v1/' + sm.img || 'https://via.placeholder.com/70'" :alt="sm.korName" class="shoppingmall-img" />
+                    <img :src="'http://localhost:8085/api/v1/' + sm.img || 'https://via.placeholder.com/70'" :alt="sm.korName" class="shoppingmall-img" />
                   </div>
                 </td>
                 <td class="text-md">{{ sm.korName }}</td>
@@ -554,7 +595,7 @@ onMounted(() => {
         
         <div class="modal-body">
           <p><strong>번호:</strong> {{ selectedshoppingmall.id }}번</p>
-          <p><strong>쇼핑몰 이미지:</strong><br><img :src="'http://localhost:8080/api/v1/' + selectedshoppingmall.img || 'https://via.placeholder.com/70'" :alt="selectedshoppingmall.korName"></p>
+          <p><strong>쇼핑몰 이미지:</strong><br><img :src="'http://localhost:8085/api/v1/' + selectedshoppingmall.img || 'https://via.placeholder.com/70'" :alt="selectedshoppingmall.korName"></p>
           <p><strong>쇼핑몰 한글명:</strong> {{ selectedshoppingmall.korName }}</p>
           <p><strong>쇼핑몰 영어명:</strong> {{ selectedshoppingmall.engName }}</p>
           <p><strong>쇼핑몰 URL:</strong><a :href="selectedshoppingmall.url" target="_blank"> {{ selectedshoppingmall.url }}</a></p>

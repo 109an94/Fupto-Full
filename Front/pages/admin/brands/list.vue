@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { use$Fetch } from "~/composables/use$Fetch";
 
 useHead({
   link: [{ rel: "stylesheet", href: "/css/admin/brand-list.css" }],
@@ -55,7 +56,7 @@ const closeModal = () => {
 const selectAll = ref(false);
 const selectedItems = ref(new Set());
 
-// API 호출
+//api 호출
 const fetchBrands = async () => {
   try {
     const params = new URLSearchParams({
@@ -70,17 +71,19 @@ const fetchBrands = async () => {
     if (formData.value.startDate) params.append("startDate", formData.value.startDate);
     if (formData.value.endDate) params.append("endDate", formData.value.endDate);
 
-    const response = await fetch(`http://localhost:8080/api/v1/admin/brands?${params.toString()}`);
-    const data = await response.json();
-    console.log(data);
+    // use$Fetch 호출
+    const data = await use$Fetch(`/admin/brands?${params.toString()}`);
+  
     brands.value = data.brands;
     totalElements.value = data.totalElements;
     totalPages.value = data.totalPages;
+
     if (brands.value.length === 0) {
       noDataMessage.value = "데이터가 없습니다.";
     } else {
       noDataMessage.value = "";
     }
+    
   } catch (error) {
     console.error("Error fetching brands:", error);
   }
@@ -90,7 +93,7 @@ const fetchBrands = async () => {
 const updateActive = async (brandId, active) => {
   try {
     console.log(`Updating active status: brandId=${brandId}, active=${active}`);
-    const response = await fetch(`http://localhost:8080/api/v1/admin/brands/${brandId}/active?active=${active}`, {
+    const response = await use$Fetch(`/admin/brands/${brandId}/active?active=${active}`, {
       method: "PATCH",
     });
     if (!response.ok) {
@@ -107,24 +110,70 @@ const confirmDelete = (brandId) => {
   }
 };
 
+// const handleDelete = async (brandId) => {
+//   try {
+//     const response = await use$Fetch(`/admin/brands/${brandId}/state`, {
+//       method: "PATCH",
+//     });
+
+//     if (!response.ok) {
+//       throw new Error("브랜드 삭제에 실패했습니다.");
+//     }
+
+//     // 삭제 성공
+//     alert("정상적으로 삭제되었습니다.");
+//     fetchBrands();
+//   } catch (error) {
+//     console.error("Error deleting brand:", error);
+//     alert(error.message);
+//   }
+// };
+
 const handleDelete = async (brandId) => {
   try {
-    const response = await fetch(`http://localhost:8080/api/v1/admin/brands/${brandId}/state`, {
+    await use$Fetch(`/admin/brands/${brandId}/state`, {
       method: "PATCH",
     });
 
-    if (!response.ok) {
-      throw new Error("브랜드 삭제에 실패했습니다.");
-    }
-
     // 삭제 성공
     alert("정상적으로 삭제되었습니다.");
-    fetchBrands();
+    await fetchBrands();
   } catch (error) {
     console.error("Error deleting brand:", error);
-    alert(error.message);
+    alert(error.message || "브랜드 삭제에 실패했습니다.");
   }
 };
+
+// const handleBulkDelete = async () => {
+//   if (selectedItems.value.size === 0) {
+//     alert("삭제할 브랜드를 선택해주세요.");
+//     return;
+//   }
+
+//   if (confirm("선택한 브랜드를 모두 삭제하시겠습니까?")) {
+//     try {
+//       const response = await use$Fetch("/admin/brands/bulk-update-state", {
+//         method: "PATCH",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify(Array.from(selectedItems.value)),
+//       });
+
+//       if (!response.ok) {
+//         throw new Error("브랜드 일괄 삭제에 실패했습니다.");
+//       }
+
+//       alert("선택한 브랜드가 성공적으로 삭제되었습니다.");
+//       selectedItems.value.clear();
+//       selectAll.value = false;
+//       fetchBrands();
+//     } catch (error) {
+//       console.error("Error deleting brands:", error);
+//       alert(error.message);
+//     }
+//   }
+// };
 
 const handleBulkDelete = async () => {
   if (selectedItems.value.size === 0) {
@@ -134,25 +183,18 @@ const handleBulkDelete = async () => {
 
   if (confirm("선택한 브랜드를 모두 삭제하시겠습니까?")) {
     try {
-      const response = await fetch("http://localhost:8080/api/v1/admin/brands/bulk-update-state", {
+      await use$Fetch("/admin/brands/bulk-update-state", {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(Array.from(selectedItems.value)),
+        body: Array.from(selectedItems.value),
       });
-
-      if (!response.ok) {
-        throw new Error("브랜드 일괄 삭제에 실패했습니다.");
-      }
 
       alert("선택한 브랜드가 성공적으로 삭제되었습니다.");
       selectedItems.value.clear();
       selectAll.value = false;
-      fetchBrands();
+      await fetchBrands();
     } catch (error) {
       console.error("Error deleting brands:", error);
-      alert(error.message);
+      alert(error.message || "브랜드 일괄 삭제에 실패했습니다.");
     }
   }
 };
@@ -458,7 +500,7 @@ onMounted(() => {
                   <td class="brand-cell">
                     <div class="d-flex align-items-center">
                       <img
-                        :src="'http://localhost:8080/api/v1/' + b.img || 'https://via.placeholder.com/70'"
+                        :src="'http://localhost:8085/api/v1/' + b.img || 'https://via.placeholder.com/70'"
                         :alt="b.korName"
                         class="brand-img"
                       />
@@ -523,7 +565,7 @@ onMounted(() => {
           <p><strong>번호:</strong> {{ selectedBrand.id }}번</p>
           <p>
             <strong>브랜드 이미지:</strong><br /><img
-              :src="'http://localhost:8080/api/v1/' + selectedBrand.img || 'https://via.placeholder.com/70'"
+              :src="'http://localhost:8085/api/v1/' + selectedBrand.img || 'https://via.placeholder.com/70'"
               :alt="selectedBrand.korName"
             />
           </p>
