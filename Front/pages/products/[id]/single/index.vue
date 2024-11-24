@@ -82,7 +82,7 @@ const toggleFavorite = async (event) => {
   const success = await toggleFavoriteAction(product.value.mappingId);
 
   if (success) {
-    product.value.isFavorite = !product.value.isFavorite;
+    product.value.favorite = !product.value.favorite;
   }
 };
 
@@ -193,11 +193,11 @@ onUnmounted(() => {
           <p class="brand">{{ product?.brandEngName }}</p>
           <div class="title-container">
             <h1 class="title">{{ product?.productName }}</h1>
-            <button :data-favorite="product?.isFavorite" @click="toggleFavorite" class="favorite-btn">
+            <button :data-favorite="product?.favorite" @click="toggleFavorite" class="favorite-btn">
               <img
                 class="favorite"
-                :src="product?.isFavorite ? '/imgs/icon/favorite-fill.svg' : '/imgs/icon/favorite.svg'"
-                :alt="product?.isFavorite ? '찜' : '찜 해제'"
+                :src="product?.favorite ? '/imgs/icon/favorite-fill.svg' : '/imgs/icon/favorite.svg'"
+                :alt="product?.favorite ? '찜' : '찜 해제'"
               />
             </button>
           </div>

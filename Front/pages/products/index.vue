@@ -29,7 +29,7 @@ const products = ref([]);
 const loading = ref(false);
 const hasMore = ref(true);
 const cursor = ref(null);
-
+////////////////////////////////////////////////////////////////////////////////
 const { data: initialData } = await useAuthFetch("/products", {
   params: {
     gender: route.query.gender,
@@ -48,6 +48,7 @@ if (initialData.value) {
   products.value = initialData.value.products;
   cursor.value = initialData.value.nextCursor;
   hasMore.value = initialData.value.hasMore;
+  console.log("Initial products:", products.value);
 
   if (route.query.category && route.query.categoryName) {
     selectedFilters.value.category = [
@@ -125,7 +126,7 @@ const toggleFavorite = async (event, product) => {
   const success = await toggleFavoriteAction(product.mappingId);
 
   if (success) {
-    product.isFavorite = !product.isFavorite;
+    product.favorite = !product.favorite;
   }
 };
 
@@ -435,14 +436,14 @@ onUnmounted(() => {
                         <img class="product-images secondary-img" :src="product.hoverImageUrl" alt="product-img-hover" />
                       </div>
                       <button
-                        :data-favorite="product.isFavorite"
+                        :data-favorite="product.favorite"
                         @click.prevent="(e) => toggleFavorite(e, product)"
                         class="favorite-btn"
                       >
                         <img
                           class="favorite"
-                          :src="product.isFavorite ? '/imgs/icon/favorite-fill.svg' : '/imgs/icon/favorite.svg'"
-                          :alt="product.isFavorite ? '찜' : '찜 해제'"
+                          :src="product.favorite ? '/imgs/icon/favorite-fill.svg' : '/imgs/icon/favorite.svg'"
+                          :alt="product.favorite ? '찜' : '찜 해제'"
                         />
                       </button>
                     </div>
