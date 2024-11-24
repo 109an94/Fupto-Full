@@ -31,7 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         if (request.getServletPath().startsWith("/auth/") ||
-                request.getServletPath().startsWith("/products") ||
+                (request.getServletPath().startsWith("/products") && !request.getServletPath().contains("/favorite")) ||
                 request.getServletPath().matches(".*/products/.*/image/.*") ||
                 request.getServletPath().matches("/products/.*/image/.*") ||
                 request.getServletPath().startsWith("/uploads/")) {
@@ -49,6 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     if (jwtUtil.vaildateToken(token)) {
                         String username = jwtUtil.extractUsername(token);
+                        Long userId = jwtUtil.extractUserId(token);
                         List<String> roles = jwtUtil.extractRoles(token);
                         System.out.println("username : "+username);
                         System.out.println("roles : "+roles);
@@ -62,11 +63,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 authorities.add(new SimpleGrantedAuthority(role));
                             }
                             UserDetails userDetails = FuptoUserDetails.builder()
+                                    .id(userId)
                                     .username(username)
-                                    .authorities(authorities).build();
+                                    .authorities(authorities)
+                                    .build();
 
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
-                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+                            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                             SecurityContextHolder.getContext().setAuthentication(authToken);
                         }
                     }

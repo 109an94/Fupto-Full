@@ -74,21 +74,15 @@ const nextSlide = () => {
   }
 };
 
-// 기존 토글 함수들
-const toggleFavorite = (event) => {
-  event.preventDefault();
-  const button = event.currentTarget;
-  const isFavorite = button.getAttribute("data-favorite") === "true";
-  const img = button.querySelector("img");
+const { toggleFavorite: toggleFavoriteAction } = useFavorite();
 
-  if (isFavorite) {
-    button.setAttribute("data-favorite", "false");
-    img.src = "/imgs/icon/favorite.svg";
-    img.alt = "즐겨찾기 추가";
-  } else {
-    button.setAttribute("data-favorite", "true");
-    img.src = "/imgs/icon/favorite-fill.svg";
-    img.alt = "즐겨찾기 제거";
+// 찜 관련
+const toggleFavorite = async (event) => {
+  event.preventDefault();
+  const success = await toggleFavoriteAction(product.value.mappingId);
+
+  if (success) {
+    product.value.isFavorite = !product.value.isFavorite;
   }
 };
 
@@ -199,8 +193,12 @@ onUnmounted(() => {
           <p class="brand">{{ product?.brandEngName }}</p>
           <div class="title-container">
             <h1 class="title">{{ product?.productName }}</h1>
-            <button data-favorite="false" @click="toggleFavorite" class="favorite-btn">
-              <img class="favorite" src="/imgs/icon/favorite.svg" alt="찜" />
+            <button :data-favorite="product?.isFavorite" @click="toggleFavorite" class="favorite-btn">
+              <img
+                class="favorite"
+                :src="product?.isFavorite ? '/imgs/icon/favorite-fill.svg' : '/imgs/icon/favorite.svg'"
+                :alt="product?.isFavorite ? '찜' : '찜 해제'"
+              />
             </button>
           </div>
         </section>

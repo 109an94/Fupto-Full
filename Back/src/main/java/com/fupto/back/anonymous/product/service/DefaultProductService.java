@@ -34,6 +34,7 @@ public class DefaultProductService implements ProductService {
     private CategoryRepository categoryRepository;
     private BrandRepository brandRepository;
     private FavoriteRepository favoriteRepository;
+    private MemberRepository memberRepository;
     private ModelMapper modelMapper;
 
     private final Set<String> VALID_SORT_VALUES = Set.of("popular", "recent", "priceAsc", "priceDesc", "discountDesc");
@@ -45,6 +46,7 @@ public class DefaultProductService implements ProductService {
             CategoryRepository categoryRepository,
             BrandRepository brandRepository,
             FavoriteRepository favoriteRepository,
+            MemberRepository memberRepository,
             ModelMapper modelMapper) {
         this.productRepository = productRepository;
         this.productImageRepository = productImageRepository;
@@ -52,10 +54,11 @@ public class DefaultProductService implements ProductService {
         this.categoryRepository = categoryRepository;
         this.brandRepository = brandRepository;
         this.favoriteRepository = favoriteRepository;
+        this.memberRepository = memberRepository;
         this.modelMapper = modelMapper;
     }
 
-    public ProductResponseDto searchProducts(ProductSearchDto searchDto) {
+    public ProductResponseDto searchProducts(ProductSearchDto searchDto, Long memberId) {
         // 정렬 값 검증
         validateSort(searchDto.getSort());
 
@@ -110,7 +113,7 @@ public class DefaultProductService implements ProductService {
 
         // DTO 변환
         List<ProductListDto> productDtos = products.stream()
-                .map(this::convertToProductListDto)
+                .map(product -> convertToProductListDto(product, memberId))
                 .toList();
 
         return ProductResponseDto.builder()
@@ -125,6 +128,7 @@ public class DefaultProductService implements ProductService {
         // 상품 기본 정보 매핑
         ProductListDto dto = ProductListDto.builder()
                 .id(product.getId())
+                .mappingId(product.getMappingId())
                 .productName(product.getProductName())
                 .brandEngName(product.getBrand().getEngName())
                 .viewCount(product.getViewCount())
@@ -144,16 +148,6 @@ public class DefaultProductService implements ProductService {
 
         return dto;
     }
-
-//    private ProductListDto convertToProductListDto(Product product, Long memberId) {
-//        ProductListDto dto = convertToProductListDto(product);
-//
-//        if (memberId != null) {
-//            dto.setFavorite(isFavorite(product.getMappingId(), memberId));
-//        }
-//
-//        return dto;
-//    }
 
     private String getImageUrl(Long productId, Integer displayOrder) {
         return String.format("http://localhost:8085/api/v1/products/%d/image/%d", productId, displayOrder);
@@ -197,7 +191,15 @@ public class DefaultProductService implements ProductService {
 
     @Override
     @Transactional
-    public ProductDetailDto getById(Long id) {
+    public ProductDetailDto getById(Long id, Long memberId) {
+        ProductDetailDto dto = getByIdInternal(id);  // private 메서드 호출
+        if (memberId != null) {
+            dto.setFavorite(isFavorite(dto.getId(), memberId));
+        }
+        return dto;
+    }
+
+    private ProductDetailDto getByIdInternal(Long id) {
         // 1. 상품 조회 및 조회수 증가
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다."));
@@ -264,6 +266,7 @@ public class DefaultProductService implements ProductService {
 
         return ProductDetailDto.builder()
                 .id(product.getId())
+                .mappingId(product.getMappingId())
                 .productName(product.getProductName())
                 .description(product.getDescription())
                 .categories(categoryPath)
@@ -276,7 +279,16 @@ public class DefaultProductService implements ProductService {
 
     @Override
     @Transactional
-    public ProductDetailDto getSingleById(Long id) {
+    public ProductDetailDto getSingleById(Long id, Long memberId) {
+        ProductDetailDto dto = getSingleByIdInternal(id);  // private 메서드로 기본 로직 분리
+        if (memberId != null) {
+            dto.setFavorite(isFavorite(dto.getId(), memberId));  // 찜 상태 설정
+        }
+        return dto;
+    }
+
+
+    private ProductDetailDto getSingleByIdInternal(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다."));
         product.increaseViewCount();
@@ -325,6 +337,7 @@ public class DefaultProductService implements ProductService {
 
         return ProductDetailDto.builder()
                 .id(product.getId())
+                .mappingId(product.getMappingId())
                 .productName(product.getProductName())
                 .description(product.getDescription())
                 .categories(categoryPath)
@@ -334,6 +347,8 @@ public class DefaultProductService implements ProductService {
                 .shops(shops)
                 .build();
     }
+
+
 
     @Override
     public ProductResponseDto getAllProductsByShoppingmall(ProductSearchDto searchDto) {
@@ -388,27 +403,45 @@ public class DefaultProductService implements ProductService {
                 .build();
     }
 
-//    @Transactional
-//    public boolean toggleFavorite(Long mappingId, Long memberId) {
-//        Optional<Favorite> existingFavorite = favoriteRepository.findByMemberIdAndMappingId(memberId, mappingId);
-//
-//        if (existingFavorite.isPresent()) {
-//            Favorite favorite = existingFavorite.get();
-//            favorite.setState(!favorite.getState());  // 상태 토글
-//            return favorite.getState();  // 현재 상태 반환
-//        } else {
-//            Favorite favorite = new Favorite();
-//            favorite.setMemberId(memberId);
-//            favorite.setMappingId(mappingId);
-//            favorite.setState(true);
-//            favoriteRepository.save(favorite);
-//            return true;
-//        }
-//    }
-//
-//    public boolean isFavorite(Long mappingId, Long memberId) {
-//        return favoriteRepository.existsByMemberIdAndMappingIdAndStateIsTrue(memberId, mappingId);
-//    }
+    @Override
+    @Transactional
+    public boolean toggleFavorite(Long mappingId, Long memberId) {
+        Optional<Favorite> existingFavorite = favoriteRepository
+                .findByMemberIdAndMappingId(memberId, mappingId);
+
+        if (existingFavorite.isPresent()) {
+            // 이미 존재하면 상태 토글
+            Favorite favorite = existingFavorite.get();
+            favorite.setState(!favorite.getState());
+            return favorite.getState();
+        } else {
+            // 새로 생성
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다."));
+
+            Favorite favorite = Favorite.builder()
+                    .mappingId(mappingId)
+                    .member(member)
+                    .state(true)
+                    .build();
+
+            favoriteRepository.save(favorite);
+            return true;
+        }
+    }
+
+    @Override
+    public boolean isFavorite(Long mappingId, Long memberId) {
+        return favoriteRepository.existsByMemberIdAndMappingIdAndStateIsTrue(memberId, mappingId);
+    }
+
+    private ProductListDto convertToProductListDto(Product product, Long memberId) {
+        ProductListDto dto = convertToProductListDto(product);
+        if (memberId != null) {
+            dto.setFavorite(isFavorite(product.getMappingId(), memberId));
+        }
+        return dto;
+    }
 
     private Integer calculateDiscountRate(Integer retailPrice, Integer salePrice) {
         if (retailPrice == null || salePrice == null || retailPrice == 0) {

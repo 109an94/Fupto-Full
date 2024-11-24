@@ -51,6 +51,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize-> authorize
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/products/*/favorite").authenticated()
                         .requestMatchers("/products/**").permitAll()
                         .requestMatchers("/admin/products/*/image/*").permitAll()
                         .requestMatchers("/products/*/image/*").permitAll()

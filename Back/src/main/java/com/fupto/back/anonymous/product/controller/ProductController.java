@@ -25,8 +25,11 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<ProductResponseDto> searchProducts(ProductSearchDto searchDto) {
-        return ResponseEntity.ok(productService.searchProducts(searchDto));
+    public ResponseEntity<ProductResponseDto> searchProducts(
+            ProductSearchDto searchDto,
+            @AuthenticationPrincipal FuptoUserDetails userDetails) {
+        Long memberId = userDetails != null ? userDetails.getId() : null;
+        return ResponseEntity.ok(productService.searchProducts(searchDto, memberId));
     }
 
     @GetMapping("/categories")
@@ -42,13 +45,19 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDetailDto> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(productService.getById(id));
+    public ResponseEntity<ProductDetailDto> getById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal FuptoUserDetails userDetails) {
+        Long memberId = userDetails != null ? userDetails.getId() : null;
+        return ResponseEntity.ok(productService.getById(id, memberId));
     }
 
     @GetMapping("/{id}/single")
-    public ResponseEntity<ProductDetailDto> getSingleProduct(@PathVariable Long id) {
-        return ResponseEntity.ok(productService.getSingleById(id));
+    public ResponseEntity<ProductDetailDto> getSingleProduct(
+            @PathVariable Long id,
+            @AuthenticationPrincipal FuptoUserDetails userDetails) {
+        Long memberId = userDetails != null ? userDetails.getId() : null;
+        return ResponseEntity.ok(productService.getSingleById(id, memberId));
     }
 
     @GetMapping("/{id}/image/{displayOrder}")
@@ -72,17 +81,21 @@ public class ProductController {
     @GetMapping("/brand/{brandId}")
     public ResponseEntity<ProductResponseDto> getProductsByBrand(
             @PathVariable Long brandId,
-            @ModelAttribute ProductSearchDto searchDto) {
+            @ModelAttribute ProductSearchDto searchDto,
+            @AuthenticationPrincipal FuptoUserDetails userDetails) {
         searchDto.setBrand(List.of(brandId));
-        return ResponseEntity.ok(productService.searchProducts(searchDto));
+        Long memberId = userDetails != null ? userDetails.getId() : null;
+        return ResponseEntity.ok(productService.searchProducts(searchDto, memberId));
     }
 
     //쇼핑몰별 상품 가져오기
     @GetMapping("/shoppingmall/{shoppingmallId}")
     public ResponseEntity<ProductResponseDto> getProductsByShoppingMall(
             @PathVariable Long shoppingmallId,
-            @ModelAttribute ProductSearchDto searchDto) {
+            @ModelAttribute ProductSearchDto searchDto,
+            @AuthenticationPrincipal FuptoUserDetails userDetails) {
         searchDto.setShoppingmall(List.of(shoppingmallId));
+        Long memberId = userDetails != null ? userDetails.getId() : null;
         return ResponseEntity.ok(productService.getAllProductsByShoppingmall(searchDto));
     }
 
@@ -93,8 +106,10 @@ public class ProductController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-//        productService.toggleFavorite(mappingId, userDetails.getId());
+        System.out.println("mappingId: " + mappingId +
+                ", userDetails: { id: " + userDetails.getId() +
+                ", username: " + userDetails.getUsername() + " }");
+        productService.toggleFavorite(mappingId, userDetails.getId());
         return ResponseEntity.ok().build();
     }
-
 }
