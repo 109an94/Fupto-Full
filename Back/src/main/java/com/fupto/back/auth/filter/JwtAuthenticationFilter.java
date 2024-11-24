@@ -49,16 +49,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 System.out.println("token : " + token);
 
                 if (jwtUtil.vaildateToken(token)) {
-                    String username = jwtUtil.extractUsername(token);
-                    List<String> roles = jwtUtil.extractRoles(token);
                     Long id = jwtUtil.extractId(token);
-                    String userId = jwtUtil.extractUserId(token);
+                    String username = jwtUtil.extractUsername(token);
                     String email = jwtUtil.extractEmail(token);
+                    List<String> roles = jwtUtil.extractRoles(token);
 
                     System.out.println("id : " + id);
-                    System.out.println("userId : " + userId);
-                    System.out.println("email : " + email);
                     System.out.println("username : " + username);
+                    System.out.println("email : " + email);
                     System.out.println("roles : " + roles);
 
                     if (username != null && !username.isEmpty()) {
@@ -68,7 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         for (String role : roles) {
                             authorities.add(new SimpleGrantedAuthority(role));
                         }
-                        UserDetails userDetails = FuptoUserDetails.builder()
+                        FuptoUserDetails userDetails = FuptoUserDetails.builder()
                                 .id(id)
                                 .username(username)
                                 .authorities(authorities)
