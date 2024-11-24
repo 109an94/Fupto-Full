@@ -16,11 +16,20 @@ public interface MemberService {
     MemberResponseDto getMember (Long id);
     Resource getProductImage(Long id) throws IOException;
     List<FavoriteListDto> getFavorites (Long id);
+    void updateAlertPrice(Long memberID, Long favoriteId, Integer alertPrice);
 
+    //sse emmitter
     void addEmitter(Long id, SseEmitter emitter);
     void removeEmitter(Long id);
-    void sendAlert(Long memberId, String message);
 
-    void updateAlertPrice(Long memberID, Long favoriteId, Integer alertPrice);
-//    void favoriteChecker(Long productId, Integer newPrice);
+    //알림 전송 및 알림 생성
+    void sendAlert(Long memberId, String message);
+    String createAlertMessage(Long mappingId, Integer newPrice, Integer alertPrice);
+    void checkAlertCondition(Favorite favorite, Integer oldAlertPrice);
+//    private boolean isPriceDropped(Favorite favorite) 가격떨어졌는 지 현재와 alert비교
+    Integer findLowestPriceByMappingId(Long mappingId);
+
+    //
+
+    void checkerforfavPrice(Long productId, Integer newPrice);
 }

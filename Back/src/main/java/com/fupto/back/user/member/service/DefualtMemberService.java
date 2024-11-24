@@ -1,10 +1,7 @@
 package com.fupto.back.user.member.service;
 
 import com.fupto.back.entity.*;
-import com.fupto.back.repository.FavoriteRepository;
-import com.fupto.back.repository.MemberRepository;
-import com.fupto.back.repository.ProductImageRepository;
-import com.fupto.back.repository.ProductRepository;
+import com.fupto.back.repository.*;
 import com.fupto.back.user.member.dto.FavoriteListDto;
 import com.fupto.back.user.member.dto.MemberEditDto;
 import com.fupto.back.user.member.dto.MemberResponseDto;
@@ -30,11 +27,14 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Service("userMemberService")
 @Transactional
 public class DefualtMemberService implements MemberService {
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
+    private final AlertRepository alertRepository;
+    private final PriceHistoryRepository priceHistoryRepository;
 
     @Value("uploads")
     private String uploadPath;
@@ -51,13 +51,15 @@ public class DefualtMemberService implements MemberService {
                                 PasswordEncoder passwordEncoder,
                                 ProductImageRepository productImageRepository,
                                 FavoriteRepository favoriteRepository,
-                                ProductRepository productRepository) {
+                                ProductRepository productRepository, AlertRepository alertRepository, PriceHistoryRepository priceHistoryRepository) {
         this.memberRepository = memberRepository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
         this.productImageRepository = productImageRepository;
         this.favoriteRepository = favoriteRepository;
         this.productRepository = productRepository;
+        this.alertRepository = alertRepository;
+        this.priceHistoryRepository = priceHistoryRepository;
     }
 
 
@@ -115,7 +117,6 @@ public class DefualtMemberService implements MemberService {
             throw new RuntimeException("사용자 정보를 찾을 수 없습니다.");
 
         Optional<Member> member = memberRepository.findById(id);
-        System.out.println(member);
 
         return modelMapper.map(member, MemberResponseDto.class);
     }
@@ -163,7 +164,7 @@ public class DefualtMemberService implements MemberService {
         }
         return dtoList;
     }
-
+//--------------emitter 영역--------------------
 
     @Override
     public void addEmitter(Long id, SseEmitter emitter) {
@@ -177,27 +178,85 @@ public class DefualtMemberService implements MemberService {
 
     @Override
     public void sendAlert(Long memberId, String message) {
+        //사용자의 sse emitter 가져오기
         SseEmitter emitter = emitters.get(memberId);
         if (emitter != null){
             try{
+                //알림 메시지 생성 및 전송
                 emitter.send(SseEmitter.event().data(message));
+                // 알림을 데이터베이스에 저장
+                Alert alert = new Alert();
+                alert.setMember(memberRepository.findById(memberId).get());
+                alert.setMessage(message);
+                alert.setCreateDate(Instant.now());
+                alertRepository.save(alert);
             }catch (IOException e){
                 emitters.remove(memberId);
             }
         }
     }
 
+
+    //--------------alert 영역--------------------
+    @Override
+    public String createAlertMessage(Long mappingId, Integer newPrice, Integer alertPrice) {
+        if (alertPrice != null) {
+            return String.format("관심 상품(ID: %d)의 가격이 설정하신 %d원 이하로 떨어져 %d원으로 변경되었습니다.", mappingId, alertPrice, newPrice);
+        } else {
+            return String.format("관심 상품(ID: %d)의 가격이 %d원으로 변경되었습니다.", mappingId, newPrice);
+    }
+        }
+
     @Transactional
     @Override
     public void updateAlertPrice(Long favoriteId, Long memberId, Integer alertPrice) {
 
-        Favorite favorite = favoriteRepository.findByIdAndMemberId(favoriteId,memberId)
-                .orElseThrow(()-> new EntityNotFoundException("Favorite not found"));
+        Favorite favorite = favoriteRepository.findByIdAndMemberId(favoriteId, memberId)
+                .orElseThrow(() -> new EntityNotFoundException("Favorite not found"));
 
+        Integer oldAlertPrice = favorite.getAlertPrice();
         favorite.setAlertPrice(alertPrice);
         favoriteRepository.save(favorite);
 
+        // 새로 설정한 알림 가격에 대해 즉시 체크
+        checkAlertCondition(favorite, oldAlertPrice);
     }
+
+    @Override
+    public void checkAlertCondition(Favorite favorite, Integer oldAlertPrice){
+        Integer lowestPrice = findLowestPriceByMappingId(favorite.getMappingId());
+        if ((oldAlertPrice == null && favorite.getAlertPrice() != null)
+                || (favorite.getAlertPrice() != null && lowestPrice <= favorite.getAlertPrice())){
+            String message = createAlertMessage(favorite.getMappingId(), lowestPrice, favorite.getAlertPrice());
+            sendAlert(favorite.getMappingId(), message);
+        }
+    }
+
+    @Transactional
+    @Override
+    public void checkerforfavPrice(Long productId, Integer newPrice){
+        List<Favorite> favorites = favoriteRepository.findByMappingId(productId);
+        Integer lowestPrice = findLowestPriceByMappingId(productId);
+        for (Favorite favorite : favorites){
+            Integer alertPrice = favorite.getAlertPrice();
+            if (alertPrice == null || lowestPrice <= alertPrice){
+                String message = createAlertMessage(productId, newPrice, alertPrice);
+                sendAlert(favorite.getMember().getId(), message);
+            }
+
+        }
+    }
+
+    //최저가 찾는 로직
+    @Override
+    public Integer findLowestPriceByMappingId(Long mappingId) {
+        List<Product> products = productRepository.findAllByMappingId(mappingId);
+        List<Long> productIds = products.stream().map(Product::getId).collect(Collectors.toList());
+
+        return priceHistoryRepository.findLowestPriceByProductIdsAndLatestDate(productIds)
+                .orElseThrow(() -> new EntityNotFoundException("No price found for mapping id: " + mappingId));
+    }
+
 
 
 }

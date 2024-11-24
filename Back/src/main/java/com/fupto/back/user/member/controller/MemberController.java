@@ -1,8 +1,7 @@
 package com.fupto.back.user.member.controller;
 
 import com.fupto.back.auth.entity.FuptoUserDetails;
-import com.fupto.back.user.member.dto.AlertPriceDto;
-import com.fupto.back.user.member.dto.FavoriteListDto;
+import com.fupto.back.user.emitter.dto.AlertPriceDto;
 import com.fupto.back.user.member.dto.MemberEditDto;
 import com.fupto.back.user.member.dto.MemberResponseDto;
 import com.fupto.back.user.member.exception.InvalidPasswordException;
@@ -81,6 +80,5 @@ public class MemberController {
         memberService.updateAlertPrice(favoriteId, memberId, alertPriceDto.getAlertPrice());
         return ResponseEntity.ok().build();
     }
-
 
 }

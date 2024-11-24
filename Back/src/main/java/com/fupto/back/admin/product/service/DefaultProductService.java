@@ -4,6 +4,7 @@ import com.fupto.back.admin.product.dto.*;
 import com.fupto.back.entity.PriceHistory;
 import com.fupto.back.entity.ProductImage;
 import com.fupto.back.repository.*;
+import com.fupto.back.user.member.service.DefualtMemberService;
 import jakarta.persistence.EntityNotFoundException;
 import com.fupto.back.entity.Category;
 import com.fupto.back.entity.Product;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class DefaultProductService implements ProductService {
 
+    private final DefualtMemberService userMemberService;
     @Value("${file.upload.path}")
     private String uploadPath;
 
@@ -50,9 +52,9 @@ public class DefaultProductService implements ProductService {
                                  BrandRepository brandRepository,
                                  ShoppingMallRepository shoppingMallRepository,
                                  PriceHistoryRepository priceHistoryRepository,
-                                    ProductImageRepository productImageRepository,
+                                 ProductImageRepository productImageRepository,
                                  ModelMapper modelMapper,
-                                 FileService fileService) {
+                                 FileService fileService, DefualtMemberService userMemberService) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.brandRepository = brandRepository;
@@ -61,6 +63,7 @@ public class DefaultProductService implements ProductService {
         this.productImageRepository = productImageRepository;
         this.modelMapper = modelMapper;
         this.fileService = fileService;
+        this.userMemberService = userMemberService;
     }
 
     @Override
@@ -510,6 +513,9 @@ public class DefaultProductService implements ProductService {
                     .salePrice(updateDto.getSalePrice())
                     .build();
             priceHistoryRepository.save(priceHistory);
+
+            //가격 변경후 favprice 검토
+            userMemberService.checkerforfavPrice(product.getMappingId(), updateDto.getSalePrice());
         }
 
         // 3. 이미지 처리

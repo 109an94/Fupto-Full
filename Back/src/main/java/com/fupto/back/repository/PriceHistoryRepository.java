@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PriceHistoryRepository extends JpaRepository<PriceHistory, Long> {
     @Query("SELECT ph.salePrice FROM PriceHistory ph WHERE ph.product.id = :productId ORDER BY ph.createDate DESC LIMIT 1")
@@ -60,4 +61,8 @@ public interface PriceHistoryRepository extends JpaRepository<PriceHistory, Long
         )
     """)
     Integer findRetailPriceOfLowestPriceProduct(@Param("mappingId") Long mappingId);
+    @Query("SELECT MIN(ph.salePrice) FROM PriceHistory ph " +
+            "WHERE ph.product.id IN :productIds " +
+            "AND ph.createDate = (SELECT MAX(ph2.createDate) FROM PriceHistory ph2 WHERE ph2.product.id = ph.product.id)")
+    Optional<Integer> findLowestPriceByProductIdsAndLatestDate(@Param("productIds") List<Long> productIds);
 }

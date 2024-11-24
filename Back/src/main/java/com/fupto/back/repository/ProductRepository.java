@@ -386,4 +386,6 @@ List<Product> findAllByShoppingmall(
         @Param("sort") String sort,
         Pageable pageable
 );
+List<Product> findAllByMappingId(Long id);
 }
+

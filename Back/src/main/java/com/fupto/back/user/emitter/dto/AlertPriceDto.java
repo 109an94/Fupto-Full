@@ -1,4 +1,4 @@
-package com.fupto.back.user.member.dto;
+package com.fupto.back.user.emitter.dto;
 
 import lombok.*;
 
@@ -7,6 +7,5 @@ import lombok.*;
 @Data
 @Builder
 public class AlertPriceDto {
-    private Long id;
     private Integer alertPrice;
 }
