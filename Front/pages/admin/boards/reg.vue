@@ -102,7 +102,10 @@ const handleSubmit = async() => {
     imageUrl.value = '';
   };
 
-  const handleCancel = resetForm;
+  const handleCancel = () => {
+  router.push('/admin/boards/list');
+};
+
 
 </script>
 
@@ -178,6 +181,7 @@ const handleSubmit = async() => {
 
           <div class="text-center">
             <button type="submit" class="btn btn-primary">등록</button>
+            <button type="submit" class="btn btn-primary" @click="handleCancel">취소</button>
           </div>
         </form>
       </div>

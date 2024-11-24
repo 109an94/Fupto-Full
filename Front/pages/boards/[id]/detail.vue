@@ -74,33 +74,41 @@ const handleEdit = () => {
   router.push(`/boards/${boardId}/edit`); // 수정 페이지로 이동
 };
 
-
 // 삭제 버튼 클릭 시 처리
-const handleDelete = async (boardId, active) => {
-  const confirmDeactivate = confirm("이 게시글을 비활성화하시겠습니까?");
-  if (confirmDeactivate) {
+const handleDelete = async () => {
+  // 삭제 확인 메시지
+  const isConfirmed = confirm('게시물을 삭제하시겠습니까?');
+  
+  // 사용자가 '확인'을 누른 경우에만 삭제 진행
+  if (isConfirmed) {
     try {
-      const response = await fetch(`${config.public.apiBase}/admin/boards/${boardId}/active`, {
+      const formData = new FormData();
+      formData.append('active', false);  // 게시글을 비활성화 (삭제처럼)
+
+      const response = await fetch(`${config.public.apiBase}/boards/${boardId}/inactive`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ active: false })
+        body: formData,
       });
-      
+
       if (response.ok) {
-        alert("게시글이 비활성화되었습니다.");
-        await loadBoardData(); // 게시글 데이터를 다시 불러와 화면을 갱신합니다.
-        // 또는 router.push('/boards/list'); // 게시글 목록 페이지로 이동
+        const result = await response.json();
+        console.log('게시글 삭제 성공:', result);
+        alert('게시글이 삭제되었습니다!');
+        router.push('/boards/list');  // 목록 페이지로 이동
       } else {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || '게시글 삭제에 실패했습니다.');
       }
     } catch (error) {
-      console.error("게시글 비활성화 실패:", error);
-      alert(`게시글 비활성화에 실패했습니다: ${error.message}`);
+      console.error('Error:', error);
+      alert(`게시글 삭제 중 오류가 발생했습니다: ${error.message}`);
     }
+  } else {
+    // 사용자가 취소를 눌렀을 경우
+    console.log('삭제가 취소되었습니다.');
   }
 };
+
 
 const closeModal = () => {
   showModal.value = false;
@@ -141,8 +149,6 @@ onMounted(async () => {
         </div>
       </section>
         
-      <hr>
-
       <section class = "body">
         
         <div class="image-preview" id="imagePreview">

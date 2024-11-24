@@ -79,6 +79,7 @@ const visiblePages = computed(() => {
   return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
 });
 
+
 onMounted(() => {
   fetchBoards();
 });
@@ -144,7 +145,9 @@ onMounted(() => {
 
         </td>
         <td class="image">
-          <img src="https://via.placeholder.com/70"  class="product-img" />
+          <img class="product-img">
+ 
+        </img>
         </td>
               
       </tr>
@@ -152,7 +155,8 @@ onMounted(() => {
     </tbody>
   </table>
 
-  <button class="write-btn">글쓰기</button>
+  <button class="write-btn"><nuxt-link :to="`/boards/reg`">글쓰기</nuxt-link></button>
+  <!-- <nuxt-link :to="`/boards/re`">{{ board.title }}[댓글 수]</nuxt-link> -->
 
   <form ref ="searchForm" @submit="handleSearch" class="searchBox">
     <select v-model="formData.searchType" name="sc" class="type">

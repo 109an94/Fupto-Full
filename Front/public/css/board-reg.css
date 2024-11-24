@@ -1,0 +1,155 @@
+.board-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  justify-content: center; 
+}
+
+.board-detail {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%; 
+  max-width: 1000px;
+  padding: 15px; 
+  justify-content: center;
+}
+
+.table {
+  width: 100%;  /* 테이블 너비를 100%로 설정 */
+  border-collapse: collapse;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  margin-left: auto;
+  margin-right: auto;  /* 좌우 자동으로 중앙 정렬 */
+  table-layout: fixed; /* 고정 너비로 설정하여 셀의 크기가 일정하게 유지되도록 함 */
+}
+
+.table th,
+.table td {
+  padding: 8px;
+  border: 1px solid #e0e0e0;
+  word-wrap: break-word; /* 긴 내용이 있을 경우 줄 바꿈 처리 */
+}
+
+.table th {
+  background-color: #f8f8f8;
+  font-weight: 500;
+  text-align: center;
+  color: #333;
+  width: 100px;
+}
+.important {
+  margin-left: 15px;
+  accent-color: #dc3545;
+}
+
+.select {
+  width: 90px;
+  padding: 6px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 12px;
+  background-color: #fff;
+  margin-right: 5px;
+}
+
+
+.btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.3s;
+}
+
+.btn-primary {
+  background-color: var(--blue);
+  color: white;
+}
+.btn-primary:hover {
+  background-color: var(--dark-blue);
+}
+.text-center {
+  text-align: center;
+}
+
+.content, .input-text {
+  width: 100%;
+  /* max-width: 300px;  최대 너비를 설정하여 너무 커지지 않도록 제한 */
+  padding: 6px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.content {
+  max-width: 800px;
+  height: 350px;
+}
+
+.input-text {
+  max-width: 800px;
+  /* width: 400px;  최대 너비를 설정 */
+}
+
+/* .input-text {
+  width: 400px;
+  padding: 6px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.content {
+  width: 600px;
+  height: 400px;
+  padding: 6px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 12px;
+} */
+
+
+.image-preview {
+  position: relative;
+  margin-top: 15px;
+}
+
+.image-preview img {
+  max-width: 110px;
+  max-height: 150px;
+  border: 1px solid var(--dark-grey);
+  border-radius: 5px;
+  object-fit: cover;
+  display: flex;
+}
+
+.remove-img-btn {
+  position: absolute;
+  top: 5px;
+
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 13px;
+  border: none;
+  border-radius: 50%;
+  width: 19px;
+  height: 19px;
+  text-align: center;
+  line-height: 22px; /* 텍스트가 버튼의 가운데에 오도록 조정 */
+  cursor: pointer;
+  z-index: 10; /* 다른 요소 위에 버튼이 위치하도록 z-index 값 조정 */
+}
+
+.remove-img-btn:hover {
+  background-color: red;
+}
+
+.btn-primary {
+  background-color: blue; /* 여기서 색을 직접 설정해봅니다. */
+  color: white;
+  z-index: 10; /* 버튼의 z-index를 높여서 다른 요소 위로 보이게 합니다. */
+}
+

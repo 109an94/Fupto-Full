@@ -1,12 +1,14 @@
 package com.fupto.back.anonymous.board.controller;
 
-import com.fupto.back.anonymous.board.dto.BoardDto;
-import com.fupto.back.anonymous.board.dto.DefaultDto;
-import com.fupto.back.anonymous.board.dto.DetailDto;
-import com.fupto.back.anonymous.board.dto.SearchDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fupto.back.admin.board.dto.BoardListDto;
+import com.fupto.back.anonymous.board.dto.*;
 import com.fupto.back.anonymous.board.service.BoardService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,28 +24,67 @@ public class BoardController {
     }
 
     @GetMapping("/all")
-    public List<BoardDto> findAll(){
+    public List<BoardDto> findAll() {
         return boardService.findAll();
     }
 
     @GetMapping("list")
     public ResponseEntity<DefaultDto> userSearchBoard(
             @ModelAttribute SearchDto searchDto
-    ){
+    ) {
         return ResponseEntity.ok(boardService.userSearch(searchDto));
     }
 
     @GetMapping("{id}/detail")
-    public ResponseEntity<DetailDto> findById(@PathVariable Long id){
+    public ResponseEntity<DetailDto> findById(@PathVariable Long id) {
         return ResponseEntity.ok(boardService.getById(id));
     }
 
-    @PatchMapping("{id}/active")
-    public ResponseEntity<BoardDto> userDelete(
+    @PatchMapping("{id}/inactive")
+    public ResponseEntity<BoardDto> userInActive(
             @PathVariable Long id,
-            @RequestParam Boolean active) throws Exception
-    {
-        return ResponseEntity.ok(boardService.userDelete(id, active));
+            @RequestParam Boolean active) throws Exception {
+        return ResponseEntity.ok(boardService.userInActive(id, active));
+    }
+
+    @PostMapping("/post")
+    public ResponseEntity<BoardDto> userPost(
+            @RequestParam("boardData") String boardDataJson,
+            @RequestParam(value = "file", required = false) MultipartFile file) {
+
+        try{
+            ObjectMapper  objectMapper = new ObjectMapper();
+            BoardDto boardDto = objectMapper.readValue(boardDataJson, BoardDto.class);
+
+            BoardDto postBoard = boardService.userPost(boardDto, file);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(postBoard);
+        }  catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @GetMapping("{id}/edit")
+    public ResponseEntity<BoardDto> userEdit(@PathVariable Long id) {
+        return ResponseEntity.ok(boardService.show(id));
+    }
+
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BoardDto> userEdit(
+            @PathVariable Long id,
+            @RequestPart("boardData") String boardDataJson,
+            @RequestParam(value = "file", required = false) MultipartFile file) {
+        try {
+            ObjectMapper  objectMapper = new ObjectMapper();
+            UserUpdateDto userUpdateDto = objectMapper.readValue(boardDataJson, UserUpdateDto.class);
+
+            BoardDto userUpdateBoard = boardService.update(id, userUpdateDto, file);
+
+            return ResponseEntity.ok(userUpdateBoard);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
 }
