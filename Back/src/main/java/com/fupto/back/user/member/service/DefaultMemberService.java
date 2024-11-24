@@ -2,6 +2,7 @@ package com.fupto.back.user.member.service;
 
 import com.fupto.back.entity.*;
 import com.fupto.back.repository.*;
+import com.fupto.back.user.emitter.service.EmitterService;
 import com.fupto.back.user.member.dto.FavoriteListDto;
 import com.fupto.back.user.member.dto.MemberEditDto;
 import com.fupto.back.user.member.dto.MemberResponseDto;
@@ -16,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,19 +26,18 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service("userMemberService")
 @Transactional
-public class DefualtMemberService implements MemberService {
-    private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
-    private final AlertRepository alertRepository;
-    private final PriceHistoryRepository priceHistoryRepository;
+public class DefaultMemberService implements MemberService {
+
 
     @Value("uploads")
     private String uploadPath;
 
+    private final PriceHistoryRepository priceHistoryRepository;
+    private final EmitterService emitterService;
     private final ProductRepository productRepository;
     private final FavoriteRepository favoriteRepository;
     private final ProductImageRepository productImageRepository;
@@ -46,19 +45,21 @@ public class DefualtMemberService implements MemberService {
     private final MemberRepository memberRepository;
     private final ModelMapper modelMapper;
 
-    public DefualtMemberService(MemberRepository memberRepository,
+    public DefaultMemberService(MemberRepository memberRepository,
                                 ModelMapper modelMapper,
                                 PasswordEncoder passwordEncoder,
                                 ProductImageRepository productImageRepository,
                                 FavoriteRepository favoriteRepository,
-                                ProductRepository productRepository, AlertRepository alertRepository, PriceHistoryRepository priceHistoryRepository) {
+                                ProductRepository productRepository,
+                                EmitterService emitterService,
+                                PriceHistoryRepository priceHistoryRepository) {
         this.memberRepository = memberRepository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
         this.productImageRepository = productImageRepository;
         this.favoriteRepository = favoriteRepository;
         this.productRepository = productRepository;
-        this.alertRepository = alertRepository;
+        this.emitterService = emitterService;
         this.priceHistoryRepository = priceHistoryRepository;
     }
 
@@ -155,6 +156,7 @@ public class DefualtMemberService implements MemberService {
             dto.setId(favorite.getId());
             dto.setProductId(product.getId());
             dto.setProductName(product.getProductName());
+            dto.setProductPrice(product.getPriceHistories().getLast().getSalePrice());
             dto.setMemberId(favorite.getMember().getId());
             dto.setMemberName(favorite.getMember().getNickname());
             dto.setCreateDate(favorite.getCreateDate());
@@ -164,38 +166,6 @@ public class DefualtMemberService implements MemberService {
         }
         return dtoList;
     }
-//--------------emitter 영역--------------------
-
-    @Override
-    public void addEmitter(Long id, SseEmitter emitter) {
-        emitters.put(id, emitter);
-    }
-
-    @Override
-    public void removeEmitter(Long id) {
-        emitters.remove(id);
-    }
-
-    @Override
-    public void sendAlert(Long memberId, String message) {
-        //사용자의 sse emitter 가져오기
-        SseEmitter emitter = emitters.get(memberId);
-        if (emitter != null){
-            try{
-                //알림 메시지 생성 및 전송
-                emitter.send(SseEmitter.event().data(message));
-                // 알림을 데이터베이스에 저장
-                Alert alert = new Alert();
-                alert.setMember(memberRepository.findById(memberId).get());
-                alert.setMessage(message);
-                alert.setCreateDate(Instant.now());
-                alertRepository.save(alert);
-            }catch (IOException e){
-                emitters.remove(memberId);
-            }
-        }
-    }
-
 
     //--------------alert 영역--------------------
     @Override
@@ -225,10 +195,12 @@ public class DefualtMemberService implements MemberService {
     @Override
     public void checkAlertCondition(Favorite favorite, Integer oldAlertPrice){
         Integer lowestPrice = findLowestPriceByMappingId(favorite.getMappingId());
+//        System.out.println("checkAlertCondition lowestPrice : "+ lowestPrice);
+
         if ((oldAlertPrice == null && favorite.getAlertPrice() != null)
                 || (favorite.getAlertPrice() != null && lowestPrice <= favorite.getAlertPrice())){
             String message = createAlertMessage(favorite.getMappingId(), lowestPrice, favorite.getAlertPrice());
-            sendAlert(favorite.getMappingId(), message);
+            System.out.println("checkAlertCondition message : "+message);
         }
     }
 
@@ -237,13 +209,13 @@ public class DefualtMemberService implements MemberService {
     public void checkerforfavPrice(Long productId, Integer newPrice){
         List<Favorite> favorites = favoriteRepository.findByMappingId(productId);
         Integer lowestPrice = findLowestPriceByMappingId(productId);
+        String alertType = "PRICE_ALERT";
         for (Favorite favorite : favorites){
             Integer alertPrice = favorite.getAlertPrice();
             if (alertPrice == null || lowestPrice <= alertPrice){
                 String message = createAlertMessage(productId, newPrice, alertPrice);
-                sendAlert(favorite.getMember().getId(), message);
+                emitterService.sendToEmitter(favorite.getMember().getId(), alertType, message);
             }
-
         }
     }
 
@@ -251,6 +223,12 @@ public class DefualtMemberService implements MemberService {
     @Override
     public Integer findLowestPriceByMappingId(Long mappingId) {
         List<Product> products = productRepository.findAllByMappingId(mappingId);
+        //mappingid가 변경 된 경우 찾아가는 로직
+        if (products == null || products.isEmpty()){
+            Product findProduct = productRepository.findById(mappingId).orElse(null);
+            Long findProductId = findProduct.getMappingId().longValue();
+            products = productRepository.findAllByMappingId(findProductId);
+        }
         List<Long> productIds = products.stream().map(Product::getId).collect(Collectors.toList());
 
         return priceHistoryRepository.findLowestPriceByProductIdsAndLatestDate(productIds)

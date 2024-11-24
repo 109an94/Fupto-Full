@@ -14,8 +14,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequestMapping("/user/member")
 public class EmitterController {
     private final EmitterService emitterService;
-
-    @Autowired
     public EmitterController(EmitterService emitterService) {
         this.emitterService = emitterService;
     }

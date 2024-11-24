@@ -58,7 +58,7 @@ public class SecurityConfig {
                         .requestMatchers("/products/*/image/*").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/member/**").hasRole("USER")
+                        .requestMatchers("/member/**").hasAnyRole("USER","ADMIN")
                         .anyRequest().authenticated())
 //                .formLogin(Customizer.withDefaults())
 //        ;

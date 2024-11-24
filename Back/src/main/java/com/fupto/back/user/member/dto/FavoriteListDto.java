@@ -16,6 +16,7 @@ public class FavoriteListDto {
 
     private Long productId;
     private String productName;
+    private Integer productPrice;
 
     private Long memberId;
     private String memberName;

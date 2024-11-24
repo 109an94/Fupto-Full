@@ -1,53 +1,59 @@
 
 <!-- script -->
 <script setup>
+import {use$Fetch} from "~/composables/use$Fetch.js";
 useHead({
-  link: [{ rel: "stylesheet", href: "/css/headers.css" }],
-  link: [{ rel: "stylesheet", href: "/css/myLayout.css" }],
   link: [{ rel: "stylesheet", href: "/css/myFavorite.css" }]
 });
-const favorites = ref([
-  {
-    id: 1,
-    brand: 'Thom Browne',
-    name: '4-Bar cotton cropped trousers',
-    price: 370000,
-    alertPrice: '300000',
-    showAlert: false,
-    image: 'https://img.ssensemedia.com/images/b_white,c_lpad,g_south,h_1086,w_724/c_scale,h_480,f_auto,q_auto/222495F070000_1/navy-stand-collar-jumpsuit.jpg'
-  },
-  {
-    id: 2,
-    brand: 'Thom Browne',
-    name: '4-Bar cotton cropped trousers 만약 이름이 길어지면?',
-    price: 300000,
-    alertPrice: '390000',
-    showAlert: false,
-    image: 'https://img.ssensemedia.com/images/b_white,c_lpad,g_south,h_1086,w_724/c_scale,h_480,f_auto,q_auto/222495F070000_1/navy-stand-collar-jumpsuit.jpg'
-  },
-  {
-    id: 3,
-    brand: 'Thom Browne',
-    name: '4-Bar cotton cropped trousers',
-    price: 370000,
-    alertPrice: '',
-    showAlert: false,
-    image: 'https://img.ssensemedia.com/images/b_white,c_lpad,g_south,h_1086,w_724/c_scale,h_480,f_auto,q_auto/222495F070000_1/navy-stand-collar-jumpsuit.jpg'
-  },
-  {
-    id: 4,
-    brand: 'Thom Browne',
-    name: '4-Bar cotton cropped trousers',
-    price: 370000,
-    alertPrice: '',
-    showAlert: false,
-    image: 'https://img.ssensemedia.com/images/b_white,c_lpad,g_south,h_1086,w_724/c_scale,h_480,f_auto,q_auto/222495F070000_1/navy-stand-collar-jumpsuit.jpg'
+
+const userDetails = useUserDetails()
+const products = ref([]);
+const fetchMember = async () => {
+  try {
+    const id = userDetails.id.value;
+    const response = await use$Fetch(`/user/member/${id}/fav`, {
+      method: 'GET'
+    });
+    if (!response) {
+      throw new Error('데이터 조회 실패');
+    }
+    console.log(response)
+    // 각 제품마다 단일 이미지를 가지도록 매핑
+    products.value = await Promise.all(
+        response.map(async (product) => {
+          const imageResponse = await use$Fetch(`/user/member/${product.productId}/favimg`, {
+            method: 'GET',
+            responseType: 'blob'
+          });
+          const imgObjectUrl = URL.createObjectURL(imageResponse);
+          return {
+            ...product,
+            showAlert: false,
+            image: imgObjectUrl
+          };
+        })
+    );
+  } catch (error) {
+    console.error("데이터 조회 오류:", error);
   }
-  // ... more items
-])
+};
+
+const updateAlertPrice = async (memberId, productId, alertPrice) => {
+  try {
+     await use$Fetch(`/user/member/${memberId}/fav/${productId}/alertPrice`, {
+      method: 'POST',
+      body: {
+        alertPrice: alertPrice
+      }
+    })
+    console.log('알림 가격이 업데이트 되었습니다.')
+  } catch (error) {
+    console.error('업데이트 실패 : ' + error);
+  }
+}
 
 const toggleAlert = (id) => {
-  const item = favorites.value.find(item => item.id === id)
+  const item = products.value.find(item => item.id === id)
   if (item) {
     item.showAlert = !item.showAlert
   }
@@ -58,40 +64,45 @@ const getTrendingIcon = (item) => {
       ? '/imgs/icon/fallchart.svg'
       : '/imgs/icon/basicchart.svg'
 }
-
+//-------lifecycle hooks--------
+onMounted(() => {
+  fetchMember()
+});
 </script>
 
 <!-- templates -->
 <template>
   <div class="favorites-container">
-    <div class="product-item" v-for="item in favorites" :key="item.id">
+    <div class="product-item" v-for="item in products" :key="item.id">
       <!-- Product Info Section -->
       <div class="product-info" >
 
 <!--        이미지-->
         <div class="product-image">
-          <img :src="item.image" :alt="item.name">
+          <img :src="item.image" :alt="item.productName">
         </div>
 <!--        디테일-->
         <div class="product-details">
-          <h3>{{ item.brand }}</h3>
-            <p>{{ item.name }}</p>
+          <h3>{{ item.productBrandName }}</h3>
+            <p>{{ item.productName }}</p>
           <div class="price-info">
             <span class="price-icon">
               <img :src="getTrendingIcon(item)" alt="price trend">
             </span>
-            <span>{{ item.price }} ₩</span>
+            <span>{{ item.productPrice }} ₩</span>
           </div>
           <div class="web-only">
             <input type="number"
                    v-model="item.alertPrice"
+                   :alt = "item.alertPrice"
                    placeholder="알림 받을 가격">
           </div>
 
         </div>
         <div class="btn-box">
           <button class="save-btn">이동</button>
-          <button class="save-btn web-only">변경</button>
+          <button class="save-btn web-only" @click="updateAlertPrice(userDetails.id.value, item.id, item.alertPrice)">
+            변경</button>
         </div>
       </div>
       <!-- 모바일 알림 설정 -->
@@ -102,8 +113,12 @@ const getTrendingIcon = (item) => {
           </div>
           <input type="number"
                  v-model="item.alertPrice"
+                 :alt = "item.alertPrice"
                  placeholder="알림 받을 가격">
-          <button class="save-btn">변경</button>
+          <button class="save-btn"
+          @click="updateAlertPrice(userDetails.id.value,
+          item.id,
+          item.alertPrice)">변경</button>
         </div>
       </div>
 <!--      드롭 다운 버튼-->

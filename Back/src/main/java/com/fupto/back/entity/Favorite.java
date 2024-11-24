@@ -39,6 +39,6 @@ public class Favorite {
     @Column(name = "update_date", insertable = false)
     private Instant updateDate;
 
-    @Column(name = "alert_price", nullable = false)
+    @Column(name = "alert_price", nullable = true)
     private Integer alertPrice;
 }

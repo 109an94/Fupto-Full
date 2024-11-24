@@ -49,12 +49,12 @@ public class MemberController {
 
 
 //    Favorite 영역-------------------------
-    @GetMapping("{id}/fav")
+    @GetMapping("{id}/fav")//계정 ID값
     public ResponseEntity<?> getFavorites(@PathVariable Long id){
         System.out.println(id);
         return ResponseEntity.ok(memberService.getFavorites(id));
     }
-    @GetMapping("{id}/favimg")
+    @GetMapping("{id}/favimg")//이미지 ID값
     public ResponseEntity<Resource> getMembersFavImg(@PathVariable Long id) throws IOException {
         Resource resource = memberService.getProductImage(id);
         String contentType = Files.probeContentType(Paths.get(resource.getURI()));
@@ -62,7 +62,7 @@ public class MemberController {
         if (contentType == null) {
             contentType = "application/octet-stream";
         }
-
+        System.out.println("---------------컨트롤러 리턴직전------------");
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
                 .body(resource);
