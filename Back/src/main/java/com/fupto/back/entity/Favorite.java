@@ -38,4 +38,7 @@ public class Favorite {
     @ColumnDefault("current_timestamp()")
     @Column(name = "update_date", insertable = false)
     private Instant updateDate;
+
+    @Column(name = "alert_price", nullable = false)
+    private Integer alertPrice;
 }

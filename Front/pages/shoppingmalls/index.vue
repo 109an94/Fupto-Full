@@ -55,10 +55,25 @@ const shoppingmalls = ref({});
 const route = useRoute();
 const router = useRouter();
 
+// const fetchShoppingmalls = async () => {
+//   const config = useRuntimeConfig();
+//   try {
+//     const response = await $fetch(`${config.public.apiBase}/shoppingmalls`, {
+//       params: {
+//         shoppingmall: route.query.shoppingmall ? route.query.shoppingmall.split(",") : undefined,
+//       },
+//     });
+
+//     shoppingmalls.value = groupShoppingmallsByFirstLetter(response);
+//   } catch (error) {
+//     console.error("Error fetching shoppingmalls:", error);
+//   }
+// };
+
 const fetchShoppingmalls = async () => {
   const config = useRuntimeConfig();
   try {
-    const response = await $fetch(`${config.public.apiBase}/shoppingmalls`, {
+    const response = await use$Fetch(`/shoppingmalls`, {
       params: {
         shoppingmall: route.query.shoppingmall ? route.query.shoppingmall.split(",") : undefined,
       },

@@ -68,4 +68,8 @@ public class Member {
     @JsonManagedReference
     private List<Favorite> favorites;
 
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Alert> alert;
+
 }

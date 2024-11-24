@@ -43,8 +43,11 @@ public class JwtUtil {
     public String extractUsername(String token){
         return extractAllClaims(token).getSubject();
     }
-    public Long extractUserId(String token){
-        return extractAllClaims(token).get("userId",Long.class);
+    public String extractUserId(String token){
+        return extractAllClaims(token).get("userId",String.class);
+    }
+    public Long extractId(String token){
+        return extractAllClaims(token).get("id",Long.class);
     }
     public String extractEmail(String token){
         return extractAllClaims(token).get("email",String.class);
@@ -67,6 +70,7 @@ public class JwtUtil {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId",userDetails.getId());
         claims.put("username",userDetails.getUsername());
+        claims.put("id",userDetails.getId());
         claims.put("password",userDetails.getPassword());
         claims.put("email",userDetails.getEmail());
         claims.put("roles",userDetails.getAuthorities());

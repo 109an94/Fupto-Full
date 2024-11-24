@@ -43,8 +43,7 @@ public class FuptoUserDetailService implements UserDetailsService {
 
         String role = member.getRole();
         authorities.add(new SimpleGrantedAuthority(role));
-
-
+        System.out.println("토큰 발급했는 지 확인용----------------");
         return FuptoUserDetails.builder()
                 .id(member.getId())
                 .username(userId)
