@@ -125,7 +125,8 @@ const removeImage = () => {
 };
 
 const handleCancel = () => {
-  router.push('/boards/list');
+  // router.push('/boards/list');
+  router.go(-1);
 };
 
 onMounted(async () => {
@@ -135,8 +136,8 @@ onMounted(async () => {
 
 <template>
   <main>
-    <div class="card">
-      <div class="card-body">
+    <div class="board-container">
+      <div class="board-detail">
         <form @submit.prevent="handleSubmit" enctype="multipart/form-data">
           <table class="table">
             <tbody>

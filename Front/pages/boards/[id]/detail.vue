@@ -21,14 +21,6 @@ const imageUrl = ref('');
 const dropdownVisible = ref(false);
 const showModal = ref(false);
 
-// 날짜 형식을 'yyyy-mm-dd'로 포맷팅하는 함수
-const formatDate = (date) => {
-  const d = new Date(date);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
 
 const getImageUrl = (url) => {
   if (!url) return '';
@@ -52,8 +44,8 @@ const loadBoardData = async () => {
       contents: data.contents,
       boardCategoryName: data.boardCategoryName,
       regMemberNickName: data.regMemberNickName,
-      createdAt: formatDate(data.createdAt),
-      modifiedAt: formatDate(data.modifiedAt),
+      createdAt: data.createdAt,
+      modifiedAt:data.modifiedAt,
       active: data.active,
       img: data.img, // 이미지 URL을 board 객체에 포함시킴
     };
@@ -62,6 +54,28 @@ const loadBoardData = async () => {
     console.error("Error loading board:", error);
     alert(`게시글을 불러오는데 실패했습니다: ${error.message}`);
   }
+};
+
+// 날짜 형식을 'yyyy-mm-dd'로 포맷팅하는 함수
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+
+  const date = new Date(dateString);
+  // UTC 날짜 포맷
+  const ymd = 
+    date.getUTCFullYear() + "-" + 
+    String(date.getUTCMonth() + 1).padStart(2, "0") + "-" + 
+    String(date.getUTCDate()).padStart(2, "0");
+
+  // UTC 시간 포맷 (시:분:초)
+  const time = 
+    String(date.getUTCHours()).padStart(2, "0") +
+    ":" +
+    String(date.getUTCMinutes()).padStart(2, "0") +
+    ":" +
+    String(date.getUTCSeconds()).padStart(2, "0");
+
+  return `${ymd} ${time}`;  // 날짜와 시간을 '시:분:초' 형식으로 반환
 };
 
 // 드롭다운 메뉴 토글
@@ -135,7 +149,7 @@ onMounted(async () => {
         <div class="user-avatar"></div>
           <div class="user-meta">
             <span class="user-name">{{ board.regMemberNickName }}</span>
-            <span class="post-date">{{ board.createdAt }}</span>
+            <span class="post-date">{{ formatDate(board.createdAt) }}</span>
           </div>
           <div class="actions-menu">
             <button class="menu-trigger" @click="toggleDropdown">

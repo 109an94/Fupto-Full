@@ -1,7 +1,7 @@
 package com.fupto.back.anonymous.board.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fupto.back.admin.board.dto.BoardListDto;
+
 import com.fupto.back.anonymous.board.dto.*;
 import com.fupto.back.anonymous.board.service.BoardService;
 import org.springframework.http.HttpStatus;
@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping("boards")
 public class BoardController {
 
-    private final BoardService boardService;
+    private BoardService boardService;
 
     public BoardController(BoardService boardService) {
         this.boardService = boardService;

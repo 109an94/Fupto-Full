@@ -90,6 +90,10 @@ const handleSubmit = async() => {
   }
   };
 
+  const handleCancel = () => {
+    window.location.href = 'http://localhost:3000/boards/list';
+};
+
   const resetForm = () => {
     board.value = {
       title: '',
@@ -101,8 +105,6 @@ const handleSubmit = async() => {
     };
     imageUrl.value = '';
   };
-
-  const handleCancel = resetForm;
 
 </script>
 
@@ -158,6 +160,7 @@ const handleSubmit = async() => {
           
           <div class="text-center">
             <button type="submit" class="btn btn-primary">등록</button>
+            <button type="button" class="btn btn-secondary" @click="handleCancel">취소</button>
           </div>
         </form>
       </div>

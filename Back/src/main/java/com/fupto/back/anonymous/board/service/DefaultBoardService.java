@@ -119,6 +119,8 @@ public class DefaultBoardService implements BoardService {
                 .contents(board.getContents())
                 .boardCategoryName(board.getBoardCategory().getName())
                 .regMemberNickName(board.getRegMember().getNickname())
+                .createdAt(board.getCreatedAt())
+                .modifiedAt(board.getModifiedAt())
                 .img(board.getImg())
                 .build();
     }
@@ -180,6 +182,8 @@ public class DefaultBoardService implements BoardService {
                 .title(board.getTitle())
                 .contents(board.getContents())
                 .boardCategoryId(board.getBoardCategory().getId())
+                .createdAt(board.getCreatedAt())
+                .modifiedAt(board.getModifiedAt())
                 .img(board.getImg())
                 .build();
     }

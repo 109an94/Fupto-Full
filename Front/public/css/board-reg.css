@@ -77,7 +77,7 @@
 }
 
 .content, .input-text {
-  width: 100%;
+  width: 95%;
   /* max-width: 300px;  최대 너비를 설정하여 너무 커지지 않도록 제한 */
   padding: 6px;
   border: 1px solid #ced4da;
@@ -148,8 +148,8 @@
 }
 
 .btn-primary {
-  background-color: blue; /* 여기서 색을 직접 설정해봅니다. */
-  color: white;
-  z-index: 10; /* 버튼의 z-index를 높여서 다른 요소 위로 보이게 합니다. */
+  border: solid 1px #007bff;
+  color: #007bff;
+  margin-right: 15px;
 }
 

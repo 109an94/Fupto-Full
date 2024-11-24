@@ -75,7 +75,7 @@ const fetchBoards = async () => {
     if (formData.value.startDate) params.append("startDate", formData.value.startDate);
     if (formData.value.endDate) params.append("endDate", formData.value.endDate);
 
-    const response = await fetch(`http://localhost:8080/api/v1/admin/boards?${params.toString()}`);
+    const response = await afetch(`http://localhost:8080/api/v1/admin/boards?${params.toString()}`);
     const data = await response.json();
     console.log(data)
     boards.value = data.boards;
