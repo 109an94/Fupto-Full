@@ -18,27 +18,27 @@ useHead({
           <li class="info-email">****@naver.com</li>
           <li><nuxt-link to="/myPage/setting/account"><button>프로필관리</button></nuxt-link></li>
         </ul>
-        <div class="icon">
-          <span>알림</span>
-        </div>
+<!--        <div class="icon">-->
+<!--          <span>알림</span>-->
+<!--        </div>-->
       </div>
       <nav class="profileNav">
         <ul>
           <li>
             <nuxt-link to="/myPage/board">
-              <span>img</span>
+              <span><img src="/imgs/icon/board.svg"></span>
               <span>게시판</span>
             </nuxt-link>
           </li>
           <li>
             <nuxt-link to="/myPage/alert">
-              <span>img</span>
-              <span>이벤트</span>
+              <span><img src="/imgs/icon/alerts.svg"></span>
+              <span>알람</span>
             </nuxt-link>
           </li>
           <li>
             <nuxt-link to="/myPage/favorite">
-              <span>img</span>
+              <span><img src="/imgs/icon/favorite.svg"></span>
               <span>찜</span>
             </nuxt-link>
           </li>

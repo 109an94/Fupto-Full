@@ -6,11 +6,12 @@ main {
 }
 
 aside.profileContainer {
+    background-color: var(--color-ui-white);
+    border-right: 1px solid var(--color-ui-backgroundb);
     /*width: 100%;*/
     /*box-sizing: border-box;*/
 
     /*영역 관상용*/
-    background-color: yellow;
 }
 
 .profileContainer{
@@ -22,9 +23,9 @@ aside.profileContainer {
 
 div.profile{
     display: flex;
+    background-color: var(--color-ui-white);
     padding: 30px;
-    /*justify-content: flex-start;*/
-    background-color: blueviolet;
+    border-bottom: 1px solid var(--color-ui-backgroundb);
 }
 
 div.profile img{
@@ -40,7 +41,7 @@ div.icon{
     margin-left: auto;
     width: 20px;
     height: 32px;
-    background-color: #989CA2;
+    /*background-color: #989CA2;*/
     padding: 0px 20px;
 }
 div.icon#extend {
@@ -50,7 +51,6 @@ ul.info{
     display: flex;
     flex-direction: column;
     gap: 6px;
-    background-color: green;
     width: 100%;
 }
 li.info-name{
@@ -77,8 +77,7 @@ nav.profileNav{
     /*justify-content: space-around;*/
     /*flex-wrap: nowrap;*/
     padding-bottom: 10px;
-    border-bottom: 1px solid var(--color-text-unselected);
-    background-color: yellowgreen;
+    border-bottom: 1px solid var(--color-text-caption);
 }
 nav.profileNav ul{
     display: flex;
@@ -105,7 +104,7 @@ nav.profileNav li span:nth-child(1){
     border : 1px solid var(--color-text-caption);
     width: 30px;
     height: 30px;
-    background-color: var(--color-text-unselected);
+    background-color: var(--color-text-caption);
 }
 
 

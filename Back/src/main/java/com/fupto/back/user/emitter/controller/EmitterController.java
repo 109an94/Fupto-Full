@@ -1,6 +1,7 @@
 package com.fupto.back.user.emitter.controller;
 
 import com.fupto.back.auth.entity.FuptoUserDetails;
+import com.fupto.back.user.emitter.dto.AlertDto;
 import com.fupto.back.user.emitter.dto.AlertEventDto;
 import com.fupto.back.user.emitter.service.EmitterService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.util.List;
 
 @RestController("userEmitterController")
 @RequestMapping("/user/member")
@@ -20,8 +23,27 @@ public class EmitterController {
 
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(@AuthenticationPrincipal FuptoUserDetails userDetails) {
+        System.out.println("-------------------subscribe----------------");
         return emitterService.createEmitter(userDetails.getId());
     }
+
+    @GetMapping("/unreadAlerts")
+    public ResponseEntity<List<AlertDto>> getUnreadAlerts(@AuthenticationPrincipal FuptoUserDetails userDetails) {
+        return ResponseEntity.ok(emitterService.getUnreadAlerts(userDetails.getId()));
+    }
+
+    @PatchMapping("/alerts/{alertId}/read")
+    public ResponseEntity<?> markAsRead(@PathVariable Long alertId) {
+        emitterService.markAlertAsRead(alertId);
+        return ResponseEntity.ok().build();
+    }
+    @PatchMapping("/readAll")
+    public ResponseEntity<?> markAsReadAll(@AuthenticationPrincipal FuptoUserDetails userDetails) {
+        emitterService.markAllAlertsAsRead(userDetails.getId());
+        return ResponseEntity.ok().build();
+    }
+
+
 
     // 테스트용 엔드포인트 (실제 운영에서는 제거하세요)
     @PostMapping("/test-alert")

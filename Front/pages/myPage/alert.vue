@@ -4,12 +4,12 @@ useHead({
 });
 const alerts = ref([
   {
-    title: '[알림] 서버 점검이 있을 예정입니다.',
+    title: '[가격 알림] 해당 상품이 ${alertPrice} 보다 낮아졌습니다..',
     sender: 'fupto관리자',
     isRead: 0
   },
   {
-    title: '[알림] 서버 점검이 있을 예정입니다.',
+    title: '[가격 알림] 해당 상품이 더 저렴해졌습니다..',
     sender: 'fupto관리자',
     isRead: 0
   }
