@@ -134,6 +134,10 @@ small {
   color: #007bff;
 }
 
+nuxt-link {
+  display: inline-block;  /* nuxt-link가 inline-block이 되도록 수정 */
+}
+
 /* 페이징네이션 */
 .Pagination-container {
   margin-top: 1rem;

@@ -51,6 +51,7 @@ public class BrandController {
 
     @GetMapping("{id}/edit")
     public ResponseEntity<BrandListDto> show(@PathVariable Long id) {
+
         return ResponseEntity.ok(brandService.show(id));
     }
 

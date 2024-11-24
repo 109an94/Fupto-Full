@@ -16,7 +16,7 @@ public interface BoardService {
 
     // id 조회
     BoardDetailDto getBoardById(Long id);
-//    BoardResponseDto getPost(Long id);
+    //    BoardResponseDto getPost(Long id);
     BoardDefaultDto getSearch(BoardSearchDto boardSearchDto);
 
     // 등록
@@ -25,9 +25,9 @@ public interface BoardService {
 
     // 수정
 //    BoardResponseDto updatePost(Long id, BoardRequestsDto requestsDto) throws Exception;
-      BoardListDto show(Long id);
+    BoardListDto show(Long id);
 
-      BoardListDto update(Long id, BoardUpdateDto boardUpdateDto, MultipartFile file) throws IOException;
+    BoardListDto update(Long id, BoardUpdateDto boardUpdateDto, MultipartFile file) throws IOException;
 
 
     // 삭제
