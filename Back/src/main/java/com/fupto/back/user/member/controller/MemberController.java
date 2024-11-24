@@ -69,15 +69,14 @@ public class MemberController {
     }
 
 
-        @PostMapping("{id}/fav/{favoriteId}/alertPrice")
+        @PostMapping("{member}/fav/{mappingId}/alertPrice")
     public ResponseEntity<AlertPriceDto> updateAlertPrice(
 //            @AuthenticationPrincipal FuptoUserDetails userDetails,
-                                                          @PathVariable Long id,
-                                                          @PathVariable Long favoriteId,
+                                                          @PathVariable Long member,
+                                                          @PathVariable Long mappingId,
                                                           @RequestBody AlertPriceDto alertPriceDto){
 //        Long memberId = userDetails.getId();
-        Long memberId = id;
-        memberService.updateAlertPrice(favoriteId, memberId, alertPriceDto.getAlertPrice());
+        memberService.updateAlertPrice(member, mappingId, alertPriceDto.getAlertPrice());
         return ResponseEntity.ok().build();
     }
 

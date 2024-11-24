@@ -161,6 +161,7 @@ public class DefaultMemberService implements MemberService {
             dto.setMemberName(favorite.getMember().getNickname());
             dto.setCreateDate(favorite.getCreateDate());
             dto.setProductBrandName(brand.getEngName());
+            dto.setAlertPrice(favorite.getAlertPrice());
 
             dtoList.add(dto);
         }
@@ -179,9 +180,9 @@ public class DefaultMemberService implements MemberService {
 
     @Transactional
     @Override
-    public void updateAlertPrice(Long favoriteId, Long memberId, Integer alertPrice) {
+    public void updateAlertPrice(Long memberId, Long mappingId, Integer alertPrice) {
 
-        Favorite favorite = favoriteRepository.findByIdAndMemberId(favoriteId, memberId)
+        Favorite favorite = favoriteRepository.findByMemberIdAndMappingId(memberId, mappingId)
                 .orElseThrow(() -> new EntityNotFoundException("Favorite not found"));
 
         Integer oldAlertPrice = favorite.getAlertPrice();

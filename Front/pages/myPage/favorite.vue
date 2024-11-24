@@ -46,7 +46,19 @@ const updateAlertPrice = async (memberId, productId, alertPrice) => {
         alertPrice: alertPrice
       }
     })
+
+    // 데이터 다시 불러오기
+    await fetchMember();
+
+    // 토글 닫기
+    const item = products.value.find(item => item.productId === productId);
+    if (item) {
+      item.showAlert = false;
+    }
+
+
     console.log('알림 가격이 업데이트 되었습니다.')
+    alert('알림 가격이 업데이트 되었습니다.')
   } catch (error) {
     console.error('업데이트 실패 : ' + error);
   }
@@ -95,13 +107,15 @@ onMounted(() => {
             <input type="number"
                    v-model="item.alertPrice"
                    :alt = "item.alertPrice"
-                   placeholder="알림 받을 가격">
+                   :placeholder="item.alertPrice ? item.alertPrice.toString() : '알림 받을 가격'">
           </div>
 
         </div>
         <div class="btn-box">
-          <button class="save-btn">이동</button>
-          <button class="save-btn web-only" @click="updateAlertPrice(userDetails.id.value, item.id, item.alertPrice)">
+          <nuxt-link :to="`/products/${item.productId}/detail`">
+            <button class="save-btn">이동</button>
+          </nuxt-link>
+          <button class="save-btn web-only" @click="updateAlertPrice(userDetails.id.value, item.productId, item.alertPrice)">
             변경</button>
         </div>
       </div>
@@ -114,10 +128,10 @@ onMounted(() => {
           <input type="number"
                  v-model="item.alertPrice"
                  :alt = "item.alertPrice"
-                 placeholder="알림 받을 가격">
+                 :placeholder="item.alertPrice ? item.alertPrice.toString() : '알림 받을 가격'">
           <button class="save-btn"
           @click="updateAlertPrice(userDetails.id.value,
-          item.id,
+          item.productId,
           item.alertPrice)">변경</button>
         </div>
       </div>
@@ -126,7 +140,7 @@ onMounted(() => {
         <button class="dropdown-btn mobile-only"
                 :class="{ 'is-active': item.showAlert }"
                 @click="toggleAlert(item.id)">
-          <img src="public/imgs/icon/arrow-forward.svg" alt="toggle">
+          <img src="/imgs/icon/arrow-forward.svg" alt="toggle">
         </button>
       </div>
     </div>
