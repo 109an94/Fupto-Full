@@ -17,6 +17,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -149,6 +152,14 @@ public class DefaultProductService implements ProductService {
         return dto;
     }
 
+    private ProductListDto convertToProductListDto(Product product, Long memberId) {
+        ProductListDto dto = convertToProductListDto(product);
+        if (memberId != null) {
+            dto.setFavorite(isFavorite(product.getMappingId(), memberId));
+        }
+        return dto;
+    }
+
     private String getImageUrl(Long productId, Integer displayOrder) {
         return String.format("http://localhost:8085/api/v1/products/%d/image/%d", productId, displayOrder);
     }
@@ -192,9 +203,9 @@ public class DefaultProductService implements ProductService {
     @Override
     @Transactional
     public ProductDetailDto getById(Long id, Long memberId) {
-        ProductDetailDto dto = getByIdInternal(id);  // private 메서드 호출
+        ProductDetailDto dto = getByIdInternal(id);  // 아래 private 메서드 호출
         if (memberId != null) {
-            dto.setFavorite(isFavorite(dto.getId(), memberId));
+            dto.setFavorite(isFavorite(dto.getMappingId(), memberId));
         }
         return dto;
     }
@@ -280,13 +291,12 @@ public class DefaultProductService implements ProductService {
     @Override
     @Transactional
     public ProductDetailDto getSingleById(Long id, Long memberId) {
-        ProductDetailDto dto = getSingleByIdInternal(id);  // private 메서드로 기본 로직 분리
+        ProductDetailDto dto = getSingleByIdInternal(id); // 아래 private 메서드 호출
         if (memberId != null) {
-            dto.setFavorite(isFavorite(dto.getId(), memberId));  // 찜 상태 설정
+            dto.setFavorite(isFavorite(dto.getMappingId(), memberId));
         }
         return dto;
     }
-
 
     private ProductDetailDto getSingleByIdInternal(Long id) {
         Product product = productRepository.findById(id)
@@ -351,7 +361,7 @@ public class DefaultProductService implements ProductService {
 
 
     @Override
-    public ProductResponseDto getAllProductsByShoppingmall(ProductSearchDto searchDto) {
+    public ProductResponseDto getAllProductsByShoppingmall(ProductSearchDto searchDto, Long memberId) {
         // 정렬 값 검증
         validateSort(searchDto.getSort());
 
@@ -393,7 +403,7 @@ public class DefaultProductService implements ProductService {
         Long nextCursor = hasMore ? products.get(products.size() - 1).getId() : null;
 
         List<ProductListDto> productDtos = products.stream()
-                .map(this::convertToProductListDto)
+                .map(product -> convertToProductListDto(product, memberId))
                 .toList();
 
         return ProductResponseDto.builder()
@@ -413,6 +423,7 @@ public class DefaultProductService implements ProductService {
             // 이미 존재하면 상태 토글
             Favorite favorite = existingFavorite.get();
             favorite.setState(!favorite.getState());
+            favorite.setUpdateDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toInstant(ZoneOffset.UTC));
             return favorite.getState();
         } else {
             // 새로 생성
@@ -433,14 +444,6 @@ public class DefaultProductService implements ProductService {
     @Override
     public boolean isFavorite(Long mappingId, Long memberId) {
         return favoriteRepository.existsByMemberIdAndMappingIdAndStateIsTrue(memberId, mappingId);
-    }
-
-    private ProductListDto convertToProductListDto(Product product, Long memberId) {
-        ProductListDto dto = convertToProductListDto(product);
-        if (memberId != null) {
-            dto.setFavorite(isFavorite(product.getMappingId(), memberId));
-        }
-        return dto;
     }
 
     private Integer calculateDiscountRate(Integer retailPrice, Integer salePrice) {

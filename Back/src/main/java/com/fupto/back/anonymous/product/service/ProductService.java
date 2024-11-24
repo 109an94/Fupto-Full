@@ -15,7 +15,7 @@ public interface ProductService {
     ProductDetailDto getById(Long id, Long memberId);
     ProductDetailDto getSingleById(Long id, Long memberId);
 
-    ProductResponseDto getAllProductsByShoppingmall(ProductSearchDto searchDto);
+    ProductResponseDto getAllProductsByShoppingmall(ProductSearchDto searchDto, Long memberId);
 
     boolean toggleFavorite(Long mappingId, Long memberId);
     boolean isFavorite(Long mappingId, Long memberId);

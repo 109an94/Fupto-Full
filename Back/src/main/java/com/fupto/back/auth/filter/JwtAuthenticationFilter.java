@@ -26,67 +26,71 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
 
+        boolean isProductsPath = request.getServletPath().startsWith("/products") &&
+                !request.getServletPath().contains("/favorite");
+
         if (request.getServletPath().startsWith("/auth/") ||
-                (request.getServletPath().startsWith("/products") && !request.getServletPath().contains("/favorite")) ||
                 request.getServletPath().startsWith("/brands") ||
                 request.getServletPath().startsWith("/shoppingmalls") ||
                 request.getServletPath().matches(".*/products/.*/image/.*") ||
                 request.getServletPath().matches("/products/.*/image/.*") ||
                 request.getServletPath().startsWith("/uploads/")) {
             filterChain.doFilter(request, response);
-        } else {
-            String authHeader = request.getHeader("Authorization");
-
-            System.out.println("authHeader : " + authHeader);
-            System.out.println("request : " + request); // 확인됨
-
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                String token = authHeader.substring(7);
-                System.out.println("token : " + token);
-
-                if (jwtUtil.vaildateToken(token)) {
-                    Long id = jwtUtil.extractId(token);
-                    String username = jwtUtil.extractUsername(token);
-                    String email = jwtUtil.extractEmail(token);
-                    List<String> roles = jwtUtil.extractRoles(token);
-
-                    System.out.println("id : " + id);
-                    System.out.println("username : " + username);
-                    System.out.println("email : " + email);
-                    System.out.println("roles : " + roles);
-
-                    if (username != null && !username.isEmpty()) {
-                        List<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
-                        authorities.add(new SimpleGrantedAuthority(username));
-
-                        for (String role : roles) {
-                            authorities.add(new SimpleGrantedAuthority(role));
-                        }
-                        FuptoUserDetails userDetails = FuptoUserDetails.builder()
-                                .id(id)
-                                .username(username)
-                                .authorities(authorities)
-                                .build();
-
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                                userDetails, null, authorities);
-                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
-                        System.out.println("dofilter---------------------" + authToken);
-                    }
-                }
-            } else {
-                System.out.println("jwt 토큰 검증 실패");
-                // jwtUtil.generateToken(request);
-                return;
-            }
-            // else {filterChain.doFilter(request, response);
-            // return;}
-            filterChain.doFilter(request, response);
+//            return;
         }
+
+        String authHeader = request.getHeader("Authorization");
+
+        System.out.println("authHeader : " + authHeader);
+        System.out.println("request : " + request); // 확인됨
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+
+            System.out.println("token : " + token);
+
+            if (jwtUtil.vaildateToken(token)) {
+                Long id = jwtUtil.extractId(token);
+                String username = jwtUtil.extractUsername(token);
+                String email = jwtUtil.extractEmail(token);
+                List<String> roles = jwtUtil.extractRoles(token);
+
+                System.out.println("id : " + id);
+                System.out.println("username : " + username);
+                System.out.println("email : " + email);
+                System.out.println("roles : " + roles);
+
+                if (username != null && !username.isEmpty()) {
+                    List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                    authorities.add(new SimpleGrantedAuthority(username));
+
+                    for (String role : roles) {
+                        authorities.add(new SimpleGrantedAuthority(role));
+                    }
+                    FuptoUserDetails userDetails = FuptoUserDetails.builder()
+                            .id(id)
+                            .username(username)
+                            .authorities(authorities)
+                            .build();
+
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, authorities);
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    System.out.println("dofilter---------------------" + authToken);
+                }
+            }
+        } else if (!isProductsPath) {
+            System.out.println("jwt 토큰 검증 실패");
+            // jwtUtil.generateToken(request);
+            return;
+        }
+        // else {filterChain.doFilter(request, response);
+        // return;}
+        filterChain.doFilter(request, response);
     }
 }

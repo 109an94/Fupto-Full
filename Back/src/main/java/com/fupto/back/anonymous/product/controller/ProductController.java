@@ -3,6 +3,7 @@ package com.fupto.back.anonymous.product.controller;
 import com.fupto.back.anonymous.product.dto.*;
 import com.fupto.back.anonymous.product.service.ProductService;
 import com.fupto.back.auth.entity.FuptoUserDetails;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("products")
 public class ProductController {
@@ -96,7 +98,7 @@ public class ProductController {
             @AuthenticationPrincipal FuptoUserDetails userDetails) {
         searchDto.setShoppingmall(List.of(shoppingmallId));
         Long memberId = userDetails != null ? userDetails.getId() : null;
-        return ResponseEntity.ok(productService.getAllProductsByShoppingmall(searchDto));
+        return ResponseEntity.ok(productService.getAllProductsByShoppingmall(searchDto, memberId));
     }
 
     @PatchMapping("/{mappingId}/favorite")
@@ -106,9 +108,6 @@ public class ProductController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        System.out.println("mappingId: " + mappingId +
-                ", userDetails: { id: " + userDetails.getId() +
-                ", username: " + userDetails.getUsername() + " }");
         productService.toggleFavorite(mappingId, userDetails.getId());
         return ResponseEntity.ok().build();
     }
