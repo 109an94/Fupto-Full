@@ -69,8 +69,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             authorities.add(new SimpleGrantedAuthority(role));
                         }
                         UserDetails userDetails = FuptoUserDetails.builder()
+                                .id(id)
                                 .username(username)
-                                .authorities(authorities).build();
+                                .authorities(authorities)
+                                .build();
 
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                                 userDetails, null, authorities);
