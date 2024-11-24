@@ -4,7 +4,7 @@ import com.fupto.back.admin.product.dto.*;
 import com.fupto.back.entity.PriceHistory;
 import com.fupto.back.entity.ProductImage;
 import com.fupto.back.repository.*;
-import com.fupto.back.user.member.service.DefualtMemberService;
+import com.fupto.back.user.member.service.DefaultMemberService;
 import jakarta.persistence.EntityNotFoundException;
 import com.fupto.back.entity.Category;
 import com.fupto.back.entity.Product;
@@ -27,14 +27,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service("adminProductService")
 @Transactional
 public class DefaultProductService implements ProductService {
 
-    private final DefualtMemberService userMemberService;
+    private final DefaultMemberService userMemberService;
     @Value("${file.upload.path}")
     private String uploadPath;
 
@@ -54,7 +53,7 @@ public class DefaultProductService implements ProductService {
                                  PriceHistoryRepository priceHistoryRepository,
                                  ProductImageRepository productImageRepository,
                                  ModelMapper modelMapper,
-                                 FileService fileService, DefualtMemberService userMemberService) {
+                                 FileService fileService, DefaultMemberService userMemberService) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.brandRepository = brandRepository;

@@ -51,7 +51,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize-> authorize
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/products/*/favorite").authenticated()
                         .requestMatchers("/products/**").permitAll()
                         .requestMatchers("/brands/**").permitAll()
                         .requestMatchers("/shoppingmalls/**").permitAll()
@@ -59,7 +58,7 @@ public class SecurityConfig {
                         .requestMatchers("/products/*/image/*").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/member/**").hasRole("USER")
+                        .requestMatchers("/member/**").hasAnyRole("USER","ADMIN")
                         .anyRequest().authenticated())
 //                .formLogin(Customizer.withDefaults())
 //        ;

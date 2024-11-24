@@ -4,6 +4,7 @@ useHead({
 });
 
 import { ref, onMounted } from 'vue';
+import { use$Fetch } from "~/composables/use$Fetch";
 
 // 상태관리
 // const router = useRouter()
@@ -75,12 +76,13 @@ const fetchBoards = async () => {
     if (formData.value.startDate) params.append("startDate", formData.value.startDate);
     if (formData.value.endDate) params.append("endDate", formData.value.endDate);
 
-    const response = await fetch(`http://localhost:8080/api/v1/admin/boards?${params.toString()}`);
-    const data = await response.json();
-    console.log(data)
+    const data = await use$Fetch(`/admin/boards?${params.toString()}`);
+    // const data = await response.json();
     boards.value = data.boards;
+
     totalElements.value = data.totalElements;
     totalPages.value = data.totalPages;
+
     if (boards.value.length === 0) {
       noDataMessage.value = '게시글이 없습니다.';
     } else {
@@ -95,7 +97,7 @@ const fetchBoards = async () => {
 const updateActive = async (boardId, active) => {
   try {
     console.log(`Updating active status: boardId=${boardId}, active=${active}`);
-    const response = await fetch(`http://localhost:8080/api/v1/admin/boards/${boardId}/active?active=${active}`, {
+    const response = await use$Fetch(`/admin/boards/${boardId}/active?active=${active}`, {
       method: "PATCH",
     });
     if (!response.ok) {
@@ -116,13 +118,13 @@ const confirmDelete = (boardId) => {
 
 const handleDelete = async (boardId) => {
   try {
-    const response = await fetch(`http://localhost:8080/api/v1/admin/boards/${boardId}`, {
+    await use$Fetch(`/admin/boards/${boardId}`, {
       method: "DELETE"
     });
 
-    if (!response.ok) {
-      throw new Error("삭제에 실패했습니다.");
-    }
+    // if (!response.ok) {
+    //   throw new Error("삭제에 실패했습니다.");
+    // }
 
     alert('삭제되었습니다.');
     fetchBoards();
@@ -143,12 +145,9 @@ const selectedDelete = async () => {
 
   if (confirm('선택한 게시글을 삭제하시겠습니까?')) {
     try {
-      const response = await fetch('http://localhost:8080/api/v1/admin/boards/selected', {
+      await use$Fetch('/admin/boards/selected', {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(Array.from(selectedItems.value)),
+        body:Array.from(selectedItems.value),
       });
 
       if (!response.ok) {
@@ -299,7 +298,7 @@ const handleSelectItem = (event, boardId) => {
   } else {
     selectedItems.value.add(boardId);
   }
-  selectAll.value = selectedItems.value.size === brands.value.length;
+  selectAll.value = selectedItems.value.size === boards.value.length;
 };
 
 const handleSearch = (event) => {
@@ -542,7 +541,7 @@ onMounted(() => {
           <p class="modal-cat"><strong>CATERORY: </strong> {{ selectedBoard.boardCategoryName }}</p>
           <p class="modal-wri"><strong>WRITER: </strong> {{ selectedBoard.regMemberNickName }}</p>
           <p><strong>IMAGE:</strong><br>
-              <img v-if="selectedBoard.img" :src="'http://localhost:8080/api/v1/' + selectedBoard.img" :alt="selectedBoard.img" />
+              <img v-if="selectedBoard.img" :src="'http://localhost:8085/api/v1/' + selectedBoard.img" :alt="selectedBoard.img" />
               <p v-else>이미지 없음</p>
           </p>
           <br>

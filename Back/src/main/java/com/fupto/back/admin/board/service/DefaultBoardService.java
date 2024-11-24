@@ -254,15 +254,15 @@ public class DefaultBoardService implements BoardService {
     @Override
     public BoardListDto show(Long id) {
         Board board = boardRepository.findById(id).orElse(null);
-         return BoardListDto.builder()
-                 .title(board.getTitle())
-                 .contents(board.getContents())
-                 .active(board.getActive())
-                 .boardCategoryId(board.getBoardCategory().getId())
-                 .regMemberId(board.getRegMember().getId())
-                 .img(board.getImg())
-                 .build();
-        }
+        return BoardListDto.builder()
+                .title(board.getTitle())
+                .contents(board.getContents())
+                .active(board.getActive())
+                .boardCategoryId(board.getBoardCategory().getId())
+                .regMemberId(board.getRegMember().getId())
+                .img(board.getImg())
+                .build();
+    }
 
     @Override
     public BoardListDto update(Long id, BoardUpdateDto boardUpdateDto, MultipartFile file) throws IOException{

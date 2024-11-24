@@ -1,5 +1,6 @@
 <script setup>
 import{ ref } from 'vue';
+import { use$Fetch } from "~/composables/use$Fetch";
 
 useHead({
   link: [{ rel: "stylesheet", href: "/css/admin/board-reg.css" }],
@@ -68,27 +69,25 @@ const handleSubmit = async() => {
     formData.append('file', board.value.fileUpload);
   }
 
-  const response = await fetch('http://localhost:8080/api/v1/admin/boards/post', {
+  const {data, error} = await use$Fetch('/admin/boards/post', {
         method: 'POST',
         body: formData,
       });
 
-  if(response.ok){
-    const result = await response.json();
-    console.log('게시글 등록 성공:',result);
-    alert('게시글이 등록되었습니다.');
-    resetForm();
-    window.location.href = 'http://localhost:3000/admin/boards/list';
-  } else {
-    const errorData = await response.json();
-    console.error('게시글 등록 실패:', errorData);
-    throw new Error(errorData.message || '게시글 등록에 실패했습니다.');
-    }
-  } catch(error) {
-    console.error('Error:',error);
-    alert('게시글 등록 중 오류가 발생했습니다.');
-  }
-  };
+      if (error) {
+            throw new Error(error.message || '게시글 등록에 실패했습니다.');
+        }
+
+        console.log('게시글 등록 성공:',data);
+        alert('게시글이 등록되었습니다.');
+        resetForm();
+        window.location.href = 'http://localhost:3000/admin/boards/list';
+        
+      } catch(error) {
+        console.error('Error:',error);
+        alert('게시글 등록 중 오류가 발생했습니다.');
+      }
+    };
 
   const resetForm = () => {
     board.value = {
@@ -102,7 +101,10 @@ const handleSubmit = async() => {
     imageUrl.value = '';
   };
 
-  const handleCancel = resetForm;
+  const handleCancel = () => {
+    resetForm();
+    window.location.href = 'http://localhost:3000/admin/boards/list';
+};
 
 </script>
 
@@ -178,6 +180,7 @@ const handleSubmit = async() => {
 
           <div class="text-center">
             <button type="submit" class="btn btn-primary">등록</button>
+            <button type="button" class="btn btn-secondary" @click="handleCancel">취소</button>
           </div>
         </form>
       </div>

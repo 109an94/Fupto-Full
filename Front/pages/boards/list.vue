@@ -4,6 +4,7 @@ useHead({
 });
 
 import { ref, onMounted} from 'vue'
+import { use$Fetch } from "~/composables/use$Fetch";
 
 const boards = ref([]);
 const totalElements = ref(0);
@@ -13,13 +14,23 @@ const pageSize = ref(10);
 
 const searchForm = ref(null);
 const noDataMessage = ref('');
-
+const imageUrl = ref('');
 
 const formData = ref({
   searchType: 'title', // 제목, 작성자, 내용(?)
   searchKeyWord: '',
   boardCategoryName: '',
 })
+
+const getImageUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('data:')) {
+    // 새로 업로드된 이미지의 경우 (data URL)
+    return url;
+  }
+  // 서버에서 가져온 이미지 URL의 경우
+  return `${config.public.apiBase}${url}`;
+};
 
 const handleCategoryClick = (categoryName) => {
   formData.value.boardCategoryName = categoryName;
@@ -37,9 +48,10 @@ const fetchBoards = async () => {
     if (formData.value.searchKeyWord) params.append("searchKeyWord", formData.value.searchKeyWord);
     if (formData.value.boardCategoryName) params.append("boardCategory", formData.value.boardCategoryName);
     
-    const response = await fetch(`http://localhost:8080/api/v1/boards/list?${params.toString()}`);
-    const data = await response.json();
+    const data = await use$Fetch(`/boards/list?${params.toString()}`);
+    // const data = await response.json();
     boards.value = data.boards;
+    imageUrl.value = data.img ? (data.img.startsWith('/') ? data.img : '/' + data.img) : '';
     totalElements.value = data.totalElements;
     totalPages.value = data.totalPages;
     if (boards.value.length === 0) {
@@ -56,7 +68,7 @@ const formatDate = (dateString) => {
   const date = new Date(dateString);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
-  const day = String(date.getDate()).padStart(2, '0'); // 날짜가 한 자리 수일 경우 0을 추가
+  const day = String(date.getDate() -1 ).padStart(2, '0'); // 날짜가 한 자리 수일 경우 0을 추가
 
   return `${year}-${month}-${day}`;
 };
@@ -78,6 +90,7 @@ const visiblePages = computed(() => {
   const endPage = Math.min(startPage + 4, totalPages.value);
   return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
 });
+
 
 onMounted(() => {
   fetchBoards();
@@ -144,15 +157,25 @@ onMounted(() => {
 
         </td>
         <td class="image">
-          <img src="https://via.placeholder.com/70"  class="product-img" />
+          <img v-if="imageUrl" :src="getImageUrl(imageUrl)" alt="미리보기 이미지">
+        </img>
         </td>
+
+        <td class="comment">
+          <img class="product-img">
+ 
+        </img>
+        </td>
+
+        
               
       </tr>
 
     </tbody>
   </table>
 
-  <button class="write-btn">글쓰기</button>
+  <button class="write-btn"><nuxt-link :to="`/boards/reg`">글쓰기</nuxt-link></button>
+  <!-- <nuxt-link :to="`/boards/re`">{{ board.title }}[댓글 수]</nuxt-link> -->
 
   <form ref ="searchForm" @submit="handleSearch" class="searchBox">
     <select v-model="formData.searchType" name="sc" class="type">

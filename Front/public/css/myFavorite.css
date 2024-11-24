@@ -69,6 +69,7 @@ input{
     min-width: 0px;
     width: 100%;
     box-sizing: border-box;
+    border-color: var(--color-text-default);
 }
 
 /*모바일 알림 버튼*/
@@ -142,6 +143,11 @@ input{
         padding: 20px;
         display: grid;
         gap: 20px;
+    }
+    input {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
     }
 
     @media screen and (max-width: 900px) {
@@ -266,4 +272,5 @@ input{
     .web-only{
          display: none !important;
      }
+
 }
