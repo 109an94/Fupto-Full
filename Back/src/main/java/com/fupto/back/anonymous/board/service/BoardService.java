@@ -1,10 +1,10 @@
 package com.fupto.back.anonymous.board.service;
 
-import com.fupto.back.anonymous.board.dto.BoardDto;
-import com.fupto.back.anonymous.board.dto.DefaultDto;
-import com.fupto.back.anonymous.board.dto.DetailDto;
-import com.fupto.back.anonymous.board.dto.SearchDto;
+import com.fupto.back.admin.board.dto.BoardListDto;
+import com.fupto.back.anonymous.board.dto.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface BoardService {
@@ -15,5 +15,11 @@ public interface BoardService {
 
     DetailDto getById(Long id);
 
-    BoardDto userDelete(Long id, Boolean active);
+    BoardDto userInActive(Long id, Boolean active);
+
+    BoardDto userPost(BoardDto boardDto, MultipartFile file) throws IOException;
+
+    BoardDto show(Long id);
+
+    BoardDto update(Long id, UserUpdateDto userUpdateDto, MultipartFile file) throws IOException;
 }

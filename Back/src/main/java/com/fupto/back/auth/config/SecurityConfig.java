@@ -60,6 +60,7 @@ public class SecurityConfig {
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/member/**").hasRole("USER")
+                        .requestMatchers("/board/reg/**").hasAnyRole("USER","ADMIN")
                         .anyRequest().authenticated())
 //                .formLogin(Customizer.withDefaults())
 //        ;

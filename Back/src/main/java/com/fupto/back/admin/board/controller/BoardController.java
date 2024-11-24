@@ -124,12 +124,12 @@ public class BoardController {
 
     @DeleteMapping("/selected")
     public ResponseEntity<Void> deleteSelected(@RequestBody List<Long> ids){
-      try{
-          boardService.deleteSelected(ids);
-          return ResponseEntity.noContent().build();
-      } catch (Exception e) {
-          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-      }
+        try{
+            boardService.deleteSelected(ids);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     // 액티브 변경

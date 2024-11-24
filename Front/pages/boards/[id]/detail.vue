@@ -3,6 +3,9 @@ useHead({
   link: [{ rel: "stylesheet", href: "/css/board-detail.css" }],
 });
 
+import { use$Fetch } from "~/composables/use$Fetch";
+
+
 const board = ref({
   title: '',
   contents: '',
@@ -21,14 +24,6 @@ const imageUrl = ref('');
 const dropdownVisible = ref(false);
 const showModal = ref(false);
 
-// 날짜 형식을 'yyyy-mm-dd'로 포맷팅하는 함수
-const formatDate = (date) => {
-  const d = new Date(date);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
 
 const getImageUrl = (url) => {
   if (!url) return '';
@@ -42,18 +37,21 @@ const getImageUrl = (url) => {
 
 const loadBoardData = async () => {
   try {
-    const response = await fetch(`${config.public.apiBase}/boards/${boardId}/detail`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await use$Fetch(`/boards/${boardId}/edit`);
+
+    console.log("Received data:", data);
+
+    if (!data) {
+      throw new Error("게시글 데이터를 받지 못했습니다.");
     }
-    const data = await response.json();
+
     board.value = {
       title: data.title,
       contents: data.contents,
       boardCategoryName: data.boardCategoryName,
       regMemberNickName: data.regMemberNickName,
-      createdAt: formatDate(data.createdAt),
-      modifiedAt: formatDate(data.modifiedAt),
+      createdAt: data.createdAt,
+      modifiedAt:data.modifiedAt,
       active: data.active,
       img: data.img, // 이미지 URL을 board 객체에 포함시킴
     };
@@ -62,6 +60,28 @@ const loadBoardData = async () => {
     console.error("Error loading board:", error);
     alert(`게시글을 불러오는데 실패했습니다: ${error.message}`);
   }
+};
+
+// 날짜 형식을 'yyyy-mm-dd'로 포맷팅하는 함수
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+
+  const date = new Date(dateString);
+  // UTC 날짜 포맷
+  const ymd = 
+    date.getUTCFullYear() + "-" + 
+    String(date.getUTCMonth() + 1).padStart(2, "0") + "-" + 
+    String(date.getUTCDate()).padStart(2, "0");
+
+  // UTC 시간 포맷 (시:분:초)
+  const time = 
+    String(date.getUTCHours()).padStart(2, "0") +
+    ":" +
+    String(date.getUTCMinutes()).padStart(2, "0") +
+    ":" +
+    String(date.getUTCSeconds()).padStart(2, "0");
+
+  return `${ymd} ${time}`;  // 날짜와 시간을 '시:분:초' 형식으로 반환
 };
 
 // 드롭다운 메뉴 토글
@@ -74,33 +94,35 @@ const handleEdit = () => {
   router.push(`/boards/${boardId}/edit`); // 수정 페이지로 이동
 };
 
-
 // 삭제 버튼 클릭 시 처리
-const handleDelete = async (boardId, active) => {
-  const confirmDeactivate = confirm("이 게시글을 비활성화하시겠습니까?");
-  if (confirmDeactivate) {
+const handleDelete = async () => {
+  // 삭제 확인 메시지
+  const isConfirmed = confirm('게시물을 삭제하시겠습니까?');
+  
+  // 사용자가 '확인'을 누른 경우에만 삭제 진행
+  if (isConfirmed) {
     try {
-      const response = await fetch(`${config.public.apiBase}/admin/boards/${boardId}/active`, {
+      const formData = new FormData();
+      formData.append('active', false);  // 게시글을 비활성화 (삭제처럼)
+
+      await use$Fetch(`/boards/${boardId}/inactive`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ active: false })
+        body: formData,
       });
+      alert('게시글이 삭제되었습니다!');
+      router.push('/boards/list');
       
-      if (response.ok) {
-        alert("게시글이 비활성화되었습니다.");
-        await loadBoardData(); // 게시글 데이터를 다시 불러와 화면을 갱신합니다.
-        // 또는 router.push('/boards/list'); // 게시글 목록 페이지로 이동
-      } else {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
     } catch (error) {
-      console.error("게시글 비활성화 실패:", error);
-      alert(`게시글 비활성화에 실패했습니다: ${error.message}`);
-    }
+    console.error('Error:', error);
+    alert(`게시글 삭제에 실패했습니다: ${error.message}`);
+  }
+
+  } else {
+    // 사용자가 취소를 눌렀을 경우
+    console.log('삭제가 취소되었습니다.');
   }
 };
+
 
 const closeModal = () => {
   showModal.value = false;
@@ -127,7 +149,7 @@ onMounted(async () => {
         <div class="user-avatar"></div>
           <div class="user-meta">
             <span class="user-name">{{ board.regMemberNickName }}</span>
-            <span class="post-date">{{ board.createdAt }}</span>
+            <span class="post-date">{{ formatDate(board.createdAt) }}</span>
           </div>
           <div class="actions-menu">
             <button class="menu-trigger" @click="toggleDropdown">
@@ -141,8 +163,6 @@ onMounted(async () => {
         </div>
       </section>
         
-      <hr>
-
       <section class = "body">
         
         <div class="image-preview" id="imagePreview">
