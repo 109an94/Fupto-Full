@@ -118,6 +118,7 @@ public class DefaultBoardService implements BoardService {
                 .title(board.getTitle())
                 .contents(board.getContents())
                 .boardCategoryName(board.getBoardCategory().getName())
+                .regMemberId(board.getId())
                 .regMemberNickName(board.getRegMember().getNickname())
                 .createdAt(board.getCreatedAt())
                 .modifiedAt(board.getModifiedAt())

@@ -40,6 +40,7 @@ public class BoardController {
         return ResponseEntity.ok(boardService.getById(id));
     }
 
+
     @PatchMapping("{id}/inactive")
     public ResponseEntity<BoardDto> userInActive(
             @PathVariable Long id,

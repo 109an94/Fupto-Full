@@ -10,6 +10,7 @@ const board = ref({
   title: '',
   contents: '',
   regMemberNickName: '',
+  regMemberId:'',
   boardCategoryName: '',
   fileUpload: null,
   active: ''
@@ -19,12 +20,12 @@ const config = useRuntimeConfig();
 const route = useRoute();
 const router = useRouter();
 const boardId = route.params.id;
-const userDetails= useUserDetails();
 
+const userDetails= useUserDetails();
+// const userDetails = ref({});
 const imageUrl = ref('');
 const dropdownVisible = ref(false);
 const showModal = ref(false);
-
 
 const getImageUrl = (url) => {
   if (!url) return '';
@@ -51,10 +52,11 @@ const loadBoardData = async () => {
       contents: data.contents,
       boardCategoryName: data.boardCategoryName,
       regMemberNickName: data.regMemberNickName,
+      regMemberId: data.regMemberId,
       createdAt: data.createdAt,
       modifiedAt:data.modifiedAt,
       active: data.active,
-      img: data.img, // 이미지 URL을 board 객체에 포함시킴
+      img: data.img,
     };
     console.log(board);
     imageUrl.value = data.img ? (data.img.startsWith('/') ? data.img : '/' + data.img) : '';
@@ -86,9 +88,26 @@ const formatDate = (dateString) => {
   return `${ymd} ${time}`;  // 날짜와 시간을 '시:분:초' 형식으로 반환
 };
 
+const isMatchUser = computed(() => {
+  return userDetails.id.value == board.value.regMemberId;
+});
+
 // 드롭다운 메뉴 토글
 const toggleDropdown = () => {
-  dropdownVisible.value = !dropdownVisible.value;
+  if (isMatchUser.value) 
+  {
+    dropdownVisible.value = !dropdownVisible.value;  // isMatchUser가 true일 때만 드롭다운 토글
+  } 
+  else {
+    alert("권한이 없습니다.");
+  }
+};
+
+const closeDropdown = (event) => {
+  // 메뉴 버튼과 메뉴 외부를 클릭했을 때 드롭다운을 닫는다
+  if (!event.target.closest(".actions-menu") && dropdownVisible.value) {
+    dropdownVisible.value = false;
+  }
 };
 
 // 수정 버튼 클릭 시 이동
@@ -133,7 +152,16 @@ const closeModal = () => {
 }
 
 onMounted(async () => {
-  await loadBoardData();
+  await loadBoardData();  // 게시글 데이터 로드
+  document.addEventListener("click", closeDropdown);  // 외부 클릭 시 드롭다운 닫기
+  // watch(() => userDetails.value, () => {
+  //   // 사용자 정보가 업데이트될 때마다 isMatchUser를 재계산
+  //   console.log("User details changed");
+  // });
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", closeDropdown);
 });
 </script>
 
@@ -154,7 +182,7 @@ onMounted(async () => {
             <span class="post-date">{{ formatDate(board.createdAt) }}</span>
           </div>
           <div class="actions-menu">
-            <button class="menu-trigger" @click="toggleDropdown">
+            <button class="menu-trigger" v-show="isMatchUser" @click="toggleDropdown">
               <img src="/public/imgs/icon/3dot.svg" alt="Menu">
             </button>
             <div v-if="dropdownVisible" class="menu-dropdown">
