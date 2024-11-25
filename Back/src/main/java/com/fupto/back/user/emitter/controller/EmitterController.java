@@ -24,6 +24,7 @@ public class EmitterController {
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(@AuthenticationPrincipal FuptoUserDetails userDetails) {
         System.out.println("-------------------subscribe----------------");
+
         return emitterService.createEmitter(userDetails.getId());
     }
 
