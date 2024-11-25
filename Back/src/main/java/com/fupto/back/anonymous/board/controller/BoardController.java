@@ -40,6 +40,7 @@ public class BoardController {
         return ResponseEntity.ok(boardService.getById(id));
     }
 
+
     @PatchMapping("{id}/inactive")
     public ResponseEntity<BoardDto> userInActive(
             @PathVariable Long id,
@@ -51,6 +52,7 @@ public class BoardController {
     public ResponseEntity<BoardDto> userPost(
             @RequestParam("boardData") String boardDataJson,
             @RequestParam(value = "file", required = false) MultipartFile file) {
+
         try{
             ObjectMapper  objectMapper = new ObjectMapper();
             BoardDto boardDto = objectMapper.readValue(boardDataJson, BoardDto.class);
@@ -66,6 +68,7 @@ public class BoardController {
     @GetMapping("{id}/edit")
     public ResponseEntity<BoardDto> userEdit(@PathVariable Long id) {
         System.out.println(id);
+
         return ResponseEntity.ok(boardService.show(id));
     }
 

@@ -11,13 +11,14 @@ useHead({
 const board = ref({
   title: '',
   contents: '',
-  regMemberId: 7,
+  regMemberId: '',
   boardCategoryId: 1,
   active: true,
   fileUpload: null,
 });
 
 const imageUrl = ref('');
+const userDetails= useUserDetails();
 
 // 이미지 미리보기 기능
 const previewImage = (event) => {
@@ -59,7 +60,7 @@ const handleSubmit = async() => {
     formData.append('boardData', JSON.stringify({
     title: board.value.title,
     contents: board.value.contents,
-    regMemberId: board.value.regMemberId,
+    regMemberId: userDetails.id.value,
     boardCategoryId: board.value.boardCategoryId,
     active: board.value.active,
   }));
@@ -180,7 +181,11 @@ const handleSubmit = async() => {
 
           <div class="text-center">
             <button type="submit" class="btn btn-primary">등록</button>
+<<<<<<< HEAD
             <button type="button" class="btn btn-secondary" @click="handleCancel">취소</button>
+=======
+            <button type="submit" class="btn btn-primary" @click="handleCancel">취소</button>
+>>>>>>> d9dac12098eab459e1abd0a41c5305389a669a97
           </div>
         </form>
       </div>
