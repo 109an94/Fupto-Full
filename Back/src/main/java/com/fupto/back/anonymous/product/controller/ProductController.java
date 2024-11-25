@@ -31,7 +31,6 @@ public class ProductController {
             ProductSearchDto searchDto,
             @AuthenticationPrincipal FuptoUserDetails userDetails) {
         Long memberId = userDetails != null ? userDetails.getId() : null;
-        log.info("searchProducts called - gender: {}, memberId: {}", searchDto.getGender(), memberId);
         return ResponseEntity.ok(productService.searchProducts(searchDto, memberId));
     }
 
