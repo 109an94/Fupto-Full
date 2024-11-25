@@ -2,10 +2,10 @@
 const { isAnonymous, logout } = useUserDetails()
 const route = useRoute();
 
-const logoutHandler = () => {
-  logout()
+const logoutHandler = async () => {
+  await logout()
   // 로그아웃 후 필요한 추가 작업 수행 (예: 홈페이지로 리다이렉트)
-  navigateTo('/')
+  await navigateTo('/')
 }
 const isActiveLink = (path, gender) => {
   if (path === "products") {
@@ -18,6 +18,7 @@ const redirect = () => {
   window.location.href = "http://localhost:3000/boards/list";
   // router.go(-1);
 }
+
 </script>
 
 <template>

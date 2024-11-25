@@ -19,7 +19,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     List<Board> findByRegMemberId(Long id);
     List<Board> findAllByActiveIsTrue();
     List<Board> findAllByOrderByModifiedAtDesc();
-    List<Board> findAllByRegMemberId(Long id);
+    List<Board> findAllByRegMemberIdAndActiveIsTrue(Long id);
 
     void deleteById(Long id);
 

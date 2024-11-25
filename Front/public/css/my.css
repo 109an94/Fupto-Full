@@ -82,7 +82,6 @@ nav.profileNav li{
     display: flex;
     align-items: center;
     text-align: center;
-    /*justify-content: space-around;*/
     padding: 10px;
 }
 
