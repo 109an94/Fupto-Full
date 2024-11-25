@@ -174,7 +174,8 @@ public class DefaultMemberService implements MemberService {
     //------board 관련 매서드
     @Override
     public List<BoardListDto> getBoards(Long memberId) {
-        List<Board> boards = boardRepository.findAllByRegMemberId(memberId);
+        List<Board> boards = boardRepository.findAllByRegMemberIdAndActiveIsTrue(memberId);
+
 
         return boards.stream().map(this::convertToBoardListDto)
                 .collect(Collectors.toList());

@@ -15,7 +15,7 @@ const member = ref({
 <template>
   <main class="mainLayout">
     <aside class="profileContainer">
-      <h1>프로필 관리</h1>
+<!--      <h1>프로필 관리</h1>-->
       <div class="profile">
         <div>
           <img src="" alt="">
