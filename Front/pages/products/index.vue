@@ -361,12 +361,44 @@ const handleClickOutside = (e) => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   setupIntersectionObserver();
   nextTick(() => {
     updateObserver();
   });
   document.addEventListener("click", handleClickOutside);
+
+  // 새로 고침시 찜 정보 업데이트
+  try {
+    const data = await use$Fetch("/products", {
+      params: {
+        gender: route.query.gender,
+        category: route.query.category ? route.query.category.split(",") : undefined,
+        sub: route.query.sub ? route.query.sub.split(",") : undefined,
+        brand: route.query.brand ? route.query.brand.split(",") : undefined,
+        min: route.query.min || undefined,
+        max: route.query.max || undefined,
+        sort: route.query.sort || "popular",
+        cursor: null,
+        limit: 100,
+      },
+    });
+
+    if (data?.products) {
+      products.value = products.value.map((product) => {
+        const updatedProduct = data.products.find((p) => p.id === product.id);
+        if (updatedProduct) {
+          return {
+            ...product,
+            favorite: updatedProduct.favorite,
+          };
+        }
+        return product;
+      });
+    }
+  } catch (error) {
+    console.error("Failed to load products with favorites:", error);
+  }
 });
 
 onUnmounted(() => {
