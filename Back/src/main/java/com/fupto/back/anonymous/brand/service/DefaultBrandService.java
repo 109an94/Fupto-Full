@@ -26,6 +26,7 @@ public class DefaultBrandService implements BrandService {
                         .id(brand.getId())
                         .engName(brand.getEngName())
                         .korName(brand.getKorName())
+                        .img(brand.getImg())
                         .build())
                 .toList();
     }

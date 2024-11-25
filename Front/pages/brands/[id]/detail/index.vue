@@ -120,20 +120,15 @@ const loadProducts = async (reset = false) => {
   }
 };
 
-const toggleFavorite = (event) => {
-  event.preventDefault();
-  const button = event.currentTarget;
-  const isFavorite = button.getAttribute("data-favorite") === "true";
-  const img = button.querySelector("img");
+const { toggleFavorite: toggleFavoriteAction } = useFavorite();
 
-  if (isFavorite) {
-    button.setAttribute("data-favorite", "false");
-    img.src = "/imgs/icon/favorite.svg";
-    img.alt = "찜 추가";
-  } else {
-    button.setAttribute("data-favorite", "true");
-    img.src = "/imgs/icon/favorite-fill.svg";
-    img.alt = "찜 제거";
+// 찜 관련 함수
+const toggleFavorite = async (event, product) => {
+  event.preventDefault();
+  const success = await toggleFavoriteAction(product.mappingId);
+
+  if (success) {
+    product.favorite = !product.favorite;
   }
 };
 
@@ -403,9 +398,9 @@ onUnmounted(() => {
                 <h1 class="brand-name">{{ brand.engName }}</h1>
                 <p class="brand-subtitle">{{ brand.korName }}</p>
               </div>
-              <button data-favorite="false" @click="toggleFavorite" class="favorite-btn1">
+              <!-- <button data-favorite="false" @click="toggleFavorite" class="favorite-btn1">
                 <img class="favorite1" src="/imgs/icon/favorite.svg" alt="찜" />
-              </button>
+              </button> -->
             </div>
 
             <div class="tabs">
@@ -480,8 +475,16 @@ onUnmounted(() => {
                         <img class="product-images primary-img" :src="product.mainImageUrl" alt="product-img" />
                         <img class="product-images secondary-img" :src="product.hoverImageUrl" alt="product-img-hover" />
                       </div>
-                      <button data-favorite="false" @click="toggleFavorite">
-                        <img class="favorite" src="/imgs/icon/favorite.svg" alt="찜" />
+                      <button
+                        :data-favorite="product.favorite"
+                        @click.prevent="(e) => toggleFavorite(e, product)"
+                        class="favorite-btn"
+                      >
+                        <img
+                          class="favorite"
+                          :src="product.favorite ? '/imgs/icon/favorite-fill.svg' : '/imgs/icon/favorite.svg'"
+                          :alt="product.favorite ? '찜' : '찜 해제'"
+                        />
                       </button>
                     </div>
                     <div class="product-info">
