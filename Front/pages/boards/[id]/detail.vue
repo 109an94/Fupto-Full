@@ -19,6 +19,7 @@ const config = useRuntimeConfig();
 const route = useRoute();
 const router = useRouter();
 const boardId = route.params.id;
+const userDetails= useUserDetails();
 
 const imageUrl = ref('');
 const dropdownVisible = ref(false);
@@ -55,6 +56,7 @@ const loadBoardData = async () => {
       active: data.active,
       img: data.img, // 이미지 URL을 board 객체에 포함시킴
     };
+    console.log(board);
     imageUrl.value = data.img ? (data.img.startsWith('/') ? data.img : '/' + data.img) : '';
   } catch (error) {
     console.error("Error loading board:", error);

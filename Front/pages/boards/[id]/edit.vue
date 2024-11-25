@@ -10,7 +10,7 @@ useHead({
 const board = ref({
   title: '',
   contents: '',
-  regMemberId: 11,
+  regMemberId: '',
   boardCategoryId: 1,
   active: true,
   fileUpload: null,
@@ -22,6 +22,7 @@ const router = useRouter();
 const boardId = route.params.id;
 
 const imageUrl = ref('');
+const userDetails= useUserDetails();
 
 const previewImage = (event) => {
         const file = event.target.files[0];
@@ -78,7 +79,7 @@ const loadBoardData = async () => {
       contents: data.contents,
       boardCategoryId: data.boardCategoryId,
       active: data.active,
-      regMemberId: data.regMemberId,
+      regMemberId: userDetails.id.value,
     };
     imageUrl.value = data.img ? (data.img.startsWith('/') ? data.img : '/' + data.img) : '';
   } catch (error) {
@@ -96,7 +97,7 @@ const handleSubmit = async () => {
       contents: board.value.contents,
       boardCategoryId: board.value.boardCategoryId,
       active: board.value.active,
-      regMemberId: board.value.regMemberId,
+      regMemberId: userDetails.id.value,
     }));
 
     // 파일이 있으면 formData에 파일 추가

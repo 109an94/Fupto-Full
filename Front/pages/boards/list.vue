@@ -47,7 +47,8 @@ const fetchBoards = async () => {
     if (formData.value.searchType) params.append("searchType", formData.value.searchType);
     if (formData.value.searchKeyWord) params.append("searchKeyWord", formData.value.searchKeyWord);
     if (formData.value.boardCategoryName) params.append("boardCategory", formData.value.boardCategoryName);
-    
+    params.append("active", true);
+
     const data = await use$Fetch(`/boards/list?${params.toString()}`);
     // const data = await response.json();
     boards.value = data.boards;
@@ -91,6 +92,12 @@ const visiblePages = computed(() => {
   return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
 });
 
+// const visiblePages = computed(() => {
+//   const startPage = Math.floor((currentPage.value - 1) / 5) * 5 + 1;
+//   const endPage = Math.min(startPage + 4, totalPages.value);
+//   return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+// });
+
 
 onMounted(() => {
   fetchBoards();
@@ -115,13 +122,7 @@ onMounted(() => {
           커뮤니티
         </button>
       </li>
-      <li>
-        <button 
-          @click="handleCategoryClick('자랑하기')" 
-          :class="{ active: formData.boardCategoryName === '자랑하기' }">
-          자랑하기
-        </button>
-      </li>
+
       <li>
         <button 
           @click="handleCategoryClick('FAQ')" 
@@ -147,24 +148,23 @@ onMounted(() => {
         </td>
         <td>
           <div>
-              <span clss="title"><nuxt-link :to="`/boards/${ board.id }/detail`">{{ board.title }}[댓글 수]</nuxt-link></span>
+              <span clss="title"><nuxt-link :to="`/boards/${ board.id }/detail`">{{ board.title }}</nuxt-link></span>
               <div class="smalls">
               <small class="wirter">{{ board.regMemberNickName }}</small>
               <small class="date">{{ formatDate(board.createdAt) }}</small>
-              <small class="hits">조회 4</small>
             </div>
           </div>
 
         </td>
-        <td class="image">
-          <img v-if="imageUrl" :src="getImageUrl(imageUrl)" alt="미리보기 이미지">
-        </img>
-        </td>
+        <td class="product-img">
+              <div class="d-flex align-items-center">
+                <img v-if="board.img" :src="'http://localhost:8085/api/v1/' + board.img" class="product-img" />
+                <!-- 이미지가 없을 경우, 빈 공간 표시되지 않음 -->
+              </div>
+            </td>
 
         <td class="comment">
-          <img class="product-img">
- 
-        </img>
+
         </td>
 
         
@@ -174,8 +174,10 @@ onMounted(() => {
     </tbody>
   </table>
 
+  <div class="write">
   <button class="write-btn"><nuxt-link :to="`/boards/reg`">글쓰기</nuxt-link></button>
   <!-- <nuxt-link :to="`/boards/re`">{{ board.title }}[댓글 수]</nuxt-link> -->
+  </div>
 
   <form ref ="searchForm" @submit="handleSearch" class="searchBox">
     <select v-model="formData.searchType" name="sc" class="type">
