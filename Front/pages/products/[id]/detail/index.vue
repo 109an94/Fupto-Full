@@ -1,6 +1,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 
+const { isAnonymous } = useUserDetails();
+const { isAuthModalOpen, checkVendorAccess, closeAuthModal, navigateToSignup, navigateToSignin } = useVendorAuth();
+
 const currentSlide = ref(0);
 const isVendorListOpen = ref(true);
 const isDescriptionOpen = ref(true);
@@ -84,6 +87,7 @@ const toggleFavorite = async (event) => {
 };
 
 const toggleVendorList = () => {
+  if (!checkVendorAccess()) return;
   isVendorListOpen.value = !isVendorListOpen.value;
 };
 
@@ -141,6 +145,9 @@ watch(currentSlide, (newSlide) => {
 
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
+  if (isAnonymous()) {
+    checkVendorAccess();
+  }
 });
 
 onUnmounted(() => {
@@ -227,28 +234,46 @@ onUnmounted(() => {
         </section>
 
         <section class="vendor-section">
-          <div class="section-header" @click="toggleVendorList">
-            <span>모든 할인 상품 둘러보기</span>
-            <svg class="arrow" :class="{ up: isVendorListOpen }" viewBox="0 0 24 24" fill="none">
-              <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" />
-            </svg>
+          <div :class="{ 'blur-section': isAnonymous() }">
+            <div class="section-header" @click="toggleVendorList">
+              <span>모든 할인 상품 둘러보기</span>
+              <svg class="arrow" :class="{ up: isVendorListOpen }" viewBox="0 0 24 24" fill="none">
+                <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" />
+              </svg>
+            </div>
+            <div class="section-content" :class="{ open: isVendorListOpen }">
+              <ul class="vendor-list">
+                <li v-for="shop in product?.shops" :key="shop.id" class="vendor-card">
+                  <div class="background-area" @click="navigateToRoute(`/products/${shop.productId}/single`)"></div>
+                  <div class="vendor-logo" @click.stop>
+                    <img :src="`${config.public.apiBase}/${shop.logoUrl}`" :alt="shop.shopName" />
+                  </div>
+                  <div class="name-wrapper" @click.stop>
+                    <span class="vendor-name">{{ shop.shopName }}</span>
+                  </div>
+                  <div class="vendor-price">
+                    <p>{{ shop.price?.toLocaleString() }} ￦</p>
+                    <a :href="shop.productUrl" class="link" target="_blank" @click.stop>이동</a>
+                  </div>
+                </li>
+              </ul>
+            </div>
           </div>
-          <div class="section-content" :class="{ open: isVendorListOpen }">
-            <ul class="vendor-list">
-              <li v-for="shop in product?.shops" :key="shop.id" class="vendor-card">
-                <div class="background-area" @click="navigateToRoute(`/products/${shop.productId}/single`)"></div>
-                <div class="vendor-logo" @click.stop>
-                  <img :src="`${config.public.apiBase}/${shop.logoUrl}`" :alt="shop.shopName" />
-                </div>
-                <div class="name-wrapper" @click.stop>
-                  <span class="vendor-name">{{ shop.shopName }}</span>
-                </div>
-                <div class="vendor-price">
-                  <p>{{ shop.price?.toLocaleString() }} ￦</p>
-                  <a :href="shop.productUrl" class="link" target="_blank" @click.stop>이동</a>
-                </div>
-              </li>
-            </ul>
+
+          <div v-if="isAnonymous() && isAuthModalOpen" class="vendor-modal-overlay">
+            <div class="popup flex flex-col items-center gap-lg">
+              <div class="flex gap-lg justify-end w-full pr">
+                <button class="icon-sm" @click="closeAuthModal">×</button>
+              </div>
+              <h2 class="text-default text-bold text-lg">쇼핑몰 정보가 궁금하시다면?</h2>
+              <button type="button" class="btn btn-fupto flex items-center justify-center" @click="navigateToSignup">
+                <span class="text-white text-bold text-md">FUPTO로 가입하기</span>
+              </button>
+              <div class="flex items-center gap-sm">
+                <span class="text-default text-regular text-sm">이미 회원이신가요?</span>
+                <a href="#" class="text-default text-bold text-md" @click.prevent="navigateToSignin">로그인하기 ></a>
+              </div>
+            </div>
           </div>
         </section>
 
