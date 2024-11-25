@@ -2,6 +2,7 @@ package com.fupto.back.user.member.controller;
 
 import com.fupto.back.auth.entity.FuptoUserDetails;
 import com.fupto.back.user.emitter.dto.AlertPriceDto;
+import com.fupto.back.user.member.dto.BoardListDto;
 import com.fupto.back.user.member.dto.MemberEditDto;
 import com.fupto.back.user.member.dto.MemberResponseDto;
 import com.fupto.back.user.member.exception.InvalidPasswordException;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 @RestController("userMemberController")
 @RequestMapping("/user/member")
@@ -45,8 +47,25 @@ public class MemberController {
         System.out.println("getmember 실행 확인");
         return ResponseEntity.ok(memberService.getMember(id));
     }
+//  board 영역 ---------------------
+    @GetMapping("{id}/boards")
+    public ResponseEntity<List<BoardListDto>> getBoards(@PathVariable Long id){
 
+        return ResponseEntity.ok(memberService.getBoards(id));
+    }
+    @GetMapping("{id}/boardimg")//이미지 ID값
+    public ResponseEntity<Resource> getBordsImg(@PathVariable Long id) throws IOException {
+        Resource resource = memberService.getBoardImage(id);
+        String contentType = Files.probeContentType(Paths.get(resource.getURI()));
 
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+        System.out.println("---------------컨트롤러 리턴직전------------");
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(resource);
+    }
 
 //    Favorite 영역-------------------------
     @GetMapping("{id}/fav")//계정 ID값

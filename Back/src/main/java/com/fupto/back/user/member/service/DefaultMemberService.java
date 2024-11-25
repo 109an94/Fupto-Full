@@ -3,6 +3,7 @@ package com.fupto.back.user.member.service;
 import com.fupto.back.entity.*;
 import com.fupto.back.repository.*;
 import com.fupto.back.user.emitter.service.EmitterService;
+import com.fupto.back.user.member.dto.BoardListDto;
 import com.fupto.back.user.member.dto.FavoriteListDto;
 import com.fupto.back.user.member.dto.MemberEditDto;
 import com.fupto.back.user.member.dto.MemberResponseDto;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 public class DefaultMemberService implements MemberService {
 
 
+    private final BoardRepository boardRepository;
     @Value("uploads")
     private String uploadPath;
 
@@ -52,7 +54,7 @@ public class DefaultMemberService implements MemberService {
                                 FavoriteRepository favoriteRepository,
                                 ProductRepository productRepository,
                                 EmitterService emitterService,
-                                PriceHistoryRepository priceHistoryRepository) {
+                                PriceHistoryRepository priceHistoryRepository, BoardRepository boardRepository) {
         this.memberRepository = memberRepository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
@@ -61,6 +63,7 @@ public class DefaultMemberService implements MemberService {
         this.productRepository = productRepository;
         this.emitterService = emitterService;
         this.priceHistoryRepository = priceHistoryRepository;
+        this.boardRepository = boardRepository;
     }
 
 
@@ -122,6 +125,7 @@ public class DefaultMemberService implements MemberService {
         return modelMapper.map(member, MemberResponseDto.class);
     }
 
+    //--------------favorite 관련 매서드-------------------------
     @Override
     public Resource getProductImage(Long id) throws IOException {
         Integer order = 1;
@@ -137,7 +141,6 @@ public class DefaultMemberService implements MemberService {
 
         return resource;
     }
-
     @Override
     public List<FavoriteListDto> getFavorites(Long id) {
         List<Favorite> favorites = favoriteRepository.findAllByMemberId(id);
@@ -167,6 +170,41 @@ public class DefaultMemberService implements MemberService {
         }
         return dtoList;
     }
+
+    //------board 관련 매서드
+    @Override
+    public List<BoardListDto> getBoards(Long memberId) {
+        List<Board> boards = boardRepository.findAllByRegMemberId(memberId);
+
+        return boards.stream().map(this::convertToBoardListDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Resource getBoardImage(Long id) throws IOException {
+        Optional<Board> board = boardRepository.findById(id);
+        String boardImg = board.map(Board::getImg).orElse("defaultImgPath");
+        Path imagePath = Paths.get(boardImg);
+        Resource resource = new FileSystemResource(imagePath.toFile());
+        if (!resource.exists()){
+            throw new FileNotFoundException("이미지 파일을 찾을 수 없습니다.");
+        }
+        return resource;
+    }
+
+    private BoardListDto convertToBoardListDto(Board board){
+        return BoardListDto.builder()
+                .id(board.getId())
+                .title(board.getTitle())
+                .img(board.getImg())
+                .regMemberId(board.getRegMember().getId())
+                .regMemberNickName(board.getRegMember().getNickname())
+                .createdAt(board.getCreatedAt())
+                .active(board.getActive())
+                .build();
+    }
+
+
 
     //--------------alert 영역--------------------
     @Override

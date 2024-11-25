@@ -3,6 +3,13 @@ useHead({
   link: [{ rel: "stylesheet", href: "/css/myLayout.css" }],
 });
 
+const userDetails = useUserDetails()
+const member = ref({
+    id : userDetails.id.value,
+    email : userDetails.email.value,
+    username : userDetails.username.value
+});
+
 </script>
 
 <template>
@@ -14,8 +21,8 @@ useHead({
           <img src="" alt="">
         </div>
         <ul class="info">
-          <li class="info-name">닉네임</li>
-          <li class="info-email">****@naver.com</li>
+          <li class="info-name">{{ member.username }}</li>
+          <li class="info-email">{{ member.email }}</li>
           <li><nuxt-link to="/myPage/setting/account"><button>프로필관리</button></nuxt-link></li>
         </ul>
 <!--        <div class="icon">-->

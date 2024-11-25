@@ -33,9 +33,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         boolean isProductsPath = request.getServletPath().startsWith("/products") &&
                 !request.getServletPath().contains("/favorite");
 
+        boolean isAuthenticated = SecurityContextHolder.getContext().getAuthentication() != null &&
+                SecurityContextHolder.getContext().getAuthentication().isAuthenticated();
+
+        // 인증되지 않은 사용자가 접근 가능한 경로
+        boolean isPublicPath = request.getServletPath().startsWith("/brands") ||
+                request.getServletPath().startsWith("/shoppingmalls");
+
+        if (!isAuthenticated && isPublicPath) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         if (request.getServletPath().startsWith("/auth/") ||
-                request.getServletPath().startsWith("/brands") ||
-                request.getServletPath().startsWith("/shoppingmalls") ||
                 request.getServletPath().matches(".*/products/.*/image/.*") ||
                 request.getServletPath().matches("/products/.*/image/.*") ||
                 request.getServletPath().startsWith("/uploads/")) {
