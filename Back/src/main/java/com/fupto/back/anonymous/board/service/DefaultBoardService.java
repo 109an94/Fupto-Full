@@ -185,6 +185,7 @@ public class DefaultBoardService implements BoardService {
                 .createdAt(board.getCreatedAt())
                 .modifiedAt(board.getModifiedAt())
                 .img(board.getImg())
+                .regMemberId(board.getRegMember().getId())
                 .build();
     }
 

@@ -1,6 +1,7 @@
 package com.fupto.back.user.member.service;
 
 import com.fupto.back.entity.Favorite;
+import com.fupto.back.user.member.dto.BoardListDto;
 import com.fupto.back.user.member.dto.FavoriteListDto;
 import com.fupto.back.user.member.dto.MemberEditDto;
 import com.fupto.back.user.member.dto.MemberResponseDto;
@@ -16,6 +17,9 @@ public interface MemberService {
     MemberResponseDto getMember (Long id);
     Resource getProductImage(Long id) throws IOException;
     List<FavoriteListDto> getFavorites (Long id);
+    List<BoardListDto> getBoards (Long memberId);
+    Resource getBoardImage(Long id) throws IOException;
+
     void updateAlertPrice( Long favoriteId, Long memberID, Integer alertPrice);
 
     //알림 전송 및 알림 생성
@@ -25,7 +29,6 @@ public interface MemberService {
 //    private boolean isPriceDropped(Favorite favorite) 가격떨어졌는 지 현재와 alert비교
     Integer findLowestPriceByMappingId(Long mappingId);
 
-    //
 
     void checkerforfavPrice(Long productId, Integer newPrice);
 }

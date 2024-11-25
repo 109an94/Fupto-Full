@@ -146,7 +146,7 @@ activeButton.value = index;
     </template>
 <!-- <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script> -->
 <style scoped>
-    @import '@/assets/css/admin/report.css';
+    //@import '@/assets/css/admin/report.css';
 </style>
 <script setup lang="ts">
 </script>
