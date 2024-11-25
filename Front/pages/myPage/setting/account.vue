@@ -4,6 +4,10 @@ import { useAuthFetch } from '@/composables/useAuthFetch'
 import { use$Fetch } from '@/composables/use$Fetch'
 import  useUserDetails  from '~/composables/useUserDetails'
 
+useHead({
+  link: [{ rel: "stylesheet", href: "/css/myAccount.css" }]
+});
+
 const userDetails = useUserDetails()
 const username = computed(() => userDetails.username.value)
 const id = computed(()=>userDetails.id.value)
@@ -167,67 +171,5 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.edit-member-container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-}
 
-.member-info {
-  background-color: #f5f5f5;
-  padding: 20px;
-  border-radius: 8px;
-}
-
-.info-row {
-  margin-bottom: 20px;
-}
-
-.input-group {
-  margin-bottom: 15px;
-}
-
-.input-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.input-group input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.notification-settings {
-  margin-top: 30px;
-}
-
-.toggle-group {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.button-group {
-  margin-top: 30px;
-  text-align: center;
-}
-
-.update-btn {
-  background-color: #4CAF50;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.update-btn:hover {
-  background-color: #45a049;
-}
 </style>

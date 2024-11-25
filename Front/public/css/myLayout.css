@@ -84,12 +84,28 @@ nav.profileNav ul{
     justify-content: space-around;
     width: 100%;
 }
+
 nav.profileNav li{
-    /*display: flex;*/
-    /*align-items: center;*/
-    /*text-align: center;*/
-    /*justify-content: space-around;*/
-    /*padding: 10px;*/
+    cursor : pointer;
+}
+nav.profileNav li img{
+    cursor : pointer;
+}
+nav.profileNav li:hover{
+    color: var(--color-text-unselected);
+}
+
+nav.profileNav li.active  {
+    color: var(--color-text-unselected);
+
+}
+nav.profileNav li:hover img{
+    filter: brightness(0) saturate(100%);
+    opacity: 0.5;
+}
+nav.profileNav li:active img{
+    filter: brightness(0) saturate(100%);
+    opacity: 0.5;
 }
 
 nav.profileNav li a{
@@ -161,16 +177,7 @@ button.icon\:close {
 }
 
 @media (max-width: 768px) {
-    nav.profileNav li{
-        cursor : pointer;
-    }
-    nav.profileNav li:hover{
-        color: var(--color-ui-backgroundb);
-    }
 
-    nav.profileNav li.router-link-active {
-        color: var(--color-text-caption);
-    }
 
     /*!* 아이콘 이미지에 대한 hover 효과도 필요한 경우 *!*/
     /*nav.profileNav li a:hover img {*/
@@ -206,8 +213,6 @@ button.icon\:close {
 
     nav.profileNav ul{
         display: inline-block;
-        /*flex-direction: row;*/
-        background-color: greenyellow;
     }
     nav.profileNav li a{
         /*display: flex;*/
@@ -222,10 +227,6 @@ button.icon\:close {
         display: none;
     }
     div.icon#extend {
-        display: flex;
-    }
-    div.profile div.hihi{
-        flex-direction: row;
         display: flex;
     }
     @media (min-width: 1400px) {
