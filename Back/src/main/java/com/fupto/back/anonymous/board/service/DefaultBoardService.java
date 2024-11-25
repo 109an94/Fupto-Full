@@ -171,7 +171,10 @@ public class DefaultBoardService implements BoardService {
         savedBoardDto.setImg(savedBoard.getImg());
         savedBoardDto.setBoardCategoryId(savedBoard.getBoardCategory().getId());
         savedBoardDto.setRegMemberNickName(savedBoard.getRegMember().getNickname());
+<<<<<<< HEAD
         savedBoardDto.setRegMemberId(savedBoard.getRegMember().getId());
+=======
+>>>>>>> d9dac12098eab459e1abd0a41c5305389a669a97
 
         return savedBoardDto;
     }
@@ -183,11 +186,17 @@ public class DefaultBoardService implements BoardService {
                 .title(board.getTitle())
                 .contents(board.getContents())
                 .boardCategoryId(board.getBoardCategory().getId())
+<<<<<<< HEAD
                 .boardCategoryName(board.getBoardCategory().getName())
                 .createdAt(board.getCreatedAt())
                 .modifiedAt(board.getModifiedAt())
                 .img(board.getImg())
                 .regMemberNickName(board.getRegMember().getNickname())
+=======
+                .createdAt(board.getCreatedAt())
+                .modifiedAt(board.getModifiedAt())
+                .img(board.getImg())
+>>>>>>> d9dac12098eab459e1abd0a41c5305389a669a97
                 .build();
     }
 
