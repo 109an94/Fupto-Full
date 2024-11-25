@@ -92,15 +92,12 @@ const visiblePages = computed(() => {
   return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
 });
 
-<<<<<<< HEAD
 // const visiblePages = computed(() => {
 //   const startPage = Math.floor((currentPage.value - 1) / 5) * 5 + 1;
 //   const endPage = Math.min(startPage + 4, totalPages.value);
 //   return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
 // });
 
-=======
->>>>>>> d9dac12098eab459e1abd0a41c5305389a669a97
 
 onMounted(() => {
   fetchBoards();
@@ -159,7 +156,6 @@ onMounted(() => {
           </div>
 
         </td>
-<<<<<<< HEAD
         <td class="product-img">
               <div class="d-flex align-items-center">
                 <img v-if="board.img" :src="'http://localhost:8085/api/v1/' + board.img" class="product-img" />
@@ -171,19 +167,6 @@ onMounted(() => {
 
         </td>
 
-=======
-        <td class="image">
-          <img v-if="imageUrl" :src="getImageUrl(imageUrl)" alt="미리보기 이미지">
-        </img>
-        </td>
-
-        <td class="comment">
-          <img class="product-img">
- 
-        </img>
-        </td>
-
->>>>>>> d9dac12098eab459e1abd0a41c5305389a669a97
         
               
       </tr>
@@ -191,15 +174,10 @@ onMounted(() => {
     </tbody>
   </table>
 
-<<<<<<< HEAD
   <div class="write">
   <button class="write-btn"><nuxt-link :to="`/boards/reg`">글쓰기</nuxt-link></button>
   <!-- <nuxt-link :to="`/boards/re`">{{ board.title }}[댓글 수]</nuxt-link> -->
   </div>
-=======
-  <button class="write-btn"><nuxt-link :to="`/boards/reg`">글쓰기</nuxt-link></button>
-  <!-- <nuxt-link :to="`/boards/re`">{{ board.title }}[댓글 수]</nuxt-link> -->
->>>>>>> d9dac12098eab459e1abd0a41c5305389a669a97
 
   <form ref ="searchForm" @submit="handleSearch" class="searchBox">
     <select v-model="formData.searchType" name="sc" class="type">

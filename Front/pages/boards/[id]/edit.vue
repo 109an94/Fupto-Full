@@ -1,10 +1,7 @@
 
 <script setup>
 import { ref } from 'vue';
-<<<<<<< HEAD
 import { use$Fetch } from "~/composables/use$Fetch";
-=======
->>>>>>> d9dac12098eab459e1abd0a41c5305389a669a97
 
 useHead({
     link: [{ rel: "stylesheet", href: "/css/board-reg.css"}],
@@ -13,11 +10,7 @@ useHead({
 const board = ref({
   title: '',
   contents: '',
-<<<<<<< HEAD
   regMemberId: '',
-=======
-  regMemberId: 7,
->>>>>>> d9dac12098eab459e1abd0a41c5305389a669a97
   boardCategoryId: 1,
   active: true,
   fileUpload: null,
@@ -29,10 +22,7 @@ const router = useRouter();
 const boardId = route.params.id;
 
 const imageUrl = ref('');
-<<<<<<< HEAD
 const userDetails= useUserDetails();
-=======
->>>>>>> d9dac12098eab459e1abd0a41c5305389a669a97
 
 const previewImage = (event) => {
         const file = event.target.files[0];
@@ -76,7 +66,6 @@ const getImageUrl = (url) => {
 
 const loadBoardData = async () => {
   try {
-<<<<<<< HEAD
     const data = await use$Fetch(`/boards/${boardId}/edit`);
 
     console.log("Received data:", data);
@@ -85,23 +74,12 @@ const loadBoardData = async () => {
       throw new Error("게시글 데이터를 받지 못했습니다.");
     }
     // const data = await response.json();
-=======
-    const response = await fetch(`${config.public.apiBase}/admin/boards/${boardId}/edit`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
->>>>>>> d9dac12098eab459e1abd0a41c5305389a669a97
     board.value = {
       title: data.title,
       contents: data.contents,
       boardCategoryId: data.boardCategoryId,
       active: data.active,
-<<<<<<< HEAD
       regMemberId: userDetails.id.value,
-=======
-      regMemberId: data.regMemberId,
->>>>>>> d9dac12098eab459e1abd0a41c5305389a669a97
     };
     imageUrl.value = data.img ? (data.img.startsWith('/') ? data.img : '/' + data.img) : '';
   } catch (error) {
@@ -119,7 +97,6 @@ const handleSubmit = async () => {
       contents: board.value.contents,
       boardCategoryId: board.value.boardCategoryId,
       active: board.value.active,
-<<<<<<< HEAD
       regMemberId: userDetails.id.value,
     }));
 
@@ -131,35 +108,13 @@ const handleSubmit = async () => {
 
     // 요청 보내기
     await use$Fetch(`/boards/${boardId}`, {
-=======
-      regMemberId: board.value.regMemberId,
-    }));
-
-    if (board.value.fileUpload) {
-      formData.append('file', board.value.fileUpload);
-    }
-
-    const response = await fetch(`${config.public.apiBase}/admin/boards/${boardId}`, {
->>>>>>> d9dac12098eab459e1abd0a41c5305389a669a97
       method: 'PATCH',
       body: formData,
     });
 
-<<<<<<< HEAD
     console.log('게시글 수정 성공');
     alert('게시글이 수정되었습니다!');
     router.push('/boards/list');
-=======
-    if (response.ok) {
-      const result = await response.json();
-      console.log('게시글 수정 성공:', result);
-      alert('게시글이 수정되었습니다!');
-      router.push('/boards/list');
-    } else {
-      const errorData = await response.json();
-      throw new Error(errorData.message || '게시글 수정에 실패했습니다.');
-    }
->>>>>>> d9dac12098eab459e1abd0a41c5305389a669a97
   } catch (error) {
     console.error('Error:', error);
     alert(`게시글 수정 중 오류가 발생했습니다: ${error.message}`);

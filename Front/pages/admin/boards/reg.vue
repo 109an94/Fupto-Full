@@ -103,15 +103,9 @@ const handleSubmit = async() => {
   };
 
   const handleCancel = () => {
-<<<<<<< HEAD
     resetForm();
     window.location.href = 'http://localhost:3000/admin/boards/list';
 };
-=======
-  router.push('/admin/boards/list');
-};
-
->>>>>>> d9dac12098eab459e1abd0a41c5305389a669a97
 
 </script>
 

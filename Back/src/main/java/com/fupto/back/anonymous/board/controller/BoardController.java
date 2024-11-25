@@ -51,10 +51,7 @@ public class BoardController {
     public ResponseEntity<BoardDto> userPost(
             @RequestParam("boardData") String boardDataJson,
             @RequestParam(value = "file", required = false) MultipartFile file) {
-<<<<<<< HEAD
-=======
 
->>>>>>> d9dac12098eab459e1abd0a41c5305389a669a97
         try{
             ObjectMapper  objectMapper = new ObjectMapper();
             BoardDto boardDto = objectMapper.readValue(boardDataJson, BoardDto.class);
@@ -69,10 +66,8 @@ public class BoardController {
 
     @GetMapping("{id}/edit")
     public ResponseEntity<BoardDto> userEdit(@PathVariable Long id) {
-<<<<<<< HEAD
         System.out.println(id);
-=======
->>>>>>> d9dac12098eab459e1abd0a41c5305389a669a97
+
         return ResponseEntity.ok(boardService.show(id));
     }
 

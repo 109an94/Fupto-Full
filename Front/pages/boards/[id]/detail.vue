@@ -107,7 +107,6 @@ const handleDelete = async () => {
       const formData = new FormData();
       formData.append('active', false);  // 게시글을 비활성화 (삭제처럼)
 
-<<<<<<< HEAD
       await use$Fetch(`/boards/${boardId}/inactive`, {
         method: 'PATCH',
         body: formData,
@@ -120,26 +119,6 @@ const handleDelete = async () => {
     alert(`게시글 삭제에 실패했습니다: ${error.message}`);
   }
 
-=======
-      const response = await fetch(`${config.public.apiBase}/boards/${boardId}/inactive`, {
-        method: 'PATCH',
-        body: formData,
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('게시글 삭제 성공:', result);
-        alert('게시글이 삭제되었습니다!');
-        router.push('/boards/list');  // 목록 페이지로 이동
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || '게시글 삭제에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert(`게시글 삭제 중 오류가 발생했습니다: ${error.message}`);
-    }
->>>>>>> d9dac12098eab459e1abd0a41c5305389a669a97
   } else {
     // 사용자가 취소를 눌렀을 경우
     console.log('삭제가 취소되었습니다.');
