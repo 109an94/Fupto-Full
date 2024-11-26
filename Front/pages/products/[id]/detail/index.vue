@@ -249,7 +249,7 @@ onUnmounted(() => {
                     <img :src="`${config.public.apiBase}/${shop.logoUrl}`" :alt="shop.shopName" />
                   </div>
                   <div class="name-wrapper" @click.stop>
-                    <span class="vendor-name">{{ shop.shopName }}</span>
+                    <nuxt-link :to="`/shoppingmalls/${shop.id}/detail`" class="vendor-name">{{ shop.shopName }}</nuxt-link>
                   </div>
                   <div class="vendor-price">
                     <p>{{ shop.price?.toLocaleString() }} ￦</p>

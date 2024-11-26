@@ -143,12 +143,13 @@ public class DefaultMemberService implements MemberService {
     }
     @Override
     public List<FavoriteListDto> getFavorites(Long id) {
-        List<Favorite> favorites = favoriteRepository.findAllByMemberId(id);
+        List<Favorite> favorites = favoriteRepository.findAllByMemberIdAndStateIsTrue(id);
         if (favorites == null || favorites.isEmpty()){
             return Collections.emptyList();
         }
         List<FavoriteListDto> dtoList = new ArrayList<>();
         for (Favorite favorite : favorites){
+            Integer priceHistories = priceHistoryRepository.findLowestCurrentPrice(favorite.getMappingId());
             Product product = productRepository.findById(favorite.getMappingId()).orElse(null);
             if (product == null){
                 continue;
@@ -159,7 +160,7 @@ public class DefaultMemberService implements MemberService {
             dto.setId(favorite.getId());
             dto.setProductId(product.getId());
             dto.setProductName(product.getProductName());
-            dto.setProductPrice(product.getPriceHistories().getLast().getSalePrice());
+            dto.setProductPrice(priceHistories);
             dto.setMemberId(favorite.getMember().getId());
             dto.setMemberName(favorite.getMember().getNickname());
             dto.setCreateDate(favorite.getCreateDate());

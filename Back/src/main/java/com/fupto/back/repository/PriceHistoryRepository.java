@@ -61,6 +61,7 @@ public interface PriceHistoryRepository extends JpaRepository<PriceHistory, Long
         )
     """)
     Integer findRetailPriceOfLowestPriceProduct(@Param("mappingId") Long mappingId);
+
     @Query("SELECT MIN(ph.salePrice) FROM PriceHistory ph " +
             "WHERE ph.product.id IN :productIds " +
             "AND ph.createDate = (SELECT MAX(ph2.createDate) FROM PriceHistory ph2 WHERE ph2.product.id = ph.product.id)")

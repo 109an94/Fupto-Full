@@ -172,6 +172,7 @@ watch(
           </li>
         </ul>
       </li>
+      <!--
       <li>
         <a href="#" @click="handleDropdownClick('categories', $event)" :class="{ active: isMenuActive('categories') }">
           <i class="bx bxs-widget icon"></i> 카테고리
@@ -185,6 +186,7 @@ watch(
           </li>
         </ul>
       </li>
+      -->
       <li class="divider">User</li>
       <li>
         <a href="#" @click="handleDropdownClick('members', $event)" :class="{ active: isMenuActive('members') }">
