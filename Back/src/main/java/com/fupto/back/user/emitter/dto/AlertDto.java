@@ -14,5 +14,9 @@ import java.time.Instant;
 public class AlertDto {
     private Long id;
     private String message;
-    private Instant ceateDate;
+    private String alertType;
+    private String memberName;
+    private String referName;
+    private Instant createDate;
+    private boolean isRead;
 }

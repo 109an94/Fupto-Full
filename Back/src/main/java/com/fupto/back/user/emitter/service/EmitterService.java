@@ -11,7 +11,7 @@ public interface EmitterService {
     void removeEmitter(Long memberId);
     void sendToEmitter(Long memberId, String alertType, Object data);
     List<AlertDto> getUnreadAlerts(Long memberId);
-    void markAlertAsRead(Long memberId);
-    void markAllAlertsAsRead(Long memberId);
+    void markAlertAsRead(Long alertId);
+    void markAllAlertsAsRead(Long alertId);
 
 }

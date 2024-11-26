@@ -54,16 +54,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String authHeader = request.getHeader("Authorization");
-
+        String token2 = request.getParameter("token");
+        String token = null;
         System.out.println("authHeader : " + authHeader);
         System.out.println("request : " + request); // 확인됨
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
+            token = authHeader.substring(7);
+        } else if (token2 != null && !token2.isEmpty()) {
+            token = token2;
+        }
 
             System.out.println("token : " + token);
 
-            if (jwtUtil.vaildateToken(token)) {
+            if (token != null && jwtUtil.vaildateToken(token)) {
                 Long id = jwtUtil.extractId(token);
                 String username = jwtUtil.extractUsername(token);
                 String email = jwtUtil.extractEmail(token);
@@ -93,12 +97,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                     System.out.println("dofilter---------------------" + authToken);
                 }
-            }
+
         } else if (!isProductsPath) {
             System.out.println("jwt 토큰 검증 실패");
             // jwtUtil.generateToken(request);
             return;
         }
+
         // else {filterChain.doFilter(request, response);
         // return;}
         filterChain.doFilter(request, response);
