@@ -48,7 +48,6 @@ if (initialData.value) {
   products.value = initialData.value.products;
   cursor.value = initialData.value.nextCursor;
   hasMore.value = initialData.value.hasMore;
-  console.log("Initial products:", products.value);
 
   if (route.query.category && route.query.categoryName) {
     selectedFilters.value.category = [
