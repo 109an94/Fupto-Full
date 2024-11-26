@@ -1,5 +1,3 @@
-
-<!-- script -->
 <script setup>
 import {use$Fetch} from "~/composables/use$Fetch.js";
 useHead({

@@ -1,8 +1,10 @@
 package com.fupto.back.user.emitter.service;
 
 import com.fupto.back.entity.Alert;
+import com.fupto.back.entity.Product;
 import com.fupto.back.repository.AlertRepository;
 import com.fupto.back.repository.MemberRepository;
+import com.fupto.back.repository.ProductRepository;
 import com.fupto.back.user.emitter.dto.AlertDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +28,13 @@ public class DefaultEmitterService implements EmitterService {
     private final Map<Long, Map<String, Object>> eventCache = new ConcurrentHashMap<>();
     private final AlertRepository alertRepository;
     private final MemberRepository memberRepository;
+    private final ProductRepository productRepository;
 
     public DefaultEmitterService(AlertRepository alertRepository,
-                                 MemberRepository memberRepository) {
+                                 MemberRepository memberRepository, ProductRepository productRepository) {
         this.alertRepository = alertRepository;
         this.memberRepository = memberRepository;
+        this.productRepository = productRepository;
     }
 
     @Override
@@ -86,26 +90,38 @@ public class DefaultEmitterService implements EmitterService {
 
     @Override
     public List<AlertDto> getUnreadAlerts(Long memberId) {
+
         return alertRepository.findByMemberIdAndIsReadFalseOrderByCreateDateDesc(memberId)
-                .stream().map(alert -> AlertDto.builder()
-                        .id(alert.getId())
-                        .message(alert.getMessage())
-                        .ceateDate(alert.getCreateDate())
-                        .build())
+                .stream().map(alert -> {
+                    String productName = productRepository
+                            .findById(alert.getReferenceId())
+                            .map(Product::getProductName)
+                            .orElse(""); // 상품이 없는 경우 빈 문자열 반환
+
+                    return AlertDto.builder()
+                            .id(alert.getId())
+                            .message(alert.getMessage())
+                            .createDate(alert.getCreateDate())
+                            .alertType(alert.getAlertType())
+                            .isRead(alert.getIsRead())
+                            .referName(productName)
+                            .memberName(alert.getMember().getNickname())
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 
     @Override
-    public void markAlertAsRead(Long memberId) {
-        Alert alert = alertRepository.findByMemberId(memberId).orElseThrow( () ->
+    public void markAlertAsRead(Long alertId) {
+        Alert alert = alertRepository.findById(alertId).orElseThrow( () ->
                 new RuntimeException("Alert not found"));
         alert.setIsRead(true);
         alertRepository.save(alert);
     }
 
     @Override
-    public void markAllAlertsAsRead(Long memberId) {
-        List<Alert> alerts = alertRepository.findAllByMemberId(memberId);
+    public void markAllAlertsAsRead(Long alertId) {
+        List<Alert> alerts = alertRepository.findAllByMemberId(alertId);
         alerts.forEach(alert -> alert.setIsRead(true));
         alertRepository.saveAll(alerts);
     }

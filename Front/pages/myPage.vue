@@ -9,6 +9,17 @@ const member = ref({
     email : userDetails.email.value,
     username : userDetails.username.value
 });
+import { onMounted } from 'vue'
+import { useAlerts } from '~/composables/useAlerts'
+import { useSSE } from '~/composables/useSSE'
+
+const { fetchUnreadAlerts } = useAlerts()
+const { connectSSE } = useSSE()
+
+onMounted(() => {
+  fetchUnreadAlerts()
+  connectSSE()
+})
 
 </script>
 
