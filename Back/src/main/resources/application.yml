@@ -1,0 +1,24 @@
+spring:
+  profiles:
+    active: dev
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  servlet:
+    multipart:
+      max-file-size: 100MB #개별 파일 사이즈
+      max-request-size: 300MB #여러개 올때 총 사이즈
+
+server:
+  http2:
+    enabled: true
+  servlet:
+    context-path: /api/v1
+
+file:
+  upload:
+    path: uploads
+
+fupto:
+  jwt:
+    secret: "H4piIdHTINbvBLfkVXT5gi/AqvrCB+n6j7+vmo6Uy3TiAOG62F7GVyW5as7Q+r26ryiddgT7xxeDET+O+uT1hQ=="

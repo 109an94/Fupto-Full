@@ -1,0 +1,122 @@
+
+.notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;    
+  justify-content: center;
+  width: 100%;            
+}
+
+table {
+  width: 90%;
+}
+
+td {
+  border-bottom: solid 1px var(--color-text-caption);
+}
+
+.num {
+  width: 10%;
+  text-align: center;
+}
+
+.title {
+  font-size: 50px;
+  width: 60%;
+}
+
+small {
+  padding-right: 20px;
+  font-size: var(--font-bold-caption);
+}
+
+.image {
+  text-align: center;
+  padding-top: 5px;
+}
+
+.product-img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 0.2rem;
+}
+
+
+.comment-td {
+  text-align: center;
+}
+
+.comment-div {
+  display: inline;
+  text-align: center;
+}
+
+.comment {
+  width: 80px;
+  height: 30px;
+  align-self: flex-end;
+  background-color: white;
+  border: solid 1px var(--color-text-caption);
+}
+
+.notice-btn {
+  width: 80px;
+  height: 30px;
+  align-self: flex-end;
+  background-color: white;
+  border: solid 1px var(--color-text-caption);
+  border-radius: 8px;
+  margin-top: 20px;
+  margin-right: 50px;
+}
+
+.notice-btn:hover,
+.notice-btn.active{
+  background-color: var(--color-text-caption);
+  color: black;
+}
+
+/* 페이징네이션 */
+.pagination-container {
+  margin-top: 1rem;
+  display: flex; /* Flexbox를 사용하여 정렬 */
+  justify-content: center; /* 중앙 정렬 */
+}
+
+.pagination {
+  display: flex;
+  justify-content: center; /* 기존 중앙 정렬 유지 */
+  list-style: none;
+  padding: 0;
+}
+
+.page-item {
+  margin: 0 0.25rem;
+}
+
+.page-link {
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  background-color: #f8f9fa; /* 배경색을 밝은 회색으로 설정 */
+  color: #007bff; /* 기본 텍스트 색상 */
+  text-decoration: none; /* 링크의 기본 밑줄 제거 */
+  transition: background-color 0.3s ease, color 0.3s ease; /* 전환 효과 추가 */
+}
+
+.page-link:hover {
+  background-color: #e9ecef; /* 마우스 오버 시 배경색 변경 */
+  color: #0056b3; /* 마우스 오버 시 텍스트 색상 변경 */
+}
+
+.page-item.disabled .page-link {
+  pointer-events: none;
+  opacity: 0.5;
+  background-color: #f8f9fa; /* 비활성화된 링크의 배경색 */
+  color: #6c757d; /* 비활성화된 링크의 텍스트 색상 */
+}
+
+.page-item.active .page-link {
+  background-color: #007bff; /* 활성화된 페이지의 배경색 */
+  color: white; /* 활성화된 페이지의 텍스트 색상 */
+}

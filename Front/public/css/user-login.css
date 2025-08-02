@@ -1,0 +1,155 @@
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: var(--color-ui-white);
+}
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+.login-box {
+    background-color: var(--color-ui-white);
+    border: 1px solid var(--color-text-caption);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 280px;
+}
+
+.login-box h1 {
+    color: var(--color-text-title);
+    font-size: var(--font-medium-h2);
+    font-weight: var(--font-midium);
+    margin-bottom: 15px;
+}
+
+.input-group {
+    display: block;
+    text-align: left;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.input-group label {
+    display: block;
+    color: var(--color-text-default);
+    font-size: var(--font-regular-body);
+    font-weight: var(--font-regular);
+    margin-bottom: 5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--color-text-default);
+    border-radius: 10px;
+    font-size: var(--font-regular-body);
+    box-sizing: border-box;
+}
+
+.login-button {
+    width: 100%;
+    padding: 10px;
+    background-color: var(--color-main-deep);
+    color: var(--color-ui-white);
+    font-size: var(--font-bold-button);
+    font-weight: var(--font-bold);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.login-button:hover {
+    background-color: var(--color-button-hover);
+}
+
+.login-links {
+    margin-top: 10px;
+}
+
+.login-links a {
+    color: var(--color-text-caption);
+    font-size: var(--font-regular-caption);
+    font-weight: var(--font-regular);
+    margin-right: 10px;
+    text-decoration: none;
+}
+
+.login-links a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive for small devices (phones) */
+@media (max-width: 480px) {
+    .login-box {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .login-button {
+        padding: 8px;
+        font-size: var(--font-regular-body);
+    }
+
+    .input-group input {
+        padding: 6px;
+    }
+}
+
+/* Responsive for tablets */
+@media (min-width: 481px) and (max-width: 768px) {
+    .login-box {
+        width: 320px; /* 태블릿에서는 너비를 조금 더 넓게 */
+        padding: 25px;
+    }
+
+    .login-button {
+        padding: 10px;
+    }
+
+    .input-group input {
+        padding: 8px;
+    }
+}
+
+/* Responsive for desktops and larger screens */
+@media (min-width: 769px) {
+    .login-box {
+        width: 350px; /* 큰 화면에서는 너비를 넓게 */
+        padding: 30px;
+    }
+
+    .login-button {
+        padding: 12px;
+    }
+
+    .input-group input {
+        padding: 10px;
+    }
+}
+
+/* Responsive for large desktops */
+@media (min-width: 1440px) {
+    .login-box {
+        width: 400px;
+        padding: 40px;
+    }
+
+    .login-button {
+        padding: 14px;
+    }
+
+    .input-group input {
+        padding: 12px;
+    }
+}

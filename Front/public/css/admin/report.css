@@ -1,0 +1,214 @@
+*{
+  font-size: 14px;
+  font-weight: 400;
+  border-color: #e0e0e0;
+  /*border: #e0e0e0 solid 1px;*/
+}
+
+@media screen and (max-width: 768px) {
+  .btn-list {
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .btn-list li {
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .btn-url {
+    width: 100%;
+  }
+}
+
+table.report {
+  border-collapse: collapse;
+  width: 100%;
+ }
+
+table.report tr {
+}
+table th,
+table td {
+  /*background-color: #f8f8f8;*/
+  border: 1px solid #e0e0e0;
+  padding: 0px 20px;
+}
+
+table.report th {
+  background-color: #f8f8f8;
+  width: 110px;
+  text-align: center;
+}
+table.report td {
+  background-color: var(--light);
+  column-gap: 10px;
+}
+
+table.report td>* {
+  margin-right: 10px;
+  /*padding: 5px;*/
+}
+table.report td>*:last-child {
+  margin-right: 0px;
+  margin-bottom: 10px;
+}
+table.report td select,
+table.report td input[type="date"],
+table.report td input[type="text"],
+table.report td button,
+table.report td option{
+  padding: 5px;
+  border: #e0e0e0 solid 1px;
+  border-radius: 5px;
+  /*text-align: center;*/
+
+}
+table.report td select{
+  /*width: 80px;*/
+  margin: 10px;
+}
+table.report td input[type="text"]{
+  display: inline-flex;
+  margin: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  color : #e0e0e0;
+  width: 80%;
+}
+
+table.report.f-list th {
+  font-weight: 500;
+  padding: 10px 0px;
+}
+table.report.f-list td {
+  padding: 10px 0px 10px 10px;
+  text-align: left;
+}
+.f-list th:nth-child(1){ width: 32px}
+.f-list th:nth-child(2){ width: 100px}
+.f-list th:nth-child(3){ width: 100px}
+.f-list th:nth-child(4){ width: 250px}
+.f-list th:nth-child(6){ width: 50px}
+.f-list th:nth-child(7){ width: 50px}
+
+table.report.member td,
+table.report.member td{
+  padding: 10px 0px;
+}
+
+
+@media screen and (max-width: 768px) {
+  table.report th,
+  table.report td {
+    display: block;
+    width: 100%;
+  }
+  table.report th {
+    padding: 10px;
+  }
+  table.report td > * {
+    width: calc(100% - 20px); /* 좌우 여백 고려 */
+    margin-bottom: 10px;
+  }
+}
+
+div .btn-list {
+  display: flex;
+  align-items: center;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  gap: 10px;
+}
+
+div .btn-list li {
+  /* margin-right: 10px; */
+}
+
+.btn-url {
+  font-size: 14px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 6px 10px;
+  color: var(--dark);
+  background: var(--light);
+  transition: all 0.3s ease;
+  border-radius: 5px;
+  font-weight: 400;
+  margin: 10px 0px;
+  cursor: pointer;
+  border-color: var(--grey);
+  border-width: 1px;
+}
+div .btn-url.active {
+  background: var(--blue);
+  color: white;
+}
+
+.btn-main{
+  background-color: var(--blue);
+  color: white;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.filter-btn{
+  text-align: center;
+}
+
+div .btn-url:hover {
+  background: var(--grey);
+}
+
+table.report.chart th,
+table.report.chart td{
+  width: auto;
+  padding: 5px 10px;
+}
+table.report.chart{
+  text-align: center;
+}
+table.report.chart td:nth-child(1){
+  width: 50px;
+}
+table.report.chart td:nth-child(2){
+  width: 80px;
+}
+table.report.chart td:nth-child(4){
+  width: 100px;
+}
+table.report.chart td:nth-child(5){
+  width: 80px;
+}
+
+.apexchart{
+  display: flex;
+  justify-content: center;
+  padding-top: 20px;
+}
+
+/*.filter-section {*/
+/*  background-color: yellow;*/
+/*}*/
+/*.filter {*/
+/*  !* flex-wrap: wrap; *!*/
+/*  display: flex;*/
+/*  margin: 10px;*/
+/*  align-items: center;*/
+/*  background-color: blue;*/
+/*}*/
+/*.param {*/
+/*  padding: 0px 20px;*/
+/*  background-color: yellow;*/
+/*}*/
+/*.value {*/
+/*  !* display: inline-flex; *!*/
+
+/*  background-color: aquamarine;*/
+/*}*/
+/*.filter-list li {*/
+/*}*/

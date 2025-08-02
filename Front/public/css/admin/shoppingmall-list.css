@@ -1,0 +1,461 @@
+.card {
+  background-color: #fff;
+  border: none;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+.card-body {
+  padding: 15px;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+.table th,
+.table td {
+  padding: 8px;
+  border: 1px solid #e0e0e0;
+}
+.table th {
+  background-color: #f8f8f8;
+  font-weight: 500;
+  text-align: center;
+  color: #333;
+  width: 100px;
+}
+.select,
+.input-text {
+  width: auto;
+  padding: 6px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.select {
+  background-color: #fff;
+  margin-right: 5px;
+}
+.price {
+  width: 100px;
+}
+.date {
+  width: 100px;
+}
+.btn-calendar {
+  background-color: #e9ecef;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 5px 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.3s;
+}
+.btn-primary {
+  background-color: var(--blue);
+  color: white;
+}
+.btn-primary:hover {
+  background-color: var(--dark-blue);
+}
+.text-center {
+  text-align: center;
+}
+
+/* LIST CSS */
+.active-toggle .custom-control-input:checked ~ .custom-control-label::before {
+  background-color: var(--blue);
+  border-color: var(--dark-blue);
+}
+.btn-outline-secondary {
+  color: #6c757d;
+  border: 1px solid #6c757d;
+  background-color: transparent;
+}
+.btn-outline-secondary:hover {
+  color: #fff;
+  background-color: #6c757d;
+}
+.btn-outline-danger {
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  background-color: transparent;
+}
+.btn-outline-danger:hover {
+  color: #fff;
+  background-color: #dc3545;
+}
+.custom-switch .custom-control-label::before {
+  left: -2.25rem;
+  width: 1.75rem;
+  pointer-events: all;
+  border-radius: 0.5rem;
+}
+.custom-switch .custom-control-label::after {
+  top: calc(0.25rem + 2px);
+  left: calc(-2.25rem + 2px);
+  width: calc(1rem - 4px);
+  height: calc(1rem - 4px);
+  background-color: #adb5bd;
+  border-radius: 0.5rem;
+  transition: transform 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+.custom-switch .custom-control-input:checked ~ .custom-control-label::after {
+  background-color: #fff;
+  transform: translateX(0.75rem);
+}
+.custom-control {
+  position: relative;
+  z-index: 1;
+  display: block;
+  min-height: 1.5rem;
+  padding-left: 2.5rem;
+}
+.custom-control-input {
+  position: absolute;
+  left: 0;
+  z-index: -1;
+  width: 1rem;
+  height: 1rem;
+  opacity: 0;
+}
+.custom-control-label {
+  position: relative;
+  margin-bottom: 0;
+  vertical-align: top;
+}
+.custom-control-label::before {
+  position: absolute;
+  top: 0.25rem;
+  left: -1.9rem;
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  pointer-events: none;
+  content: "";
+  background-color: #fff;
+  border: 1px solid #adb5bd;
+}
+.custom-control-label::after {
+  position: absolute;
+  top: 0.25rem;
+  left: -1.5rem;
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  content: "";
+  background: no-repeat 50% / 50% 50%;
+}
+.custom-checkbox .custom-control-input:checked ~ .custom-control-label::before {
+  background-color: var(--blue);
+  border-color: var(--blue);
+}
+.custom-checkbox .custom-control-input:checked ~ .custom-control-label::after {
+  content: "";
+  position: absolute;
+  top: 0.25rem;
+  left: -1.5rem;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  background-image: none; /* 기존의 SVG를 제거합니다. */
+}
+.mdi::before {
+  display: inline-block;
+  font: normal normal normal 24px/1 "boxicons";
+  font-size: inherit;
+  text-rendering: auto;
+  line-height: inherit;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.mdi-chevron-down::before {
+  content: "\e9bf";
+}
+.mdi-pencil::before {
+  content: "\ea77";
+}
+.mdi-delete::before {
+  content: "\eab8";
+}
+.shoppingmall-img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 0.2rem;
+}
+.text-md {
+  font-size: 14px;
+}
+.d-flex {
+  display: flex;
+  justify-content: space-between;
+}
+.align-items-center {
+  align-items: center;
+}
+.ml-2 {
+  margin-left: 0.5rem;
+}
+.mr-2 {
+  margin-right: 0.5rem;
+}
+.shoppingmall-list-table {
+  table-layout: fixed;
+  width: 100%;
+}
+.shoppingmall-list-table th,
+.shoppingmall-list-table td {
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.shoppingmall-list-table td.shoppingmall-cell {
+  text-align: left;
+  padding-left: 10px;
+}
+.shoppingmall-list-table td.shoppingmall-cell .d-flex {
+  justify-content: center;
+  width: 100%;
+}
+
+/* 열 너비 조절 */
+.shoppingmall-list-table th:nth-child(1),
+.shoppingmall-list-table td:nth-child(1) {
+  width: 5%; /* 체크박스 열 */
+}
+
+.shoppingmall-list-table th:nth-child(2),
+.shoppingmall-list-table td:nth-child(2) {
+  width: 5%; /* NO. 열 */
+}
+
+.shoppingmall-list-table th:nth-child(3),
+.shoppingmall-list-table td:nth-child(3) {
+  width: 10%; /* shoppingmall이미지 열 */
+}
+
+.shoppingmall-list-table th:nth-child(4),
+.shoppingmall-list-table td:nth-child(4) {
+  width: 10%; /* shoppingmall한글명 열 */
+}
+
+.shoppingmall-list-table th:nth-child(5),
+.shoppingmall-list-table td:nth-child(5) {
+  width: 10%; /* shoppingmall영어명 열 */
+}
+
+.shoppingmall-list-table th:nth-child(6),
+.shoppingmall-list-table td:nth-child(6) {
+  width: 10%; /* URL 열 */
+}
+
+.shoppingmall-list-table th:nth-child(7),
+.shoppingmall-list-table td:nth-child(7),
+.shoppingmall-list-table th:nth-child(8),
+.shoppingmall-list-table td:nth-child(8) {
+  width: 10%; /* 배송비와 관부가세 열 */
+}
+
+.shoppingmall-list-table th:nth-child(9),
+.shoppingmall-list-table td:nth-child(9),
+.shoppingmall-list-table th:nth-child(10),
+.shoppingmall-list-table td:nth-child(10) {
+  width: 10%; /* 등록일자와 수정일자 열 */
+}
+
+.shoppingmall-list-table th:nth-child(11),
+.shoppingmall-list-table td:nth-child(11) {
+  width: 10%; /* 사용여부 열 */
+}
+
+.shoppingmall-list-table th:nth-child(12),
+.shoppingmall-list-table td:nth-child(12) {
+  width: 20%; /* 비고 열 */
+}
+
+/* 페이징네이션 */
+.pagination-container {
+  margin-top: 1rem;
+  display: flex; /* Flexbox를 사용하여 정렬 */
+  justify-content: center; /* 중앙 정렬 */
+}
+
+.pagination {
+  display: flex;
+  justify-content: center; /* 기존 중앙 정렬 유지 */
+  list-style: none;
+  padding: 0;
+}
+
+.page-item {
+  margin: 0 0.25rem;
+}
+
+.page-link {
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  background-color: #f8f9fa; /* 배경색을 밝은 회색으로 설정 */
+  color: #007bff; /* 기본 텍스트 색상 */
+  text-decoration: none; /* 링크의 기본 밑줄 제거 */
+  transition: background-color 0.3s ease, color 0.3s ease; /* 전환 효과 추가 */
+}
+
+.page-link:hover {
+  background-color: #e9ecef; /* 마우스 오버 시 배경색 변경 */
+  color: #0056b3; /* 마우스 오버 시 텍스트 색상 변경 */
+}
+
+.page-item.disabled .page-link {
+  pointer-events: none;
+  opacity: 0.5;
+  background-color: #f8f9fa; /* 비활성화된 링크의 배경색 */
+  color: #6c757d; /* 비활성화된 링크의 텍스트 색상 */
+}
+
+.page-item.active .page-link {
+  background-color: #007bff; /* 활성화된 페이지의 배경색 */
+  color: white; /* 활성화된 페이지의 텍스트 색상 */
+}
+ 
+.date-cell {
+  text-align: center;
+  vertical-align: middle;
+  padding: 8px;
+}
+
+.pl-switch {
+  position: relative;
+  display: inline-block;
+  width: 35px;
+  height: 20px;
+}
+
+.pl-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.pl-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.pl-slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+.pl-slider.round {
+  border-radius: 34px;
+}
+
+.pl-slider.round:before {
+  border-radius: 50%;
+}
+
+input:checked + .pl-slider {
+  background-color: #2196f3;
+}
+
+input:checked + .pl-slider:before {
+  transform: translateX(15px);
+}
+
+/* LIST CSS */
+.pl-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+/* 모달창 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 700px;
+  height: 700px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.modal-title {
+  font-size: 24px;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto; /* 세로 스크롤 추가 */
+  padding-right: 10px; /* 스크롤바 공간 확보 */
+}
+
+.modal-body img {
+  width: 100%;
+  height: 200px;
+  object-fit: contain;
+  object-position: center;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px; /* 푸터와 본문 사이 간격 추가 */
+}
+
+.close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}

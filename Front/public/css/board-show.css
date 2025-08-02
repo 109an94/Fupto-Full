@@ -1,0 +1,35 @@
+div.boardContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  background-color: white;
+  margin: 0;
+  /*padding: 20px;*/
+  grid-template-columns: repeat(auto-fill, minmax(213px, 1fr));
+}
+.image-box {
+  width: 200px;
+  height: 300px;
+  margin: 20px;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+}
+@media (max-width: 768px) {
+  div.boardContainer {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      justify-items: start; /* 왼쪽 정렬 */
+  }
+  .image-box {
+      width: 140px;
+      height: 170px;
+  }
+}

@@ -1,0 +1,276 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 20px;
+  width: 372px;
+  height: 520px; /* 모달의 높이 조정 */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden; /* 내용이 넘치지 않도록 설정 */
+  position: relative;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: column; /* 제목과 닫기 버튼을 양쪽에 정렬 */
+  align-items: center;
+  padding-bottom: 10px;
+
+  border-bottom: 1px solid #ddd;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+  flex-grow: 1;
+  display: flex;
+  justify-content: center; /* 중앙 정렬 */
+}
+
+.close {
+  margin-left: auto; /* 자동 여백 추가로 오른쪽 정렬 */
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.modal-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; /* 각 요소 사이 간격 */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-group {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.form-group label {
+  width: 50px; /* 레이블의 고정 너비 */
+  text-align: right;
+  margin-right: 10px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.form-group input,
+.form-group textarea {
+  flex-grow: 1;
+  width: calc(100% - 100px); /* 부모 요소의 너비에 맞춤 */
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+textarea {
+  resize: none;
+}
+
+.image-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  width: 100%; /* 부모 요소의 너비에 맞춤 */
+}
+
+.brand-image {
+  width: 130px;
+  height: 120px;
+  background-color: #d9d9d9;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.btn {
+  width: 74px;
+  height: 35px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.3s;
+}
+
+.btn-primary {
+  background-color: var(--color-button-defualt);
+  color: var(--color-ui-white);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-button-hover);
+}
+
+/* ----------------------------모달1 css---------------------------------------- */
+.alert-setting-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--color-ui-white);
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 300px;
+  margin: 20px auto;
+}
+
+.alert-header {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.alert-title {
+  font-size: var(--font-bold-h2);
+  color: var(--color-text-title);
+  margin: 0;
+}
+
+.alert-body {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.price-input-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--color-ui-backgroundb);
+  border-radius: 5px;
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+.price-input-group input {
+  border: none;
+  background: none;
+  width: calc(100% - 30px); /* 금액 입력칸 크기 조절 */
+  font-size: var(--font-regular-body);
+  padding: 5px;
+}
+
+.price-input-group input:focus {
+  outline: none;
+}
+
+.currency-unit {
+  color: var(--color-text-caption);
+}
+
+.error-message {
+  color: var(--color-ui-notion);
+  font-size: var(--font-bold-caption);
+  text-align: center;
+  margin: 0 0 10px 0;
+}
+
+.alert-footer {
+  text-align: center;
+}
+
+.confirm-button {
+  background-color: var(--color-button-defualt);
+  color: var(--color-ui-white);
+  border: none;
+  border-radius: 5px;
+  width: 100%;
+  height: 40px;
+  font-size: var(--font-bold-button);
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.confirm-button:hover {
+  background-color: var(--color-button-hover);
+}
+
+/* ----------------------------모달2 css---------------------------------------- */
+.signup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: var(--color-ui-white);
+}
+
+.signup-card {
+  width: 350px;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  background-color: var(--color-ui-white);
+}
+
+.brand-title {
+  font-size: var(--font-bold-h2);
+  font-weight: var(--font-bold);
+  color: var(--color-text-title);
+  margin-bottom: 30px;
+}
+
+.highlight {
+  color: var(--color-main-light);
+}
+
+.signup-button {
+  display: inline-block;
+  width: 100%;
+  padding: 12px 0;
+  margin: 20px 0;
+  font-size: var(--font-medium-body);
+  font-weight: var(--font-bold);
+  color: var(--color-ui-white);
+  background-color: var(--color-button-defualt);
+  border: 2px solid var(--color-button-defualt);
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.signup-button:hover {
+  background-color: var(--color-ui-white);
+  color: var(--color-button-defualt);
+}
+
+.login-link {
+  font-size: var(--font-medium-caption);
+  color: var(--color-text-unselected);
+  cursor: pointer;
+  margin-top: 10px;
+}

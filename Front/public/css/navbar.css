@@ -1,0 +1,107 @@
+@media (min-width: 769px) {
+  .main-footer-nav {
+    display: none;
+  }
+}
+
+@media (width <= 768px) {
+  .m-icon\:menu::before {
+    mask-image: url(/imgs/icon/menu.svg);
+  }
+  .m-icon\:search::before {
+    mask-image: url(/imgs/icon/search.svg);
+  }
+  .m-icon\:home::before {
+    mask-image: url(/imgs/icon/home.svg);
+  }
+  .m-icon\:zzim::before {
+    mask-image: url(/imgs/icon/zzim.svg);
+  }
+  .m-icon\:account::before {
+    mask-image: url(/imgs/icon/account.svg);
+  }
+
+  .main-footer-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--color-ui-white);
+    border-top: 1px solid var(--color-text-unselected);
+    z-index: 1000;
+  }
+
+  .main-footer-nav > ul {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+
+  .main-footer-nav_list > li {
+    border-radius: 15px;
+  }
+
+  :is(.m-icon\:menu, .m-icon\:search, .m-icon\:home, .m-icon\:zzim, .m-icon\:account) {
+    --icon-width: 24px;
+    --icon-color: black;
+    display: inline-flex;
+    overflow: hidden;
+    width: var(--icon-width);
+    height: var(--icon-width);
+    align-items: center;
+    padding: 22px 22px;
+    gap: var(--icon-width);
+  }
+
+  .m-icon\:menu::before,
+  .m-icon\:search::before,
+  .m-icon\:home::before,
+  .m-icon\:zzim::before,
+  .m-icon\:account::before {
+    flex-shrink: 0;
+
+    content: "";
+    display: inline-flex;
+    width: var(--icon-width);
+    height: var(--icon-width);
+    overflow: hidden;
+    text-indent: -999px;
+    background-color: var(--color-text-unselected);
+    background-repeat: no-repeat;
+    mask-size: var(--icon-width);
+  }
+
+  .m-icon-size\:1 {
+    --icon-width: 14px;
+  }
+  .m-icon-size\:2 {
+    --icon-width: 24px;
+  }
+  .m-icon-size\:3 {
+    --icon-width: 32px;
+  }
+  .m-icon-size\:4 {
+    --icon-width: 40px;
+  }
+  .m-icon-size\:5 {
+    --icon-width: 56px;
+  }
+
+  .m-icon-color\:main-1 {
+    --icon-color: var(--color-main-deep, #1d70f5);
+  }
+  .m-icon-color\:main-2 {
+    --icon-color: var(--color-main-default, #00abf6);
+  }
+  .m-icon-color\:main-3 {
+    --icon-color: var(--color-main-light, #58ccff);
+  }
+
+  .main-footer-nav li:hover {
+    background-color: var(--color-ui-backgrounda);
+  }
+  .main-footer-nav a:hover::before {
+    background-color: var(--color-text-default);
+  }
+}

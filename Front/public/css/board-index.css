@@ -1,0 +1,232 @@
+.main-content {
+  margin-top: 110px;
+  margin-left: auto;
+  margin-right: auto;
+  overflow-y: auto;
+  max-width: 1400px;
+  padding: 0 20px;
+  min-height: 1100px;
+}
+
+.board_ul{
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.board_ul li{
+  margin: 10px 8px;
+}
+
+.board_ul button {
+  height: 40px;
+  width: 120px;
+  background-color: var(--color-ui-white);
+  border: 1px solid var(--color-ui-backgroundb);
+  border-radius: 5px;
+  font-size: 14px;
+  transition: background-color 0.2s, color 0.2s;;
+}
+
+button:hover,
+button.active{
+  border: solid 1px #007bff;
+  /* background-color: var(--color-ui-backgroundb); */
+  color: #007bff;
+}
+
+/* 검색창 */
+.searchBox {
+  display: flex; /* flexbox를 사용하여 수평으로 배치 */
+  margin-bottom: 50px;
+}
+
+.type {
+  border-radius: 10px;
+  width: 80px;
+  height: 25px;
+  border: 1px solid var(--color-ui-backgroundb);
+  display: flex;
+  justify-content: center; /* 옵션 텍스트를 가운데 정렬 */
+  align-items: center; /* 수직으로 가운데 정렬 */
+  text-align: center; /* 옵션 텍스트를 가운데 정렬 */
+} 
+
+.keyword {
+  border-radius: 10px;
+  padding-left: 5px;
+  height: 23px;
+  width: 300px;
+  border: 1px solid var(--color-ui-backgroundb);
+}
+
+.searchBtn {
+  border-radius: 10px;
+  width: 50px;
+  height: 25px;
+  border: 1px solid var(--color-ui-backgroundb);
+  padding-bottom: 1px;
+}
+
+
+/* 게시글 간격 */
+.board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;    
+  justify-content: center;
+  width: 100%;            
+}
+
+table {
+  width: 100%;
+}
+
+td {
+  border-bottom: solid 1px var(--color-text-caption);
+}
+
+.num {
+  width: 10%;
+  text-align: center;
+}
+
+.title {
+  font-size: 50px;
+  width: 60%;
+}
+
+small {
+  padding-right: 20px;
+  font-size: var(--font-bold-caption);
+}
+
+.image {
+  text-align: center;
+  padding-top: 5px;
+}
+
+.product-img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 0.2rem;
+}
+
+
+/* 글쓰기 */
+.write-btn {
+  width: 70px;
+  height: 30px;
+  align-self: flex-end;
+  border-radius: 5px;
+  background-color: white;
+  border: 1px solid var(--color-ui-backgroundb);
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-right: 50px;
+}
+
+.write-btn:hover,
+.write-btn.active{
+  border: solid 1px #007bff;
+  background-color: white;
+  color: #007bff;
+}
+
+nuxt-link {
+  display: inline-block;  /* nuxt-link가 inline-block이 되도록 수정 */
+}
+
+/* 페이징네이션 */
+.Pagination-container {
+  margin-top: 1rem;
+  display: flex; /* Flexbox를 사용하여 정렬 */
+  justify-content: center; /* 중앙 정렬 */
+}
+
+.Pagination {
+  display: flex;
+  justify-content: center; /* 기존 중앙 정렬 유지 */
+  list-style: none;
+  padding: 0;
+}
+
+.Page-item {
+  margin: 0 0.25rem;
+}
+
+.Page-link {
+  margin: 0 5px;
+  padding: 0.5rem 1rem;
+  color: black; /* 기본 텍스트 색상 */
+  text-decoration: none; /* 링크의 기본 밑줄 제거 */
+  transition: background-color 0.3s ease, color 0.3s ease; /* 전환 효과 추가 */
+}
+
+.Page-link:hover {
+  border-bottom: solid 1px #007bff;
+}
+
+.Page-item.disabled .Page-link {
+  pointer-events: none;
+  opacity: 0.5;
+  background-color: #f8f9fa; /* 비활성화된 링크의 배경색 */
+  color: #6c757d; /* 비활성화된 링크의 텍스트 색상 */
+}
+
+.Page-item.active .Page-link {
+  border-bottom: solid 1px #007bff; 
+  /* 활성화된 페이지의 배경색 */
+  color: black; /* 활성화된 페이지의 텍스트 색상 */
+}
+
+
+@media (max-width: 768px) {
+  .board_ul{
+    flex-wrap: wrap; 
+    justify-content: center;
+    width: 100%; 
+  }
+
+  .board_ul li {
+    flex: 1 1 auto; 
+    max-width: 120px;
+  }
+
+
+}
+
+@media (max-width: 679px) {
+  .board_ul {
+    flex-wrap: wrap; 
+    justify-content: center;
+    width: 100%; 
+  }
+
+  .board_ul li {
+    flex: 1 1 auto; 
+    max-width: 100px;
+  }
+
+  .board_ul button {
+    width: 100px;
+  }
+
+  @media (max-width: 579px) {
+  .board_ul {
+    flex-wrap: wrap; 
+    justify-content: center;
+    width: 100%; 
+  }
+
+  .board_ul li {
+    flex: 1 1 auto; 
+    max-width: 70px;
+  }
+
+  .board_ul button {
+    width: 70px;
+  }
+}
+}

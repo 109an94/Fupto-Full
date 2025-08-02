@@ -1,0 +1,353 @@
+main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+aside.profileContainer {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.profileContainer{
+ box-sizing: border-box;
+vertical-align: baseline;
+display: block;
+}
+
+.profileContainer .profile{
+    display: flex;
+    padding: 30px;
+    justify-content: flex-start;
+}
+
+.profile img{
+    width: 80px;
+    height: 80px;
+    display: block;
+    background-color: #989CA2;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+.profile .icon{
+    display: flex;
+    margin-left: auto;
+    width: 20px;
+    height: 32px;
+    background-color: #989CA2;
+    padding: 0px 20px;
+
+}
+div.info{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+}
+div.info-name{
+    color:var(--color-text-title);
+    font-size: var(--font-regular-h3);
+}
+div.info-email{
+    color:var(--color-text-unselected);
+    font-size: var(--font-regular-notion);
+
+}
+div.info button{
+    color: var(--color-text-unselected);
+    background-color: var(--color-ui-white);
+    border: 1px solid var(--color-text-caption);
+    font-size: var(--font-regular-notion);
+    border-radius: 3px;
+    width: 74px;
+    height: 25px;
+}
+
+nav.profileNav{
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: nowrap;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-text-unselected);
+}
+nav.profileNav ul{
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+nav.profileNav li{
+
+    display: flex;
+    align-items: center;
+    text-align: center;
+    /*justify-content: space-around;*/
+    padding: 10px;
+}
+
+nav.profileNav li a{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 10px;
+
+}
+nav.profileNav li span:nth-child(1){
+    border : 1px solid var(--color-text-caption);
+    width: 30px;
+    height: 30px;
+    background-color: var(--color-text-unselected);
+}
+
+
+/*event card 관련*/
+div.eventCard{
+    width: 100%;
+    height: 150px;
+    /*background-color: yellow;*/
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--color-text-caption);
+    justify-content: space-between;
+}
+div.eventCard img{
+    background-color: var(--color-text-unselected);
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    margin: 20px;
+    /*margin-right: 30px;*/
+}
+
+div.eventCard .eventBanner a{
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: space-around;
+    /*background-color: var(--color-text-caption);*/
+    padding: 10px;
+
+}
+div.eventCard .eventBanner{
+    flex: 1;
+    min-width: 0;
+
+}
+
+
+
+.eventBanner div.title{
+    font-size: var(--font-bold-h3);
+    color: var(--color-text-default);
+ }
+.eventBanner div.description{
+    font-size: var(--font-regular-body);
+    color: var(--color-text-default);
+}
+.eventBanner div.title,
+.eventBanner div.description {
+    /*다음칸이 안나옴*/
+    white-space: nowrap;
+    /*박스 안을 안넘어가고 사라짐*/
+    overflow: hidden;
+    /*....으로 나옴*/
+    text-overflow: ellipsis;
+    /*사라지는 너비가 100%기준*/
+    max-width: 100%;
+}
+
+/*----- favorite card 관련 -------*/
+.favoriteContainer {
+    /*display: ;*/
+    padding: 10px;
+}
+
+div.favoriteCard {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    /*width: 95%;*/
+    max-width: 768px;
+    height: 110px;
+    background-color: beige;
+    border: 1px solid var(--color-text-caption);
+    border-radius: 10px;
+
+    padding: 20px;
+    margin-bottom: 10px;
+    /*justify-content: space-between;*/
+
+}
+div.favoriteDetail{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    width: 100%;
+
+}
+
+div.favoriteTitle {
+    display: flex;
+    flex-direction: row;
+    display: inline-flex;
+    /*미디어 쿼리 확장시 조정 필요*/
+    /*min-width: 80vw;*/
+}
+
+
+div.favoriteDetail img{
+    width: 70px;
+    height: 70px;
+    align-items: center;
+    border-radius: 50%;
+    background-color: var(--color-button-defualt);
+    /*margin-right: 20px*/
+}
+div.favoriteDetail div.favoriteTitle {
+    /*width: 100%;*/
+    /*min 잡으면 미디어 쿼리때 쓸만함*/
+    /*min-width: 300px;*/
+    width:630px;
+    /*display: flex;*/
+    /*width: auto*/
+}
+div.favoriteButton {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+div.favoriteBanner{
+    display: flex;
+    flex-direction: column;
+    /*align-items: ;*/
+    padding: 0px 20px;
+}
+.favoriteBanner div.title{
+    font-size: var(--font-bold-h3);
+    color: var(--color-text-default);
+}
+.favoriteBanner div.description{
+    font-size: var(--font-regular-body);
+    color: var(--color-text-default);
+}
+
+.favoriteBanner div.title,
+.favoriteBanner div.description {
+    display: flex;
+    /*다음칸이 안나옴*/
+    white-space: nowrap;
+    /*박스 안을 안넘어가고 사라짐*/
+    overflow: hidden;
+    /*....으로 나옴*/
+    text-overflow: ellipsis;
+    /*사라지는 너비가 100%기준*/
+    /*max-width: 100%;*/
+}
+
+/*-------게시판 영역---------*/
+div.boardContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    /*background-color: #f8f8f8;*/
+    margin: 0;
+    /*padding: 20px;*/
+    grid-template-columns: repeat(auto-fill, minmax(213px, 1fr));
+}
+.image-box {
+    width: 213px;
+    height: 260px;
+    margin: 5px;
+    background-color: #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+@media (max-width: 768px) {
+    div.boardContainer {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        justify-items: start; /* 왼쪽 정렬 */
+    }
+    .image-box {
+        width: 140px;
+        height: 170px;
+    }
+}
+
+
+/*-------아이콘 영역---------*/
+button.icon\:close {
+    align-self: flex-start;
+    /*padding-top: 5px;*/
+    /*margin: px;*/
+}
+.icon\:close{
+    --icon-width: 30px;
+    --icon-color:black;
+    display: inline-flex;
+    align-items: center;
+    height: var(--icon-width);
+    width: var(--icon-width);
+    overflow: visible;
+    color: var(--color-text-unselected);
+    margin: 10px;
+    /*overflow: visible;*/
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    flex-wrap: nowrap;
+    /*flex-grow: 0;*/
+}
+:is(
+.icon\:close
+)::before{
+    flex-shrink: 0;
+    content: "";
+    width: var(--icon-width);
+    height: var(--icon-width);
+    display: inline-flex;
+    overflow: hidden;
+    /*text-indent: -999px;*/
+    background-color: var(--color-text-unselected);
+    background-repeat: no-repeat;
+    mask-size: var(--icon-width);
+}
+.icon\:close::before{
+    mask-image: url("../imgs/icon/cancel.svg");
+}
+.icon\:close span{
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    main aside.profileContainer {
+        /*display: none;*/
+        width: 100%;
+    }
+
+
+}
+
+@media (min-width: 769px) {
+    main aside.profileContainer {
+        /*display: none;*/
+        width: 100%
+    }
+    div.favoriteCard,
+    div.eventCard{
+        /*width: 100vw;*/
+    }
+
+}
