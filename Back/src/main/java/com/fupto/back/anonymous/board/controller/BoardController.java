@@ -40,6 +40,7 @@ public class BoardController {
         return ResponseEntity.ok(boardService.getById(id));
     }
 
+
     @PatchMapping("{id}/inactive")
     public ResponseEntity<BoardDto> userInActive(
             @PathVariable Long id,
@@ -66,6 +67,8 @@ public class BoardController {
 
     @GetMapping("{id}/edit")
     public ResponseEntity<BoardDto> userEdit(@PathVariable Long id) {
+        System.out.println(id);
+
         return ResponseEntity.ok(boardService.show(id));
     }
 

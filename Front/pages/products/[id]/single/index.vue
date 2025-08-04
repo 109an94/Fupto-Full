@@ -1,6 +1,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 
+const { isAnonymous } = useUserDetails();
+const { isAuthModalOpen, checkVendorAccess, closeAuthModal, navigateToSignup, navigateToSignin } = useVendorAuth();
+
 const currentSlide = ref(0);
 const isDescriptionOpen = ref(true);
 const isFooterVisible = ref(false);
@@ -20,7 +23,7 @@ useHead(() => ({
   },
 }));
 
-const { data: product, error } = await useFetch(`${config.public.apiBase}/products/${productId}/single`, {
+const { data: product, error } = await useAuthFetch(`/products/${productId}/single`, {
   key: `product-${productId}`,
 });
 
@@ -74,21 +77,15 @@ const nextSlide = () => {
   }
 };
 
-// 기존 토글 함수들
-const toggleFavorite = (event) => {
-  event.preventDefault();
-  const button = event.currentTarget;
-  const isFavorite = button.getAttribute("data-favorite") === "true";
-  const img = button.querySelector("img");
+const { toggleFavorite: toggleFavoriteAction } = useFavorite();
 
-  if (isFavorite) {
-    button.setAttribute("data-favorite", "false");
-    img.src = "/imgs/icon/favorite.svg";
-    img.alt = "즐겨찾기 추가";
-  } else {
-    button.setAttribute("data-favorite", "true");
-    img.src = "/imgs/icon/favorite-fill.svg";
-    img.alt = "즐겨찾기 제거";
+// 찜 관련
+const toggleFavorite = async (event) => {
+  event.preventDefault();
+  const success = await toggleFavoriteAction(product.value.mappingId);
+
+  if (success) {
+    product.value.favorite = !product.value.favorite;
   }
 };
 
@@ -146,6 +143,9 @@ watch(currentSlide, (newSlide) => {
 
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
+  if (isAnonymous()) {
+    checkVendorAccess();
+  }
 });
 
 onUnmounted(() => {
@@ -199,8 +199,12 @@ onUnmounted(() => {
           <p class="brand">{{ product?.brandEngName }}</p>
           <div class="title-container">
             <h1 class="title">{{ product?.productName }}</h1>
-            <button data-favorite="false" @click="toggleFavorite" class="favorite-btn">
-              <img class="favorite" src="/imgs/icon/favorite.svg" alt="찜" />
+            <button :data-favorite="product?.favorite" @click="toggleFavorite" class="favorite-btn">
+              <img
+                class="favorite"
+                :src="product?.favorite ? '/imgs/icon/favorite-fill.svg' : '/imgs/icon/favorite.svg'"
+                :alt="product?.favorite ? '찜' : '찜 해제'"
+              />
             </button>
           </div>
         </section>
@@ -218,21 +222,39 @@ onUnmounted(() => {
         </section>
 
         <section class="vendor-section">
-          <ul class="vendor-list">
-            <li v-for="shop in product?.shops" :key="shop.id" class="vendor-card">
-              <div class="background-area" @click="navigateToRoute(`/products/${shop.productId}/single`)"></div>
-              <div class="vendor-logo" @click.stop>
-                <img :src="`${config.public.apiBase}/${shop.logoUrl}`" :alt="shop.shopName" />
+          <div :class="{ 'blur-section': isAnonymous() }">
+            <ul class="vendor-list">
+              <li v-for="shop in product?.shops" :key="shop.id" class="vendor-card">
+                <div class="background-area" @click="navigateToRoute(`/products/${shop.productId}/single`)"></div>
+                <div class="vendor-logo" @click.stop>
+                  <img :src="`${config.public.apiBase}/${shop.logoUrl}`" :alt="shop.shopName" />
+                </div>
+                <div class="name-wrapper" @click.stop>
+                  <nuxt-link :to="`/shoppingmalls/${shop.id}/detail`" class="vendor-name">{{ shop.shopName }}</nuxt-link>
+                </div>
+                <div class="vendor-price">
+                  <p>{{ shop.price?.toLocaleString() }} ￦</p>
+                  <a :href="shop.productUrl" class="link" target="_blank" @click.stop>이동</a>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div v-if="isAnonymous() && isAuthModalOpen" class="vendor-modal-overlay">
+            <div class="popup flex flex-col items-center gap-lg">
+              <div class="flex gap-lg justify-end w-full pr">
+                <button class="icon-sm" @click="closeAuthModal">×</button>
               </div>
-              <div class="name-wrapper" @click.stop>
-                <span class="vendor-name">{{ shop.shopName }}</span>
+              <h2 class="text-default text-bold text-lg">쇼핑몰 정보가 궁금하시다면?</h2>
+              <button type="button" class="btn btn-fupto flex items-center justify-center" @click="navigateToSignup">
+                <span class="text-white text-bold text-md">FUPTO로 가입하기</span>
+              </button>
+              <div class="flex items-center gap-sm">
+                <span class="text-default text-regular text-sm">이미 회원이신가요?</span>
+                <a href="#" class="text-default text-bold text-md" @click.prevent="navigateToSignin">로그인하기 ></a>
               </div>
-              <div class="vendor-price">
-                <p>{{ shop.price?.toLocaleString() }} ￦</p>
-                <a :href="shop.productUrl" class="link" target="_blank" @click.stop>이동</a>
-              </div>
-            </li>
-          </ul>
+            </div>
+          </div>
         </section>
 
         <section class="description-section">

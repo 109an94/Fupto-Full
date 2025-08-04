@@ -23,7 +23,7 @@ const shops = ref([]);
 
 const loadProductData = async () => {
   try {
-    const data = await $fetch(`${config.public.apiBase}/admin/products/${productId}/edit`);
+    const data = await use$Fetch(`/admin/products/${productId}/edit`);
 
     await fetchCategories(1);
     if (data.category1Id) {
@@ -66,7 +66,7 @@ const fetchCategories = async (level, parentId = null) => {
     if (parentId) params.append("parentId", parentId);
     params.append("level", level);
 
-    const data = await $fetch(`${config.public.apiBase}/admin/products/categories?${params.toString()}`);
+    const data = await use$Fetch(`/admin/products/categories?${params.toString()}`);
 
     if (level === 1) {
       categories.value.level1 = data;
@@ -104,7 +104,7 @@ const handleCategory2Change = async (product) => {
 // 브랜드, 쇼핑몰 데이터 가져오기
 const fetchBrands = async () => {
   try {
-    const data = await $fetch(`${config.public.apiBase}/admin/products/brands`);
+    const data = await use$Fetch("/admin/products/brands");
     brands.value = data.map((brand) => ({
       id: brand.id,
       name: `${brand.engName}(${brand.korName})`,
@@ -116,7 +116,7 @@ const fetchBrands = async () => {
 
 const fetchShops = async () => {
   try {
-    const data = await $fetch(`${config.public.apiBase}/admin/products/shopping-malls`);
+    const data = await use$Fetch("/admin/products/shopping-malls");
     shops.value = data.map((shop) => ({
       id: shop.id,
       name: `${shop.engName}(${shop.korName})`,
@@ -130,7 +130,7 @@ const handleActiveChange = (product) => {
   console.log(`Product ${product.id} active status: ${product.active}`);
 };
 
-// 가격 포맷팅 (기존 코드 유지)
+// 가격 포맷팅
 const formatNumber = (value) => {
   if (!value) return "";
   return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -246,7 +246,7 @@ const submitForm = async () => {
       });
     }
 
-    await $fetch(`${config.public.apiBase}/admin/products/${productId}`, {
+    await use$Fetch(`/admin/products/${productId}`, {
       method: "PATCH",
       body: formData,
     });

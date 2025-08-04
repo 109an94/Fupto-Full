@@ -209,7 +209,7 @@ const toggleSubProducts = (index) => {
     </template>
 <!-- <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script> -->
 <style scoped>
-@import '@/assets/css/admin/report.css';
+@import '@/public/css/admin/report.css';
 .sub-product {
   background-color: #f0f0f0;
 }

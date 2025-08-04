@@ -86,8 +86,4 @@ public class Product {
         this.viewCount += 1;
     }
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<Favorite> favorites;
-
 }

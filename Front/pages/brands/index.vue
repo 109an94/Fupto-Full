@@ -57,7 +57,7 @@ const router = useRouter();
 const fetchBrands = async () => {
   const config = useRuntimeConfig();
   try {
-    const response = await $fetch(`${config.public.apiBase}/brands`, {
+    const response = await use$Fetch(`/brands`, {
       params: {
         brand: route.query.brand ? route.query.brand.split(",") : undefined,
       },

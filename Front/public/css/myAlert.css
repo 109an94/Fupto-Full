@@ -1,0 +1,86 @@
+
+/* 기본 모바일 스타일 (768px 이하) */
+.alert-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px;
+}
+
+.alert {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #fff;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.alert-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.close-btn {
+    /*position: absolute;*/
+    top: 10px;
+    right: 10px;
+    border: none;
+    background: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px 10px;
+    color: #666;
+}
+
+.close-btn:hover {
+    color: #000;
+}
+
+.profile-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #eee;
+}
+
+.alert-content {
+    flex: 1;
+}
+
+.alert-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.alert-info {
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* 태블릿/데스크톱 뷰 (769px 이상) */
+@media screen and (min-width: 769px) {
+    .alert-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .alert {
+        padding: 20px;
+    }
+}
+
+/* 대형 데스크톱 뷰 (1200px 이상) */
+@media screen and (min-width: 1200px) {
+    .alert-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        max-width: 1200px;
+        max-height: 92px;
+    }
+    div.alert {
+
+    }
+}

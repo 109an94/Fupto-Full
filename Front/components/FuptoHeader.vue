@@ -1,6 +1,12 @@
 <script setup>
+const { isAnonymous, logout } = useUserDetails()
 const route = useRoute();
 
+const logoutHandler = async () => {
+  await logout()
+  // 로그아웃 후 필요한 추가 작업 수행 (예: 홈페이지로 리다이렉트)
+  await navigateTo('/')
+}
 const isActiveLink = (path, gender) => {
   if (path === "products") {
     return route.path === `/${path}` && route.query.gender === gender;
@@ -12,6 +18,7 @@ const redirect = () => {
   window.location.href = "http://localhost:3000/boards/list";
   // router.go(-1);
 }
+
 </script>
 
 <template>
@@ -29,6 +36,12 @@ const redirect = () => {
         </li>
         <li class="main-nav_link">
           <NuxtLink to="/boards/list" :class="{ 'active-link': isActiveLink('boards') }" @click="redirect">게시글</NuxtLink>
+        </li>
+        <li class="utility-nav-list">
+          <nuxt-link v-if="isAnonymous()==false" to="/myPage"
+                     :class="{ 'active-link': isActiveLink('myPage') }">my</nuxt-link>
+          <NuxtLink v-if="isAnonymous()" to="/user/signin">로그인</NuxtLink>
+          <nuxt-link v-else @click="logoutHandler" to="/user/signin">로그아웃</nuxt-link>
         </li>
       </ul>
     </nav>

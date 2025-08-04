@@ -92,3 +92,46 @@
   background-color: transparent;
   text-shadow: 0 0 0.5px currentColor;
 }
+
+
+/*유틸리티 추가 css*/
+.nav-container {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 20px;
+  padding-bottom: 10px;
+}
+
+.main-nav-list {
+  display: flex;
+  justify-content: space-around;
+  flex: 1;
+  /*max-width: 2000px; !* 메인 네비게이션의 최대 너비 설정 *!*/
+}
+
+.utility-nav-list {
+  display: flex;
+  gap: 10px; /* 유틸리티 메뉴 간의 간격 */
+  margin-right: 10px;
+
+  font-weight: 600;
+  font-size: var(--font-regular-caption);
+}
+
+
+@media screen and (max-width: 765px) {
+  .utility-nav-list {
+    display: none;
+  }
+
+  .nav-container {
+    justify-content: center;
+  }
+
+  .main-nav-list {
+    max-width: 100%;
+    justify-content: space-around;
+  }
+}

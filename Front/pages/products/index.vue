@@ -7,8 +7,6 @@ useHead({
 
 const route = useRoute();
 const router = useRouter();
-const config = useRuntimeConfig();
-
 const gender = ref(route.query.gender);
 const asideRef = ref(null);
 const selectedFilters = ref({
@@ -31,9 +29,8 @@ const products = ref([]);
 const loading = ref(false);
 const hasMore = ref(true);
 const cursor = ref(null);
-
-const { data: initialData } = await useFetch("/products", {
-  baseURL: config.public.apiBase,
+////////////////////////////////////////////////////////////////////////////////
+const { data: initialData } = await useAuthFetch("/products", {
   params: {
     gender: route.query.gender,
     category: route.query.category ? route.query.category.split(",") : undefined,
@@ -90,8 +87,7 @@ const loadProducts = async (reset = false) => {
       limit: 100,
     };
 
-    const data = await $fetch("/products", {
-      baseURL: config.public.apiBase,
+    const data = await use$Fetch("/products", {
       params,
     });
 
@@ -121,20 +117,15 @@ const loadProducts = async (reset = false) => {
   }
 };
 
-const toggleFavorite = (event) => {
-  event.preventDefault();
-  const button = event.currentTarget;
-  const isFavorite = button.getAttribute("data-favorite") === "true";
-  const img = button.querySelector("img");
+const { toggleFavorite: toggleFavoriteAction } = useFavorite();
 
-  if (isFavorite) {
-    button.setAttribute("data-favorite", "false");
-    img.src = "/imgs/icon/favorite.svg";
-    img.alt = "찜 추가";
-  } else {
-    button.setAttribute("data-favorite", "true");
-    img.src = "/imgs/icon/favorite-fill.svg";
-    img.alt = "찜 제거";
+// 찜 관련 함수
+const toggleFavorite = async (event, product) => {
+  event.preventDefault();
+  const success = await toggleFavoriteAction(product.mappingId);
+
+  if (success) {
+    product.favorite = !product.favorite;
   }
 };
 
@@ -148,7 +139,7 @@ const selectOption = async (option) => {
   isActive.value = false;
 
   try {
-    const response = await $fetch(`${config.public.apiBase}/products`, {
+    const response = await use$Fetch("/products", {
       params: {
         gender: route.query.gender,
         category: route.query.category ? route.query.category.split(",") : undefined,
@@ -369,12 +360,44 @@ const handleClickOutside = (e) => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   setupIntersectionObserver();
   nextTick(() => {
     updateObserver();
   });
   document.addEventListener("click", handleClickOutside);
+
+  // 새로 고침시 찜 정보 업데이트
+  try {
+    const data = await use$Fetch("/products", {
+      params: {
+        gender: route.query.gender,
+        category: route.query.category ? route.query.category.split(",") : undefined,
+        sub: route.query.sub ? route.query.sub.split(",") : undefined,
+        brand: route.query.brand ? route.query.brand.split(",") : undefined,
+        min: route.query.min || undefined,
+        max: route.query.max || undefined,
+        sort: route.query.sort || "popular",
+        cursor: null,
+        limit: 100,
+      },
+    });
+
+    if (data?.products) {
+      products.value = products.value.map((product) => {
+        const updatedProduct = data.products.find((p) => p.id === product.id);
+        if (updatedProduct) {
+          return {
+            ...product,
+            favorite: updatedProduct.favorite,
+          };
+        }
+        return product;
+      });
+    }
+  } catch (error) {
+    console.error("Failed to load products with favorites:", error);
+  }
 });
 
 onUnmounted(() => {
@@ -443,8 +466,16 @@ onUnmounted(() => {
                         <img class="product-images primary-img" :src="product.mainImageUrl" alt="product-img" />
                         <img class="product-images secondary-img" :src="product.hoverImageUrl" alt="product-img-hover" />
                       </div>
-                      <button data-favorite="false" @click="toggleFavorite">
-                        <img class="favorite" src="/imgs/icon/favorite.svg" alt="찜" />
+                      <button
+                        :data-favorite="product.favorite"
+                        @click.prevent="(e) => toggleFavorite(e, product)"
+                        class="favorite-btn"
+                      >
+                        <img
+                          class="favorite"
+                          :src="product.favorite ? '/imgs/icon/favorite-fill.svg' : '/imgs/icon/favorite.svg'"
+                          :alt="product.favorite ? '찜' : '찜 해제'"
+                        />
                       </button>
                     </div>
                     <div class="product-info">

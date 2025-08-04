@@ -1,6 +1,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { use$Fetch } from "~/composables/use$Fetch";
 
 useHead({
     link: [{ rel: "stylesheet", href: "/css/admin/board-reg.css"}],
@@ -9,7 +10,7 @@ useHead({
 const board = ref({
   title: '',
   contents: '',
-  regMemberId: 7,
+  regMemberId: '',
   boardCategoryId: 1,
   active: true,
   fileUpload: null,
@@ -21,6 +22,7 @@ const router = useRouter();
 const boardId = route.params.id;
 
 const imageUrl = ref('');
+const userDetails= useUserDetails();
 
 const previewImage = (event) => {
         const file = event.target.files[0];
@@ -64,17 +66,20 @@ const getImageUrl = (url) => {
 
 const loadBoardData = async () => {
   try {
-    const response = await fetch(`${config.public.apiBase}/admin/boards/${boardId}/edit`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await use$Fetch(`/admin/boards/${boardId}/edit`);
+
+    console.log("Received data:", data);
+
+    if (!data) {
+      throw new Error("게시글 데이터를 받지 못했습니다.");
     }
-    const data = await response.json();
+    
     board.value = {
       title: data.title,
       contents: data.contents,
       boardCategoryId: data.boardCategoryId,
       active: data.active,
-      regMemberId: data.regMemberId,
+      regMemberId: userDetails.id.value,
     };
     imageUrl.value = data.img ? (data.img.startsWith('/') ? data.img : '/' + data.img) : '';
   } catch (error) {
@@ -92,27 +97,21 @@ const handleSubmit = async () => {
       contents: board.value.contents,
       boardCategoryId: board.value.boardCategoryId,
       active: board.value.active,
-      regMemberId: board.value.regMemberId,
+      regMemberId: userDetails.id.value,
     }));
 
     if (board.value.fileUpload) {
       formData.append('file', board.value.fileUpload);
     }
 
-    const response = await fetch(`${config.public.apiBase}/admin/boards/${boardId}`, {
+    await use$Fetch(`/admin/boards/${boardId}`, {
       method: 'PATCH',
       body: formData,
     });
 
-    if (response.ok) {
-      const result = await response.json();
-      console.log('게시글 수정 성공:', result);
+      console.log('게시글 수정 성공:');
       alert('게시글이 수정되었습니다!');
       router.push('/admin/boards/list');
-    } else {
-      const errorData = await response.json();
-      throw new Error(errorData.message || '게시글 수정에 실패했습니다.');
-    }
   } catch (error) {
     console.error('Error:', error);
     alert(`게시글 수정 중 오류가 발생했습니다: ${error.message}`);

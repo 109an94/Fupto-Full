@@ -56,7 +56,7 @@ const fetchCategories = async (level, parentId = null) => {
     if (parentId) params.append("parentId", parentId);
     params.append("level", level);
 
-    const data = await $fetch(`${config.public.apiBase}/admin/products/categories?${params.toString()}`);
+    const data = await use$Fetch(`/admin/products/categories?${params.toString()}`);
 
     if (level === 1) {
       categories.value.level1 = data;
@@ -93,7 +93,7 @@ const handleCategory2Change = async (product) => {
 
 const fetchBrands = async () => {
   try {
-    const data = await $fetch(`${config.public.apiBase}/admin/products/brands`);
+    const data = await use$Fetch("/admin/products/brands");
 
     brands.value = data.map((brand) => ({
       id: brand.id,
@@ -106,7 +106,7 @@ const fetchBrands = async () => {
 
 const fetchShops = async () => {
   try {
-    const data = await $fetch(`${config.public.apiBase}/admin/products/shopping-malls`);
+    const data = await use$Fetch("/admin/products/shopping-malls");
 
     shops.value = data.map((shop) => ({
       id: shop.id,
@@ -171,7 +171,6 @@ const handleFileUpload = (event, id) => {
   const product = products.value.find((p) => p.id === id);
   if (product) {
     product.fileList = [...(product.fileList || []), ...Array.from(files)];
-
     product.images = product.fileList.map((file) => URL.createObjectURL(file));
     product.imageNames = product.fileList.map((file) => file.name);
   }
@@ -181,7 +180,6 @@ const removeImage = (productId, imageIndex) => {
   const product = products.value.find((p) => p.id === productId);
   if (product && product.fileList) {
     URL.revokeObjectURL(product.images[imageIndex]);
-
     product.fileList.splice(imageIndex, 1);
     product.images.splice(imageIndex, 1);
     product.imageNames.splice(imageIndex, 1);
@@ -215,7 +213,6 @@ const submitForm = async () => {
       })
     );
 
-    // 파일 추가
     products.value.forEach((product) => {
       if (product.fileList && product.fileList.length > 0) {
         product.fileList.forEach((file) => {
@@ -224,7 +221,7 @@ const submitForm = async () => {
       }
     });
 
-    await $fetch(`${config.public.apiBase}/admin/products`, {
+    await use$Fetch("/admin/products", {
       method: "POST",
       body: formData,
     });
@@ -247,7 +244,6 @@ onMounted(async () => {
   addProductForm();
 });
 </script>
-
 <template>
   <div>
     <main>

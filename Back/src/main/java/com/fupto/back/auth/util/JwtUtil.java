@@ -11,10 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Component
 public class JwtUtil {
@@ -30,6 +27,7 @@ public class JwtUtil {
             extractAllClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e){
+            System.out.println("JWT 검증 실패: " + e.getMessage());
             return false;
         }
     }
@@ -38,16 +36,15 @@ public class JwtUtil {
         return Jwts.parserBuilder()//파서 빌드 생성
                 .setSigningKey(secretKey) //서명키 설정 (토큰과 같은 값)
                 .build()//파서 생성
-                .parseClaimsJwt(token) //토큰 검증 (형식,서명,만료)**jws로 변경?
+                .parseClaimsJws(token) //토큰 검증 (형식,서명,만료)**jws로 변경?
                 .getBody(); //토큰에서 페이로드를 추출함
     }
 
+    public Long extractId(String token){
+        return extractAllClaims(token).get("id",Long.class);
+    }
     public String extractUsername(String token){
         return extractAllClaims(token).getSubject();
-    }
-
-    public String extractUserId(String token){
-        return extractAllClaims(token).get("userId",String.class);
     }
     public String extractEmail(String token){
         return extractAllClaims(token).get("email",String.class);
@@ -55,11 +52,20 @@ public class JwtUtil {
     public String extractnickname(String token){
         return extractAllClaims(token).get("nickname",String.class);
     }
-    public String extractRoles(String token){
-        return null;
+    public List<String> extractRoles(String token){
+        List<Map<String, String>> roles = extractAllClaims(token).get("roles", List.class);
+
+        List<String> roleNames = new ArrayList<>();
+        for(Map<String, String> role : roles) {
+            System.out.println(role);
+            roleNames.add(role.get("authority"));
+            System.out.println(role.get("authority"));
+        }
+        return roleNames;
     }
     public String generateToken(FuptoUserDetails userDetails){
         Map<String, Object> claims = new HashMap<>();
+        claims.put("id",userDetails.getId());
         claims.put("username",userDetails.getUsername());
         claims.put("password",userDetails.getPassword());
         claims.put("email",userDetails.getEmail());

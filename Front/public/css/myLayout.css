@@ -6,11 +6,12 @@ main {
 }
 
 aside.profileContainer {
+    background-color: var(--color-ui-white);
+    border-right: 1px solid var(--color-ui-backgroundb);
     /*width: 100%;*/
     /*box-sizing: border-box;*/
 
     /*영역 관상용*/
-    background-color: yellow;
 }
 
 .profileContainer{
@@ -22,9 +23,9 @@ aside.profileContainer {
 
 div.profile{
     display: flex;
+    background-color: var(--color-ui-white);
     padding: 30px;
-    /*justify-content: flex-start;*/
-    background-color: blueviolet;
+    border-bottom: 1px solid var(--color-ui-backgroundb);
 }
 
 div.profile img{
@@ -40,7 +41,7 @@ div.icon{
     margin-left: auto;
     width: 20px;
     height: 32px;
-    background-color: #989CA2;
+    /*background-color: #989CA2;*/
     padding: 0px 20px;
 }
 div.icon#extend {
@@ -50,7 +51,6 @@ ul.info{
     display: flex;
     flex-direction: column;
     gap: 6px;
-    background-color: green;
     width: 100%;
 }
 li.info-name{
@@ -77,20 +77,35 @@ nav.profileNav{
     /*justify-content: space-around;*/
     /*flex-wrap: nowrap;*/
     padding-bottom: 10px;
-    border-bottom: 1px solid var(--color-text-unselected);
-    background-color: yellowgreen;
+    border-bottom: 1px solid var(--color-text-caption);
 }
 nav.profileNav ul{
     display: flex;
     justify-content: space-around;
     width: 100%;
 }
+
 nav.profileNav li{
-    /*display: flex;*/
-    /*align-items: center;*/
-    /*text-align: center;*/
-    /*justify-content: space-around;*/
-    /*padding: 10px;*/
+    cursor : pointer;
+}
+nav.profileNav li img{
+    cursor : pointer;
+}
+nav.profileNav li:hover{
+    color: var(--color-text-unselected);
+}
+
+nav.profileNav li.active  {
+    color: var(--color-text-unselected);
+
+}
+nav.profileNav li:hover img{
+    filter: brightness(0) saturate(100%);
+    opacity: 0.5;
+}
+nav.profileNav li:active img{
+    filter: brightness(0) saturate(100%);
+    opacity: 0.5;
 }
 
 nav.profileNav li a{
@@ -101,11 +116,19 @@ nav.profileNav li a{
     padding: 10px;
 
 }
-nav.profileNav li span:nth-child(1){
-    border : 1px solid var(--color-text-caption);
+nav.profileNav li img{
     width: 30px;
     height: 30px;
-    background-color: var(--color-text-unselected);
+    object-fit: contain;
+}
+
+
+nav.profileNav li span:nth-child(1){
+    /*border : 1px solid var(--color-text-caption);*/
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    /*background-color: var(--color-text-caption);*/
 }
 
 
@@ -156,19 +179,28 @@ button.icon\:close {
 @media (max-width: 768px) {
 
 
+    /*!* 아이콘 이미지에 대한 hover 효과도 필요한 경우 *!*/
+    /*nav.profileNav li a:hover img {*/
+    /*    filter: brightness(0) saturate(100%) invert(var(--color-ui-backgroundb));*/
+    /*}*/
+
+    /*nav.profileNav li a.router-link-active img {*/
+    /*    filter: brightness(0) saturate(100%) invert(var(--color-text-caption));*/
+    /*}*/
+
+
 }
 
 @media (min-width: 769px) {
 
     .mainLayout {
         display: flex;
-        background-color: #58ccff;
+        /*background-color: #58ccff;*/
+        overflow: hidden;
     }
     aside.profileContainer {
         min-width: 300px;
-        margin-left: calc(max(0px, 20vw - 160px));
-        /*padding-left: 100px;*/
-        /*margin-left: 100px;*/
+        /*margin-left: calc(max(0px, 20vw - 160px));*/
         border-right: 1px solid var(--color-text-caption);
         /*최소 크기 때문에 넣어둔거...*/
         max-height: 10000px;
@@ -181,8 +213,6 @@ button.icon\:close {
 
     nav.profileNav ul{
         display: inline-block;
-        /*flex-direction: row;*/
-        background-color: greenyellow;
     }
     nav.profileNav li a{
         /*display: flex;*/
@@ -199,8 +229,10 @@ button.icon\:close {
     div.icon#extend {
         display: flex;
     }
-    div.profile div.hihi{
-        flex-direction: row;
-        display: flex;
+    @media (min-width: 1400px) {
+        aside.profileContainer {
+            margin-left: calc(max(15px, 1vw));
+        }
     }
  }
+

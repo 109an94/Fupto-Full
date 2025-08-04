@@ -34,44 +34,48 @@ const categories = ref([]);
 const loadSecondCategories = async (genderId) => {
   if (!genderId) return;
 
-  const config = useRuntimeConfig();
-  const data = await $fetch("/products/categories", {
-    baseURL: config.public.apiBase,
-    params: { parentId: genderId },
-  });
+  try {
+    const data = await use$Fetch("/products/categories", {
+      params: { parentId: genderId },
+    });
 
-  if (data) {
-    categories.value = data.map((category) => ({
-      id: category.id,
-      name: category.name,
-      checked: false,
-      isExpanded: false,
-      subCategories: [{ id: `all-${category.id}`, name: "All", checked: true }],
-    }));
+    if (data) {
+      categories.value = data.map((category) => ({
+        id: category.id,
+        name: category.name,
+        checked: false,
+        isExpanded: false,
+        subCategories: [{ id: `all-${category.id}`, name: "All", checked: true }],
+      }));
 
-    if (route.query.cat) {
-      const selectedCatIds = route.query.cat.split(",");
-      await restoreSelectedCategories(selectedCatIds);
+      if (route.query.cat) {
+        const selectedCatIds = route.query.cat.split(",");
+        await restoreSelectedCategories(selectedCatIds);
+      }
     }
+  } catch (error) {
+    console.error("Error loading second categories:", error);
   }
 };
 
 const loadThirdCategories = async (category) => {
-  const config = useRuntimeConfig();
-  const data = await $fetch("/products/categories", {
-    baseURL: config.public.apiBase,
-    params: { parentId: category.id },
-  });
+  try {
+    const data = await use$Fetch("/products/categories", {
+      params: { parentId: category.id },
+    });
 
-  if (data) {
-    category.subCategories = [
-      { id: `all-${category.id}`, name: "All", checked: true },
-      ...data.map((subCat) => ({
-        id: subCat.id.toString(),
-        name: subCat.name,
-        checked: false,
-      })),
-    ];
+    if (data) {
+      category.subCategories = [
+        { id: `all-${category.id}`, name: "All", checked: true },
+        ...data.map((subCat) => ({
+          id: subCat.id.toString(),
+          name: subCat.name,
+          checked: false,
+        })),
+      ];
+    }
+  } catch (error) {
+    console.error("Error loading third categories:", error);
   }
 };
 
@@ -158,25 +162,26 @@ const searchQuery = ref("");
 const brands = ref([]);
 
 const loadBrands = async () => {
-  const config = useRuntimeConfig();
-  const data = await $fetch("/products/brands", {
-    baseURL: config.public.apiBase,
-  });
+  try {
+    const data = await use$Fetch("/products/brands");
 
-  if (data) {
-    brands.value = data.map((brand) => ({
-      id: `brand-${brand.id}`,
-      originalId: brand.id,
-      name: `${brand.engName}(${brand.korName})`,
-      checked: false,
-    }));
+    if (data) {
+      brands.value = data.map((brand) => ({
+        id: `brand-${brand.id}`,
+        originalId: brand.id,
+        name: `${brand.engName}(${brand.korName})`,
+        checked: false,
+      }));
 
-    if (route.query.brand) {
-      const selectedBrandIds = route.query.brand.split(",");
-      brands.value.forEach((brand) => {
-        brand.checked = selectedBrandIds.includes(brand.originalId.toString());
-      });
+      if (route.query.brand) {
+        const selectedBrandIds = route.query.brand.split(",");
+        brands.value.forEach((brand) => {
+          brand.checked = selectedBrandIds.includes(brand.originalId.toString());
+        });
+      }
     }
+  } catch (error) {
+    console.error("Error loading brands:", error);
   }
 };
 

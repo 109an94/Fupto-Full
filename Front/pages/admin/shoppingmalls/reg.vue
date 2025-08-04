@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { use$Fetch } from "~/composables/use$Fetch";
 
 useHead({
     link: [{ rel: "stylesheet", href: "/css/admin/shoppingmall-reg.css"}],
@@ -106,6 +107,51 @@ const previewImage = (event) => {
 };
 
 // Form submission handler
+// const handleSubmit = async () => {
+//     if (!validateForm()) {
+//         alert('필수항목을 입력하세요.');
+//         return;
+//     }
+
+//     try {
+//         const formData = new FormData();
+//         formData.append('shoppingmallData', JSON.stringify({
+//             korName: shoppingmall.value.korName,
+//             engName: shoppingmall.value.engName,
+//             url: shoppingmall.value.url,
+//             active: shoppingmall.value.active,
+//             description: shoppingmall.value.description,
+//             deliveryfee: shoppingmall.value.deliveryfee,
+//             taxes: shoppingmall.value.taxes
+//         }));
+
+//         if (shoppingmall.value.fileUpload) {
+//             formData.append('file', shoppingmall.value.fileUpload);
+//         }
+
+//         const response = await fetch(`http://localhost:8080/api/v1/admin/shoppingmalls/reg`, {
+//             method: 'POST',
+//             body: formData,
+//         });
+
+//         if (response.ok) {
+//             const result = await response.json();
+//             console.log('쇼핑몰 등록 성공:', result);
+//             alert('쇼핑몰이 성공적으로 등록되었습니다!');
+//             resetForm();
+
+//             // 등록 후 리다이렉트
+//             window.location.href = 'http://localhost:3000/admin/Shoppingmalls/list';
+//         } else {
+//             const errorData = await response.json();
+//             throw new Error(errorData.message || '쇼핑몰 등록에 실패했습니다.');
+//         }
+//     } catch (error) {
+//         console.error('Error:', error);
+//         alert(`쇼핑몰 등록 중 오류가 발생했습니다: ${error.message}`);
+//     }
+// };
+
 const handleSubmit = async () => {
     if (!validateForm()) {
         alert('필수항목을 입력하세요.');
@@ -114,6 +160,7 @@ const handleSubmit = async () => {
 
     try {
         const formData = new FormData();
+
         formData.append('shoppingmallData', JSON.stringify({
             korName: shoppingmall.value.korName,
             engName: shoppingmall.value.engName,
@@ -128,23 +175,20 @@ const handleSubmit = async () => {
             formData.append('file', shoppingmall.value.fileUpload);
         }
 
-        const response = await fetch(`http://localhost:8080/api/v1/admin/shoppingmalls/reg`, {
+        const { data, error } = await use$Fetch('/admin/shoppingmalls/reg', {
             method: 'POST',
             body: formData,
         });
 
-        if (response.ok) {
-            const result = await response.json();
-            console.log('쇼핑몰 등록 성공:', result);
-            alert('쇼핑몰이 성공적으로 등록되었습니다!');
-            resetForm();
-
-            // 등록 후 리다이렉트
-            window.location.href = 'http://localhost:3000/admin/Shoppingmalls/list';
-        } else {
-            const errorData = await response.json();
-            throw new Error(errorData.message || '쇼핑몰 등록에 실패했습니다.');
+        if (error) {
+            throw new Error(error.message || '쇼핑몰 등록에 실패했습니다.');
         }
+
+        console.log('쇼핑몰 등록 성공:', data);
+        alert('쇼핑몰이 성공적으로 등록되었습니다!');
+        resetForm();
+
+        window.location.href = 'http://localhost:3000/admin/shoppingmalls/list';
     } catch (error) {
         console.error('Error:', error);
         alert(`쇼핑몰 등록 중 오류가 발생했습니다: ${error.message}`);

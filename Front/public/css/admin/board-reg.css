@@ -61,12 +61,24 @@
 }
 
 .btn-primary {
+  background-color: white;
+  color: var(--blue);
+  margin-right: 15px;
+  border: solid 1px var(--blue);
+}
+
+.btn-primary:hover {
   background-color: var(--blue);
   color: white;
 }
-.btn-primary:hover {
-  background-color: var(--dark-blue);
-}
+
+/* .btn-secondary {
+  background-color: gray;
+  color: black;
+  border: solid 1px red;
+} */
+
+
 .text-center {
   text-align: center;
 }

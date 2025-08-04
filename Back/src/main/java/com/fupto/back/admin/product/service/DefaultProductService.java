@@ -4,6 +4,7 @@ import com.fupto.back.admin.product.dto.*;
 import com.fupto.back.entity.PriceHistory;
 import com.fupto.back.entity.ProductImage;
 import com.fupto.back.repository.*;
+import com.fupto.back.user.member.service.DefaultMemberService;
 import jakarta.persistence.EntityNotFoundException;
 import com.fupto.back.entity.Category;
 import com.fupto.back.entity.Product;
@@ -26,13 +27,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service("adminProductService")
 @Transactional
 public class DefaultProductService implements ProductService {
 
+    private final DefaultMemberService userMemberService;
     @Value("${file.upload.path}")
     private String uploadPath;
 
@@ -50,9 +51,9 @@ public class DefaultProductService implements ProductService {
                                  BrandRepository brandRepository,
                                  ShoppingMallRepository shoppingMallRepository,
                                  PriceHistoryRepository priceHistoryRepository,
-                                    ProductImageRepository productImageRepository,
+                                 ProductImageRepository productImageRepository,
                                  ModelMapper modelMapper,
-                                 FileService fileService) {
+                                 FileService fileService, DefaultMemberService userMemberService) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.brandRepository = brandRepository;
@@ -61,6 +62,7 @@ public class DefaultProductService implements ProductService {
         this.productImageRepository = productImageRepository;
         this.modelMapper = modelMapper;
         this.fileService = fileService;
+        this.userMemberService = userMemberService;
     }
 
     @Override
@@ -510,6 +512,9 @@ public class DefaultProductService implements ProductService {
                     .salePrice(updateDto.getSalePrice())
                     .build();
             priceHistoryRepository.save(priceHistory);
+
+            //가격 변경후 favprice 검토
+            userMemberService.checkerforfavPrice(product.getMappingId(), updateDto.getSalePrice());
         }
 
         // 3. 이미지 처리
@@ -697,7 +702,7 @@ public class DefaultProductService implements ProductService {
                 .filter(image -> image.getDisplayOrder() == 1)
                 .findFirst()
                 .ifPresent(image -> productListDto.setImagePath(
-                        "http://localhost:8080/api/v1/admin/products/" + product.getId() + "/image/1"
+                        "http://localhost:8085/api/v1/admin/products/" + product.getId() + "/image/1"
                 ));
 
         return productListDto;

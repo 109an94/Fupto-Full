@@ -1,12 +1,13 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { useAuthFetch } from "~/composables/useAuthFetch";
+import { use$Fetch } from "~/composables/use$Fetch";
 
 useHead({
   link: [{ rel: "stylesheet", href: "/css/admin/product-list.css" }],
 });
 
 // 상태 관리
-const config = useRuntimeConfig();
 const products = ref([]);
 const totalElements = ref(0);
 const totalPages = ref(0);
@@ -84,7 +85,7 @@ const fetchProducts = async () => {
 
     console.log("Search Parameters:", params.toString());
 
-    const data = await $fetch(`${config.public.apiBase}/admin/products?${params.toString()}`);
+    const data = await use$Fetch(`/admin/products?${params.toString()}`);
 
     products.value = data.products;
     totalElements.value = data.totalElements;
@@ -141,7 +142,7 @@ const handleMapping = async () => {
       mappingProductIds: Array.from(selectedItems.value).filter((id) => id !== mappingMainProduct.value),
     };
 
-    await $fetch(`${config.public.apiBase}/admin/products/mapping`, {
+    await use$Fetch(`/admin/products/mapping`, {
       method: "POST",
       body: request,
     });
@@ -167,8 +168,7 @@ const handleCloseCompleteModal = async () => {
 // 매핑된 상품만 가져오기
 const fetchMappingProducts = async (productId) => {
   try {
-    const data = await $fetch(`${config.public.apiBase}/admin/products/${productId}/mapping`);
-
+    const data = await use$Fetch(`/admin/products/${productId}/mapping`);
     mappedProducts.value[productId] = data;
   } catch (error) {
     console.error("Error fetching mapping products:", error);
@@ -182,14 +182,14 @@ const fetchCategories = async (level, parentId = null) => {
     if (parentId) params.append("parentId", parentId);
     params.append("level", level);
 
-    const data = await $fetch(`${config.public.apiBase}/admin/products/categories?${params.toString()}`);
+    const data = await use$Fetch(`/admin/products/categories?${params.toString()}`);
 
     if (level === 1) {
-      categories.value.level1 = data;
+      categories.value.level1 = data.value;
     } else if (level === 2) {
-      categories.value.level2 = data;
+      categories.value.level2 = data.value;
     } else if (level === 3) {
-      categories.value.level3 = data;
+      categories.value.level3 = data.value;
     }
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -200,8 +200,9 @@ const fetchCategories = async (level, parentId = null) => {
 const updateActive = async (productId, active) => {
   try {
     console.log(`Updating active status: productId=${productId}, active=${active}`);
-    await $fetch(`${config.public.apiBase}/admin/products/${productId}/active?active=${active}`, {
+    await use$Fetch(`/admin/products/${productId}/active`, {
       method: "PATCH",
+      query: { active },
     });
   } catch (error) {
     console.error("Error updating active status:", error);
@@ -218,12 +219,12 @@ const handleActiveChange = async (product) => {
 const updateState = async (productId, isMainProduct = false) => {
   try {
     if (isMainProduct) {
-      await $fetch(`${config.public.apiBase}/admin/products/${productId}/promote`, {
+      await use$Fetch(`/admin/products/${productId}/promote`, {
         method: "PATCH",
       });
       fetchProducts();
     } else {
-      await $fetch(`${config.public.apiBase}/admin/products/${productId}/state`, {
+      await use$Fetch(`/admin/products/${productId}/state`, {
         method: "PATCH",
       });
 
@@ -631,7 +632,7 @@ onMounted(() => {
                 <td>{{ p.id }}</td>
                 <td class="product-cell">
                   <div class="d-flex align-items-center">
-                    <img :src="p.imagePath || 'https://via.placeholder.com/70'" :alt="p.productName" class="product-img" />
+                    <img :src="p.imagePath" :alt="p.productName" class="product-img" />
                     <div class="product-info ml-2">
                       <span class="text-md">{{ p.productName }}</span>
                       <small class="d-block text-muted text-sm">{{ p.brandEngName }}</small>

@@ -1,0 +1,77 @@
+.edit-member-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.member-info {
+    /*background-color: #D9D9D9;*/
+    border: 1px solid var(--color-text-caption);
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.info-row {
+    margin-bottom: 20px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.input-group input {
+    width: 95%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.notification-settings {
+    margin-top: 30px;
+}
+
+.toggle-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.button-group {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.update-btn {
+    background-color: var(--color-main-deep);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.update-btn:hover {
+    background-color: var(--color-main-default);
+}
+
+@media screen and (min-width: 768px) {
+    .edit-member-container {
+        width: 70%; /* 태블릿/데스크톱에서는 70% 너비로 제한 */
+        max-width: 800px; /* 최대 너비 증가 */
+    }
+}
+
+@media screen and (min-width: 1024px) {
+    .edit-member-container {
+        width: 50%; /* 더 큰 화면에서는 50% 너비로 제한 */
+    }
+}

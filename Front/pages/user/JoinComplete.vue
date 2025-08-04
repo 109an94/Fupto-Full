@@ -4,7 +4,7 @@
         F<span class="highlight">UCK</span>UPTO
       </div>
       <div class="checkmark">
-        <img src="@/assets/imgs/icon/check.svg" alt="Check Icon" class="checkmark-icon" />
+        <img src="/imgs/icon/check.svg" alt="Check Icon" class="checkmark-icon" />
       </div>
       <p class="completion-message">회원가입 완료이 완료되었습니다.</p>
       <div class="buttons">
@@ -21,5 +21,5 @@ export default {
 </script>
 
 <style scoped>
-@import url("@/assets/css/user-joinComplete.css");
+@import url("@/public/css/user-joinComplete.css");
 </style>

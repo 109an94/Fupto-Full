@@ -172,6 +172,7 @@ watch(
           </li>
         </ul>
       </li>
+      <!--
       <li>
         <a href="#" @click="handleDropdownClick('categories', $event)" :class="{ active: isMenuActive('categories') }">
           <i class="bx bxs-widget icon"></i> 카테고리
@@ -185,6 +186,7 @@ watch(
           </li>
         </ul>
       </li>
+      -->
       <li class="divider">User</li>
       <li>
         <a href="#" @click="handleDropdownClick('members', $event)" :class="{ active: isMenuActive('members') }">
@@ -195,11 +197,6 @@ watch(
           <li>
             <NuxtLink to="/admin/members/list" :class="{ 'sub-menu-active': isSubMenuActive('/admin/members/list') }">
               고객 관리
-            </NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/users/update" :class="{ 'sub-menu-active': isSubMenuActive('/admin/users/update') }">
-              회원 정보#
             </NuxtLink>
           </li>
         </ul>
