@@ -1,16 +1,13 @@
 package com.fupto.back.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fupto.back.entity.Favorite;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -46,6 +43,7 @@ public class Member {
     private Instant createDate;
 
     @ColumnDefault("current_timestamp()")
+    @LastModifiedDate
     @Column(name = "update_date", insertable = false)
     private Instant updateDate;
 
@@ -61,6 +59,7 @@ public class Member {
     @Column(name = "birth_date")
     private Instant birthDate;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "regMember", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Board> boards;
@@ -68,5 +67,9 @@ public class Member {
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Favorite> favorites;
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Alert> alert;
 
 }

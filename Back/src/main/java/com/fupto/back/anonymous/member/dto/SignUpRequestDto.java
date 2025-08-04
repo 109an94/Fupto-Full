@@ -20,17 +20,5 @@ public class SignUpRequestDto {
     private String gender;
     private String tel;
     private String email;
-//    private Instant createDate;
-//    private Instant updateDate;
-//    private Instant loginDate;
     private String role = "ROLE_USER";
-
-//    private SignUpRequestDto(String userId, String nickname, String password) {
-//        this.userId = userId;
-//        this.nickname = nickname;
-//        this.password = password;
-//
-//        this.createDate = Instant.now();
-//        this.updateDate = Instant.now();
-//    }
 }

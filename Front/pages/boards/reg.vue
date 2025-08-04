@@ -1,5 +1,6 @@
 <script setup>
-import{ ref } from 'vue';
+import{ ref, onMounted } from 'vue';
+import { use$Fetch } from "~/composables/use$Fetch";
 
 useHead({
   link: [{ rel: "stylesheet", href: "/css/board-reg.css" }],
@@ -10,13 +11,14 @@ useHead({
 const board = ref({
   title: '',
   contents: '',
-  regMemberId: 7,
+  regMemberId: '',
   boardCategoryId: 1,
   active: true,
   fileUpload: null,
 });
 
 const imageUrl = ref('');
+const userDetails= useUserDetails();
 
 // 이미지 미리보기 기능
 const previewImage = (event) => {
@@ -58,7 +60,7 @@ const handleSubmit = async() => {
     formData.append('boardData', JSON.stringify({
     title: board.value.title,
     contents: board.value.contents,
-    regMemberId: board.value.regMemberId,
+    regMemberId: userDetails.id.value,
     boardCategoryId: board.value.boardCategoryId,
     active: board.value.active,
   }));
@@ -68,27 +70,25 @@ const handleSubmit = async() => {
     formData.append('file', board.value.fileUpload);
   }
 
-  const response = await fetch('http://localhost:8080/api/v1/boards/post', {
+  const {data, error} = await use$Fetch('/boards/post', {
         method: 'POST',
         body: formData,
       });
 
-  if(response.ok){
-    const result = await response.json();
-    console.log('게시글 등록 성공:',result);
-    alert('게시글이 등록되었습니다.');
-    resetForm();
-    window.location.href = 'http://localhost:3000/boards/list';
-  } else {
-    const errorData = await response.json();
-    console.error('게시글 등록 실패:', errorData);
-    throw new Error(errorData.message || '게시글 등록에 실패했습니다.');
-    }
-  } catch(error) {
-    console.error('Error:',error);
-    alert('게시글 등록 중 오류가 발생했습니다.');
-  }
-  };
+      if (error) {
+            throw new Error(error.message || '게시글 등록에 실패했습니다.');
+        }
+
+        console.log('게시글 등록 성공:',data);
+        alert('게시글이 등록되었습니다.');
+        resetForm();
+        window.location.href = 'http://localhost:3000/boards/list';
+        
+      } catch(error) {
+        console.error('Error:',error);
+        alert('게시글 등록 중 오류가 발생했습니다.');
+      }
+    };
 
   const handleCancel = () => {
     window.location.href = 'http://localhost:3000/boards/list';
@@ -98,7 +98,7 @@ const handleSubmit = async() => {
     board.value = {
       title: '',
       contents: '',
-      regMemberId: 7,
+      regMemberId: '',
       boardCategoryId: 1,
       active: true,
       fileUpload: null,

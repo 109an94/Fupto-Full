@@ -1,13 +1,13 @@
 package com.fupto.back.admin.member.service;
 
 import com.fupto.back.admin.member.dto.*;
-import com.fupto.back.entity.Board;
-import com.fupto.back.entity.Favorite;
-import com.fupto.back.entity.Member;
-import com.fupto.back.repository.BoardRepository;
-import com.fupto.back.repository.FavoriteRepository;
-import com.fupto.back.repository.MemberRepository;
+import com.fupto.back.entity.*;
+import com.fupto.back.repository.*;
+import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +15,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -27,16 +31,23 @@ import java.util.stream.Collectors;
 @Service("adminMemberService")
 public class DefaultMemberService implements MemberService{
 
+    private final ProductRepository productRepository;
+    @Value("uploads")
+    private String uploadPath;
+
     private final MemberRepository memberRepository;
     private final ModelMapper modelMapper;
     private final BoardRepository boardRepository;
     private final FavoriteRepository favoriteRepository;
+    private final ProductImageRepository productImageRepository;
 
-    public DefaultMemberService(MemberRepository memberRepository, ModelMapper modelMapper, BoardRepository boardRepository, FavoriteRepository favoriteRepository) {
+    public DefaultMemberService(MemberRepository memberRepository, ModelMapper modelMapper, BoardRepository boardRepository, FavoriteRepository favoriteRepository, ProductImageRepository productImageRepository, ProductRepository productRepository) {
         this.memberRepository = memberRepository;
         this.modelMapper = modelMapper;
         this.boardRepository = boardRepository;
         this.favoriteRepository = favoriteRepository;
+        this.productImageRepository = productImageRepository;
+        this.productRepository = productRepository;
     }
 
     @Override
@@ -183,19 +194,56 @@ public class DefaultMemberService implements MemberService{
         return dto;
     }
 
-    private FavoriteListDto getFavorite (Favorite favorite){
+    @Override
+    public FavoriteListDto getFavorite (Favorite favorite){
         if (favorite == null){
             return null;
         }
+        Product product = productRepository.findById(favorite.getMappingId()).orElse(null);
+
+//        Long prductId = favorite.getProduct().getId();
+        Brand brand = product.getBrand();
 
         FavoriteListDto dto = new FavoriteListDto();
         dto.setId(favorite.getId());
-        dto.setProductId(favorite.getProduct().getId());
-        dto.setProductName(favorite.getProduct().getProductName());
+        dto.setProductId(product.getId());
+        dto.setProductName(product.getProductName());
         dto.setMemberId(favorite.getMember().getId());
         dto.setMemberName(favorite.getMember().getNickname());
         dto.setCreateDate(favorite.getCreateDate());
+        dto.setProductBrandName(brand.getEngName());
 
         return dto;
     }
+    @Override // 이거 생각해보니 안씀
+    public FavoriteResponseDto getFavCount (Long memberId){
+            List<Favorite> favorites = favoriteRepository.findAllByMemberId(memberId);
+            Long totalCount = (long) favorites.size();
+
+            List<FavoriteListDto> favoriteList = favorites.stream()
+                    .map(this::getFavorite)
+                    .collect(Collectors.toList());
+
+        return FavoriteResponseDto.builder()
+                .totalCount(totalCount)
+                .favoriteList(favoriteList)
+                .build();
+    }
+
+    @Override
+    public Resource getProductImage(Long id) throws IOException {
+        Integer order = 1;
+        ProductImage productImage = productImageRepository.findByProductIdAndDisplayOrder(id, order)
+                .orElseThrow( () -> new EntityNotFoundException("해당 순서의 이미지를 찾을 수 없습니다."));
+        Path imagePath = Paths.get(uploadPath, productImage.getFilePath());
+        Resource resource = new FileSystemResource(imagePath.toFile());
+
+        if (!resource.exists()){
+            throw new FileNotFoundException("이미지 파일을 찾을 수 없습니다.");
+        }
+
+
+        return resource;
+    }
+
 }

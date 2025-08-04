@@ -3,10 +3,14 @@ useHead({
   link: [{ rel: "stylesheet", href: "/css/board-detail.css" }],
 });
 
+import { use$Fetch } from "~/composables/use$Fetch";
+
+
 const board = ref({
   title: '',
   contents: '',
   regMemberNickName: '',
+  regMemberId:'',
   boardCategoryName: '',
   fileUpload: null,
   active: ''
@@ -17,10 +21,11 @@ const route = useRoute();
 const router = useRouter();
 const boardId = route.params.id;
 
+const userDetails= useUserDetails();
+// const userDetails = ref({});
 const imageUrl = ref('');
 const dropdownVisible = ref(false);
 const showModal = ref(false);
-
 
 const getImageUrl = (url) => {
   if (!url) return '';
@@ -34,21 +39,26 @@ const getImageUrl = (url) => {
 
 const loadBoardData = async () => {
   try {
-    const response = await fetch(`${config.public.apiBase}/boards/${boardId}/detail`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await use$Fetch(`/boards/${boardId}/edit`);
+
+    console.log("Received data:", data);
+
+    if (!data) {
+      throw new Error("게시글 데이터를 받지 못했습니다.");
     }
-    const data = await response.json();
+
     board.value = {
       title: data.title,
       contents: data.contents,
       boardCategoryName: data.boardCategoryName,
       regMemberNickName: data.regMemberNickName,
+      regMemberId: data.regMemberId,
       createdAt: data.createdAt,
       modifiedAt:data.modifiedAt,
       active: data.active,
-      img: data.img, // 이미지 URL을 board 객체에 포함시킴
+      img: data.img,
     };
+    console.log(board);
     imageUrl.value = data.img ? (data.img.startsWith('/') ? data.img : '/' + data.img) : '';
   } catch (error) {
     console.error("Error loading board:", error);
@@ -78,9 +88,26 @@ const formatDate = (dateString) => {
   return `${ymd} ${time}`;  // 날짜와 시간을 '시:분:초' 형식으로 반환
 };
 
+const isMatchUser = computed(() => {
+  return userDetails.id.value == board.value.regMemberId;
+});
+
 // 드롭다운 메뉴 토글
 const toggleDropdown = () => {
-  dropdownVisible.value = !dropdownVisible.value;
+  if (isMatchUser.value) 
+  {
+    dropdownVisible.value = !dropdownVisible.value;  // isMatchUser가 true일 때만 드롭다운 토글
+  } 
+  else {
+    alert("권한이 없습니다.");
+  }
+};
+
+const closeDropdown = (event) => {
+  // 메뉴 버튼과 메뉴 외부를 클릭했을 때 드롭다운을 닫는다
+  if (!event.target.closest(".actions-menu") && dropdownVisible.value) {
+    dropdownVisible.value = false;
+  }
 };
 
 // 수정 버튼 클릭 시 이동
@@ -99,24 +126,18 @@ const handleDelete = async () => {
       const formData = new FormData();
       formData.append('active', false);  // 게시글을 비활성화 (삭제처럼)
 
-      const response = await fetch(`${config.public.apiBase}/boards/${boardId}/inactive`, {
+      await use$Fetch(`/boards/${boardId}/inactive`, {
         method: 'PATCH',
         body: formData,
       });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('게시글 삭제 성공:', result);
-        alert('게시글이 삭제되었습니다!');
-        router.push('/boards/list');  // 목록 페이지로 이동
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || '게시글 삭제에 실패했습니다.');
-      }
+      alert('게시글이 삭제되었습니다!');
+      router.push('/boards/list');
+      
     } catch (error) {
-      console.error('Error:', error);
-      alert(`게시글 삭제 중 오류가 발생했습니다: ${error.message}`);
-    }
+    console.error('Error:', error);
+    alert(`게시글 삭제에 실패했습니다: ${error.message}`);
+  }
+
   } else {
     // 사용자가 취소를 눌렀을 경우
     console.log('삭제가 취소되었습니다.');
@@ -131,7 +152,16 @@ const closeModal = () => {
 }
 
 onMounted(async () => {
-  await loadBoardData();
+  await loadBoardData();  // 게시글 데이터 로드
+  document.addEventListener("click", closeDropdown);  // 외부 클릭 시 드롭다운 닫기
+  // watch(() => userDetails.value, () => {
+  //   // 사용자 정보가 업데이트될 때마다 isMatchUser를 재계산
+  //   console.log("User details changed");
+  // });
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", closeDropdown);
 });
 </script>
 
@@ -152,7 +182,7 @@ onMounted(async () => {
             <span class="post-date">{{ formatDate(board.createdAt) }}</span>
           </div>
           <div class="actions-menu">
-            <button class="menu-trigger" @click="toggleDropdown">
+            <button class="menu-trigger" v-show="isMatchUser" @click="toggleDropdown">
               <img src="/public/imgs/icon/3dot.svg" alt="Menu">
             </button>
             <div v-if="dropdownVisible" class="menu-dropdown">

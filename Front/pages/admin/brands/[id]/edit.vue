@@ -101,13 +101,39 @@ const getImageUrl = (url) => {
   return `${config.public.apiBase}${url}`;
 };
 
+// const loadBrandData = async () => {
+//   try {
+//     const response = await use$Fetch(`/admin/brands/${brandId}/edit`);
+//     if (!response.ok) {
+//       throw new Error(`HTTP error! status: ${response.status}`);
+//     }
+//     const data = await response.json();
+//     brand.value = {
+//       korName: data.korName,
+//       engName: data.engName,
+//       url: data.url,
+//       active: data.active,
+//       description: data.description,
+//     };
+//      // 이미지 URL 수정
+//     imageUrl.value = data.img ? (data.img.startsWith('/') ? data.img : '/' + data.img) : '';
+
+//   } catch (error) {
+//     console.error("Error loading brand:", error);
+//     alert(`브랜드 정보를 불러오는데 실패했습니다: ${error.message}`);
+//   }
+// };
+
 const loadBrandData = async () => {
   try {
-    const response = await fetch(`${config.public.apiBase}/admin/brands/${brandId}/edit`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await use$Fetch(`/admin/brands/${brandId}/edit`);
+    
+    console.log("Received data:", data); // 디버깅을 위해 받은 데이터 로깅
+
+    if (!data) {
+      throw new Error("브랜드 데이터를 받지 못했습니다.");
     }
-    const data = await response.json();
+
     brand.value = {
       korName: data.korName,
       engName: data.engName,
@@ -115,7 +141,8 @@ const loadBrandData = async () => {
       active: data.active,
       description: data.description,
     };
-     // 이미지 URL 수정
+
+    // 이미지 URL 수정
     imageUrl.value = data.img ? (data.img.startsWith('/') ? data.img : '/' + data.img) : '';
 
   } catch (error) {
@@ -124,11 +151,51 @@ const loadBrandData = async () => {
   }
 };
 
+// const handleSubmit = async () => {
+//   if (!validateForm()) {
+//     alert('필수항목을 입력하세요.');
+//     return;
+//   }
+//   try {
+//     const formData = new FormData();
+//     formData.append('brandData', JSON.stringify({
+//       korName: brand.value.korName,
+//       engName: brand.value.engName,
+//       url: brand.value.url,
+//       active: brand.value.active,
+//       description: brand.value.description
+//     }));
+
+//     if (brand.value.fileUpload) {
+//       formData.append('file', brand.value.fileUpload);
+//     }
+
+//     const response = await use$Fetch(`/admin/brands/${brandId}`, {
+//       method: 'PATCH',
+//       body: formData,
+//     });
+
+//     if (response.ok) {
+//       const result = await response.json();
+//       console.log('브랜드 수정 성공:', result);
+//       alert('브랜드가 성공적으로 수정되었습니다!');
+//       router.push('/admin/brands/list');
+//     } else {
+//       const errorData = await response.json();
+//       throw new Error(errorData.message || '브랜드 수정에 실패했습니다.');
+//     }
+//   } catch (error) {
+//     console.error('Error:', error);
+//     alert(`브랜드 수정 중 오류가 발생했습니다: ${error.message}`);
+//   }
+// };
+
 const handleSubmit = async () => {
   if (!validateForm()) {
     alert('필수항목을 입력하세요.');
     return;
   }
+
   try {
     const formData = new FormData();
     formData.append('brandData', JSON.stringify({
@@ -143,20 +210,14 @@ const handleSubmit = async () => {
       formData.append('file', brand.value.fileUpload);
     }
 
-    const response = await fetch(`${config.public.apiBase}/admin/brands/${brandId}`, {
+    await use$Fetch(`/admin/brands/${brandId}`, {
       method: 'PATCH',
       body: formData,
     });
 
-    if (response.ok) {
-      const result = await response.json();
-      console.log('브랜드 수정 성공:', result);
-      alert('브랜드가 성공적으로 수정되었습니다!');
-      router.push('/admin/brands/list');
-    } else {
-      const errorData = await response.json();
-      throw new Error(errorData.message || '브랜드 수정에 실패했습니다.');
-    }
+    console.log('브랜드 수정 성공');
+    alert('브랜드가 성공적으로 수정되었습니다!');
+    router.push('/admin/brands/list');
   } catch (error) {
     console.error('Error:', error);
     alert(`브랜드 수정 중 오류가 발생했습니다: ${error.message}`);
